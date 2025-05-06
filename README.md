@@ -37,3 +37,9 @@ We aim to demonstrate how machine learning models can enhance real-world defense
 1️⃣ Clone the repository:
 ```bash
 git clone https://github.com/bikramtheitguy/ai-coastal-security-defense.git
+
+## 🚀 Live Demo
+
+- [🚀 Live Demo](https://ai-coastal-security-defense.streamlit.app.github.dev/)
++ [🚀 Live Demo](https://ai-coastal-security-defense.streamlit.app/)
+
