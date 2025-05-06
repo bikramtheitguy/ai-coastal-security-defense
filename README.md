@@ -1,48 +1,39 @@
-# ai-coastal-security-defense
-# AI-Driven Coastal Security Defense System
+# ai-coastal-security-defense  
+## 🌊 AI-Driven Coastal Security Defense System
 
-This project simulates an AI-powered system for coastal security, combining:
-- Threat detection (vessel anomalies)
-- Target precision (drone surveillance)
-- Autonomous surveillance (AI-driven detection)
-- Cybersecurity defense (network intrusion detection)
+This project simulates an AI-powered system for coastal security, combining:  
+- 🚢 **Threat Detection** → Vessel anomalies from movement patterns  
+- 🚁 **Target Precision** → Drone surveillance with object classification  
+- 🛰️ **Autonomous Surveillance** → AI-driven detection and tracking  
+- 🔐 **Cybersecurity Defense** → Network intrusion detection using log data  
 
 We aim to demonstrate how machine learning models can enhance real-world defense operations, even using simulated or synthetic datasets.
 
 ---
 
-## Project Structure
----
+## 📂 Project Structure
 
-## Datasets
-
-- **Vessel Movement Data**: Simulated AIS records, including speed, heading, anomaly flags.
-- **Drone Surveillance Data**: Synthetic frame labels with object detection outputs.
-- **Cybersecurity Network Logs**: Dummy network packet data with intrusion attempts.
 
 ---
 
-## Core ML Components
+## 📊 Datasets
 
-- **Anomaly Detection** (Isolation Forest / LOF) on vessel data.
-- **Threat Classification** (Random Forest / Logistic Regression) on drone frames.
-- **Intrusion Detection** (Random Forest / SVM) on cybersecurity logs.
-
----
-
-## How to Run
-
-1. Clone the repository:---
-
-## Future Work
-
-- Integrate real AIS datasets and satellite imagery.
-- Expand drone data with video-based object detection (YOLOv8).
-- Incorporate real-time cybersecurity logs.
-- Deploy models with MLOps (ClearML / MLflow).
+- **Vessel Movement Data** → Simulated AIS records with speed, heading, anomaly flags  
+- **Drone Surveillance Data** → Synthetic object labels for drone images  
+- **Cybersecurity Network Logs** → Dummy network packets with intrusion markers  
 
 ---
 
-## Why This Project Matters
+## 🧠 Core ML Components
 
-This project showcases how AI and machine learning can revolutionize coastal and maritime security, providing actionable insights for surveillance, defense, and cybersecurity — all essential components for government, military, and public sector applications.
+- **Anomaly Detection** → Isolation Forest, Local Outlier Factor on vessel data  
+- **Threat Classification** → Random Forest, Logistic Regression on drone threats  
+- **Intrusion Detection** → Random Forest, SVM on cybersecurity logs  
+
+---
+
+## ⚙️ How to Run
+
+1️⃣ Clone the repository:
+```bash
+git clone https://github.com/bikramtheitguy/ai-coastal-security-defense.git
