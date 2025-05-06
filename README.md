@@ -40,6 +40,7 @@ git clone https://github.com/bikramtheitguy/ai-coastal-security-defense.git
 
 ## 🚀 Live Demo
 
-- [🚀 Live Demo](https://ai-coastal-security-defense.streamlit.app.github.dev/)
-+ [🚀 Live Demo](https://ai-coastal-security-defense.streamlit.app/)
+## 🚀 Live Demo
 
+
++ [🚀 Live Demo](https://ai-coastal-security-defense.streamlit.app/)
