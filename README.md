@@ -14,3 +14,18 @@ We demonstrate how machine learning models can enhance real-world defense operat
 
 ## 📂 Project Structure
 
+
+---
+
+## 🚀 Live Demo
+
+[▶️ Launch the Streamlit Dashboard](https://ai-coastal-security-defense.streamlit.app/)
+
+---
+
+## ⚙️ Installation & Usage
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/bikramtheitguy/ai-coastal-security-defense.git
+   cd ai-coastal-security-defense
