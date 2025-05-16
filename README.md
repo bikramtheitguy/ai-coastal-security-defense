@@ -10,7 +10,7 @@ This project simulates an AI-powered system for coastal security, combining:
 We aim to demonstrate how machine learning models can enhance real-world defense operations, even using simulated or synthetic datasets.
 
 ---
-
+y
 ## 📂 Project Structure
 
 
