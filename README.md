@@ -8,6 +8,11 @@ This project simulates an AI-powered system for coastal security, combining:
 - 🔐 **Cybersecurity Defense** → Network intrusion detection using log data  
 
 We aim to demonstrate how machine learning models can enhance real-world defense operations, even using simulated or synthetic datasets.
+## 🚀 Live Demo – AI Coastal Security Defense
+[![Open in Streamlit](https://img.shields.io/badge/Streamlit-Open%20App-brightgreen?logo=streamlit)](https://ai-coastal-security-defense.streamlit.app/)
+
+Experience the **AI Coastal Security Defense** project live on Streamlit Cloud.  
+It showcases anomaly detection, vessel tracking, and coastal surveillance dashboards.
 
 ---
 
