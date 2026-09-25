@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from ..audit import audit, verify_chain
 from ..config import settings
 from ..db import Base, db_session, get_engine
-from ..deps import require, require_any
+from ..deps import current_user, require, require_any
 from ..models import (Alert, Asset, AuditLog, BackupRecord, CyberEvent, DataSource, Incident, Mission, Personnel, Station,
                       User, UserSession, Vessel, WeatherReport, utcnow)
 from ..services import scenarios, simulator
@@ -409,3 +409,27 @@ def search(q: str, user=Depends(require("COP_VIEW")), db: Session = Depends(db_s
         for x in db.query(Mission).filter(Mission.code.ilike(like)).limit(5):
             out.append({"type": "patrol", "id": x.id, "label": x.code, "sub": x.status, "route": "/assets?v=patrols"})
     return out
+
+
+# ------------------------------------------------------------------ top bar status (any authenticated user)
+@router.get("/status/bar")
+def status_bar(user=Depends(current_user), db: Session = Depends(db_session)):
+    order = ["NONE", "ADVISORY", "WARNING", "CYCLONE_ALERT"]
+    ws = db.query(WeatherReport).all()
+    worst = max(ws, key=lambda w: order.index(w.warning_level), default=None)
+    out = {"degraded_sources": db.query(DataSource).filter(DataSource.status.in_(["DEGRADED", "OFFLINE"])).count(),
+           "simulator": simulator.status()["running"],
+           "weather": None if worst is None else {
+               "label": "Normal" if worst.warning_level == "NONE" else title_case(worst.warning_level),
+               "colour": {"NONE": "GREEN", "ADVISORY": "AMBER", "WARNING": "RED", "CYCLONE_ALERT": "RED"}[worst.warning_level],
+               "text": worst.warning_text}}
+    if "INCIDENT_VIEW" in user._perms:
+        out["alerts"] = db.query(Alert).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).count()
+        opn = db.query(Incident.priority).filter(Incident.status.in_(OPEN_STATUSES)).all()
+        out["l1"] = sum(1 for (p,) in opn if p == "L1")
+        out["l2"] = sum(1 for (p,) in opn if p == "L2")
+    return out
+
+
+def title_case(s: str) -> str:
+    return s.replace("_", " ").title()

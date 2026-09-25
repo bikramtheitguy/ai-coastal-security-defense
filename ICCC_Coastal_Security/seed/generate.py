@@ -21,7 +21,7 @@ from app.models import (Alert, Asset, ConfigItem, CrewAssignment, CyberEvent, Da
                         TrainingRecord, User, Vessel, VesselTrackPoint, WatchListEntry, WeatherReport, Zone, utcnow)
 from app.security import hash_password
 from app.services.common import default_config_items
-from app.services.geo import move
+from app.services.geo import bearing_deg, move
 
 from .geography import COASTLINE, DISTRICTS, PORTS, SEAWARD, STATIONS
 
@@ -250,7 +250,7 @@ class Gen:
                 if r.random() < 0.6:
                     q.append("SAR")
                 self._person(st, r.choice(["SI", "ASI"]), "BOAT_MASTER", "Boat Master", "ON_DUTY", q, exp)
-            n_crew = 7
+            n_crew = 10 if st.name in {"Dhamra", "Paradip", "Gopalpur", "Chandipur", "Puri", "Astaranga", "Talchua", "Bahabalpur"} else 7
             for c in range(n_crew):
                 q = ["BOAT_CREW", "SWIMMING", "SEA_SURVIVAL"]
                 for extra, p in (("MARINE_VHF", 0.5), ("SAR", 0.35), ("FIRST_AID", 0.5), ("NIGHT_OPS", 0.4),
@@ -406,8 +406,11 @@ class Gen:
 
     def _rename(self, a: Asset, code: str, subtype: str | None = None, crew: int | None = None):
         clash = self.db.query(Asset).filter(Asset.asset_code == code).first()
-        if clash and clash.id != a.id:
-            clash.asset_code = f"FIB-5T-{90 + clash.id:02d}"
+        if clash and clash.id != a.id:  # swap codes so numbering stays contiguous
+            mine = a.asset_code
+            a.asset_code = "__swap__"
+            self.db.flush()
+            clash.asset_code = mine
             self.db.flush()
         a.asset_code = code
         if subtype:
@@ -442,14 +445,16 @@ class Gen:
                                          "vhf": has_ais or r.random() < 0.3, "first_aid": r.random() < 0.6},
                        emergency_contact=f"{self.name()} 90000{r.randint(10000, 99999)}",
                        expected_return=self.now + timedelta(hours=r.randint(2, 60)),
-                       lat=lat, lon=lon, course=r.uniform(0, 360), speed_kn=r.uniform(1, 3) if beh == "FISHING" else r.uniform(5, 8),
+                       lat=lat, lon=lon, course=bearing_deg(lat, lon, tl, to),
+                       speed_kn=r.uniform(1, 3) if beh == "FISHING" or vtype == "NON_MOTORISED" else r.uniform(5, 8),
                        ais_active=has_ais, last_ais_ts=self.now if has_ais else None,
-                       track_source="AIS" if has_ais else ("REPORTED" if transponder != "NONE" else "RADAR"),
+                       track_source="AIS" if has_ais else ("TRANSPONDER" if transponder != "NONE" else "REPORTED"),
                        identity_status="IDENTIFIED", behaviour=beh, target_lat=tl, target_lon=to, registered_citizen=True,
                        source="AIS (SIMULATED)" if has_ais else "TRANSPONDER/RADAR (SIMULATED)", verification="SYSTEM",
                        confidence=0.9 if has_ais else 0.6)
             if not has_ais and transponder == "NONE":
                 v.lat, v.lon = self.sea_point(st, 1, 6)
+                v.course = bearing_deg(v.lat, v.lon, tl, to)
             self.db.add(v)
         # merchant traffic near ports
         ports = {p.code: p for p in self.db.query(Place).filter(Place.place_type == "PORT")}
@@ -459,7 +464,7 @@ class Gen:
             n += 1
             self.db.add(Vessel(vessel_code=f"VSL-{n:04d}", name=nm, vessel_type=r.choice(["CARGO", "TANKER", "CARGO"]),
                                mmsi=f"SIM{470000000 + r.randint(1000, 99999)}", ais_name=nm, flag=r.choice(["IN", "SG", "PA", "LR"]),
-                               length_m=r.randint(120, 250), lat=lat, lon=lon, course=290, speed_kn=r.uniform(8, 13),
+                               length_m=r.randint(120, 250), lat=lat, lon=lon, course=bearing_deg(lat, lon, port.lat, port.lon + 0.03), speed_kn=r.uniform(8, 13),
                                ais_active=True, last_ais_ts=self.now, track_source="AIS", identity_status="IDENTIFIED",
                                behaviour="TRANSIT", target_lat=port.lat, target_lon=port.lon + 0.03,
                                source="AIS (SIMULATED)", verification="SYSTEM"))

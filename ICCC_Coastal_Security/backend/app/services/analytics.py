@@ -43,6 +43,12 @@ def nearest_station_id(db: Session, lat: float, lon: float, stations=None) -> in
     return best.id if best else None
 
 
+def of_concern(v: Vessel) -> bool:
+    """Small craft without AIS are normal on this coast. Concern = no verified identity, an AIS-fitted vessel
+    that has gone silent, or a human-designated Target of Interest."""
+    return v.identity_status != "IDENTIFIED" or v.is_toi or bool(v.mmsi and not v.ais_active)
+
+
 def raise_alert(db: Session, *, alert_type: str, vessel: Vessel | None, title: str, description: str,
                 lat: float | None, lon: float | None, source: str, confidence: float, stations=None,
                 severity: str | None = None, is_exercise: bool = False, dedup_hours: float = 6) -> Alert | None:
@@ -109,7 +115,7 @@ def run_detectors(db: Session) -> list[Alert]:
                             f"Last AIS position shown; current position may be radar-derived or estimated.",
                 lat=v.lat, lon=v.lon, source="AIS (SIMULATED)", confidence=0.8)
         # Radar target without AIS / dark vessel
-        if v.track_source == "RADAR" and (not v.mmsi or not v.ais_active):
+        if v.track_source == "RADAR" and ((v.mmsi and not v.ais_active) or v.identity_status == "UNIDENTIFIED"):
             add(alert_type="RADAR_NO_AIS", vessel=v, title=f"Radar target without AIS: {v.vessel_code}",
                 description="Coastal radar track has no correlated AIS transmission.",
                 lat=v.lat, lon=v.lon, source="COASTAL RADAR (SIMULATED)", confidence=0.7)
@@ -143,13 +149,13 @@ def run_detectors(db: Session) -> list[Alert]:
         # Proximity to sensitive installation
         for p in sensitive:
             d = haversine_nm(v.lat, v.lon, p.lat, p.lon)
-            if d <= rules["sensitive_radius_nm"] and (v.identity_status != "IDENTIFIED" or v.speed_kn < 2):
+            if d <= rules["sensitive_radius_nm"] and of_concern(v):
                 add(alert_type="SENSITIVE_PROXIMITY", vessel=v, title=f"Near sensitive installation: {label}",
                     description=f"{d:.1f} NM from {p.name} (rule: <= {rules['sensitive_radius_nm']} NM and "
-                                f"unidentified or stationary).",
+                                f"unidentified / AIS-silent / TOI).",
                     lat=v.lat, lon=v.lon, source="GEOFENCE (SIMULATED)", confidence=0.7)
         # Night approach
-        if night and (v.identity_status != "IDENTIFIED" or not v.ais_active):
+        if night and of_concern(v):
             for p in landings:
                 d = haversine_nm(v.lat, v.lon, p.lat, p.lon)
                 if d <= rules["night_approach_nm"] and (v.speed_kn or 0) > 1:
@@ -214,8 +220,7 @@ def run_detectors(db: Session) -> list[Alert]:
     for i in range(len(slow)):
         for j in range(i + 1, len(slow)):
             a, b = slow[i], slow[j]
-            if not ({a.identity_status, b.identity_status} - {"IDENTIFIED"} or a.is_toi or b.is_toi
-                    or not a.ais_active or not b.ais_active):
+            if not (of_concern(a) or of_concern(b)):
                 continue
             d = haversine_nm(a.lat, a.lon, b.lat, b.lon)
             if d <= rules["rendezvous_nm"]:

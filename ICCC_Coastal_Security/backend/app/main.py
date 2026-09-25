@@ -77,7 +77,9 @@ def create_app() -> FastAPI:
         return {"name": "ICCC Coastal Security & MDA Platform", "mode": "PROOF OF CONCEPT",
                 "data_label": "SIMULATED / POC DATA", "map_label": "LIVE PUBLIC MAP + SIMULATED OPERATIONAL DATA — NOT FOR NAVIGATION",
                 "chart_label": "LOCAL STATIC NAUTICAL REFERENCE — NOT FOR NAVIGATION",
-                "static_chart": _chart_file() is not None, "demo_accounts": True}
+                "static_chart": _chart_file() is not None, "demo_accounts": True,
+                "map_tile_url": settings.map_tile_url, "seamark_tile_url": settings.seamark_tile_url,
+                "coastline": _coastline()}
 
     @app.get("/api/public/static-chart")
     def static_chart():
@@ -103,6 +105,11 @@ def create_app() -> FastAPI:
         return FileResponse(dist / "index.html")
 
     return app
+
+
+def _coastline():
+    from seed.geography import COASTLINE
+    return COASTLINE
 
 
 def _chart_file() -> Path | None:

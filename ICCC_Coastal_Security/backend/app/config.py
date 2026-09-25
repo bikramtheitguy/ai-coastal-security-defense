@@ -22,7 +22,7 @@ def _bool(name: str, default: bool) -> bool:
 @dataclass
 class Settings:
     database_url: str = field(default_factory=lambda: os.getenv(
-        "DATABASE_URL", f"sqlite:///{PROJECT_ROOT / 'data' / 'iccc_poc.db'}"))
+        "DATABASE_URL", f"sqlite:///{Path(os.getenv('DATA_DIR', str(PROJECT_ROOT / 'data'))) / 'iccc_poc.db'}"))
     secret_key: str = field(default_factory=lambda: os.getenv(
         "SECRET_KEY", "POC-ONLY-CHANGE-ME-this-key-is-not-secret"))
     jwt_ttl_minutes: int = field(default_factory=lambda: int(os.getenv("JWT_TTL_MINUTES", "480")))
@@ -44,6 +44,9 @@ class Settings:
     static_chart_dir: Path = field(default_factory=lambda: Path(os.getenv(
         "STATIC_CHART_DIR", str(PROJECT_ROOT / "assets" / "static_nautical_chart"))))
     cors_origins: str = field(default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:3000"))
+    map_tile_url: str = field(default_factory=lambda: os.getenv("MAP_TILE_URL", "https://tile.openstreetmap.org/{z}/{x}/{y}.png"))
+    seamark_tile_url: str = field(default_factory=lambda: os.getenv(
+        "SEAMARK_TILE_URL", "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"))
     stale_after_seconds: int = field(default_factory=lambda: int(os.getenv("STALE_AFTER_SECONDS", "300")))
 
     @property
