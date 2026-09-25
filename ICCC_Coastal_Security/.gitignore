@@ -1,0 +1,11 @@
+data/
+__pycache__/
+*.pyc
+.venv/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+.env
