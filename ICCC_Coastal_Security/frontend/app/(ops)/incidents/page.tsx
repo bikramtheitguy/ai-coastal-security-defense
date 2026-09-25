@@ -35,7 +35,7 @@ export default function IncidentsPage() {
       <div className="page-head"><div><div className="crumb">05 · Incident Command</div><h1>{head[v] ?? "Incidents"}</h1></div><span className="spacer" />
         <NewIncidentButton /></div>
       {v === "alerts" ? <Alerts /> : (
-        <div className="split" style={{ gridTemplateColumns: "minmax(0, 0.9fr) minmax(0, 1.4fr)" }}>
+        <div className="split" style={{ gridTemplateColumns: "minmax(440px, 1fr) minmax(0, 1.3fr)" }}>
           <Card flush><Table rows={rows} sel={id} onRow={select} empty="No incidents in this view" cols={[
             { k: "priority", h: "P", r: (i) => <Pill s={i.priority} label={i.priority} /> }, { k: "code", h: "Incident", r: (i) => <><b>{i.code}</b><div className="small">{i.title}</div></> },
             { k: "status", h: "Status", r: (i) => <Pill s={i.status} label={`${i.status} ${i.status_label}`} /> }, { k: "station", h: "MPS" },

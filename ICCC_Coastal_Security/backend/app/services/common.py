@@ -49,12 +49,14 @@ def provenance(obj, now: datetime | None = None) -> dict:
         freshness = "RECENT"
     else:
         freshness = "STALE"
+    # Incident.classification is the incident type, which shadows the mixin's data-classification column.
+    data_class = "RESTRICTED (SIMULATED)" if getattr(obj, "__tablename__", "") == "incidents" else obj.classification
     return {
         "source": obj.source, "source_ts": iso(ts), "received_ts": iso(obj.received_ts),
         "age_seconds": None if age is None else int(age), "freshness": freshness,
         "confidence": obj.confidence, "verification": obj.verification,
-        "classification": obj.classification, "data_owner": obj.data_owner,
-        "simulated": (obj.source or "").upper().startswith("SIM") or "SIMULATED" in (obj.classification or ""),
+        "classification": data_class, "data_owner": obj.data_owner,
+        "simulated": (obj.source or "").upper().startswith("SIM") or "SIMULATED" in (data_class or ""),
     }
 
 

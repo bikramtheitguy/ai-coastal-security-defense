@@ -148,6 +148,16 @@ function Sidebar() {
   );
 }
 
+function AccessGuard({ children }: { children: React.ReactNode }) {
+  const { can } = useAuth();
+  const path = usePathname();
+  const g = MENU.find((x) => path?.startsWith(x.path));
+  if (g && !g.perm.some(can))
+    return <div className="page"><div className="err" role="alert">Not authorised for {g.label}: requires one of {g.perm.join(", ")}.
+      Access is based on role, rank, posting, jurisdiction and need-to-know. This attempt is recorded when data is requested.</div></div>;
+  return <>{children}</>;
+}
+
 export function Shell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   useEffect(() => {
@@ -159,7 +169,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <TopBar />
       <div className="shell">
         <Sidebar />
-        <main className="main">{children}</main>
+        <main className="main"><AccessGuard>{children}</AccessGuard></main>
       </div>
     </>
   );
