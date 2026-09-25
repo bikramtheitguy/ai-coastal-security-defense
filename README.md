@@ -1,3 +1,8 @@
+> **New:** the **AI-Enabled Integrated Coastal Security & Maritime Domain Awareness Platform (POC)** — a full-stack ICCC
+> application (live nautical COP, readiness, incident command, multilingual public assistant) — lives in
+> [`ICCC_Coastal_Security/`](ICCC_Coastal_Security/README.md). All of its data is SIMULATED / POC DATA.
+> The content below describes the earlier Streamlit ML prototype.
+
 # ai-coastal-security-defense  
 ## 🌊 AI-Driven Coastal Security Defense System
 

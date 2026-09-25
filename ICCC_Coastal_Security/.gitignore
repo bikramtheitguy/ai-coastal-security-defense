@@ -9,3 +9,6 @@ tests/e2e/node_modules/
 tests/e2e/test-results/
 tests/e2e/playwright-report/
 .env
+docker/certs/*.crt
+frontend/tsconfig.tsbuildinfo
+frontend/next-env.d.ts.bak

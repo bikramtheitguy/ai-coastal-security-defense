@@ -27,10 +27,12 @@ def _configure(tmp: str):
 def env():
     tmp = tempfile.mkdtemp(prefix="iccc_test_")
     _configure(tmp)
-    if os.environ.get("TEST_DATABASE_URL"):
-        from app.db import Base, init_engine
-        from app import models  # noqa: F401
-        Base.metadata.drop_all(init_engine())
+    if os.environ.get("TEST_DATABASE_URL"):  # fresh schema per module on PostgreSQL
+        from sqlalchemy import text
+        from app.db import init_engine
+        with init_engine().begin() as c:
+            c.execute(text("DROP SCHEMA public CASCADE"))
+            c.execute(text("CREATE SCHEMA public"))
     return tmp
 
 

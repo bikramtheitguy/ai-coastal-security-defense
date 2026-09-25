@@ -435,7 +435,7 @@ class IncidentEvent(Base):
     incident_id = Column(Integer, ForeignKey("incidents.id"), index=True, nullable=False)
     ts = Column(DateTime, default=utcnow)
     event_type = Column(String(32))
-    actor = Column(String(64))
+    actor = Column(String(128))
     detail = Column(Text)
 
 
@@ -503,7 +503,7 @@ class Conversation(Base):
     citizen_name = Column(String(96))
     citizen_mobile = Column(String(24))
     language = Column(String(8), default="en")
-    script = Column(String(16), default="Latin")
+    script = Column(String(32), default="Latin")
     status = Column(String(16), default="ACTIVE")    # ACTIVE / ESCALATED / HUMAN_TAKEOVER / CLOSED
     family = Column(String(48))
     priority = Column(String(4))
@@ -669,7 +669,7 @@ class AuditLog(Base):
     ip = Column(String(64))
     action = Column(String(48), index=True)
     entity_type = Column(String(32))
-    entity_id = Column(String(48))
+    entity_id = Column(String(200))
     before = Column(JSON)
     after = Column(JSON)
     outcome = Column(String(12), default="SUCCESS")  # SUCCESS / DENIED / FAILED

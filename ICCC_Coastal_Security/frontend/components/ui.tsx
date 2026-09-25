@@ -7,30 +7,31 @@ export function useApi<T = any>(path: string | null, intervalMs = 0) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [updated, setUpdated] = useState<Date | null>(null);
-  const alive = useRef(true);
+  const current = useRef<string | null>(path);
+  const seq = useRef(0);
   const load = useCallback(async () => {
     if (!path) return;
+    const mine = ++seq.current;
     try {
       const d = await api<T>(path);
-      if (!alive.current) return;
+      // Ignore responses that were superseded by a newer request or a different path (e.g. while typing a search).
+      if (mine !== seq.current || current.current !== path) return;
       setData(d);
       setError(null);
       setUpdated(new Date());
     } catch (e: any) {
-      if (alive.current) setError(e.message ?? String(e)); // keep last known data visible
+      if (mine === seq.current && current.current === path) setError(e.message ?? String(e)); // keep last known data visible
     }
   }, [path]);
   useEffect(() => {
-    alive.current = true;
+    current.current = path;
     setData(null);
+    setError(null);
     load();
-    if (!intervalMs) return () => { alive.current = false; };
+    if (!intervalMs) return;
     const t = setInterval(load, intervalMs);
-    return () => {
-      alive.current = false;
-      clearInterval(t);
-    };
-  }, [load, intervalMs]);
+    return () => clearInterval(t);
+  }, [load, intervalMs, path]);
   return { data, error, updated, reload: load, setData };
 }
 

@@ -152,9 +152,9 @@ def advance(db: Session, o: Order, to: str, user, note: str | None = None) -> Or
                 inc.launch_at = inc.launch_at or now
                 eta = round(haversine_nm(asset.lat, asset.lon, o.dest_lat, o.dest_lon) / (asset.cruise_speed_kn or 18) * 60)
                 if inc.status in {"C2", "C3", "C4"}:
-                    inc_transition(db, inc, "C5", f"system (field-confirmed by {user.username}; order {o.code} "
-                                                  f"authorised by {o.issuer})",
-                                   note=f"{asset.asset_code} EN ROUTE, ETA ~{eta} min")
+                    inc_transition(db, inc, "C5", "system",
+                                   note=f"{asset.asset_code} EN ROUTE, ETA ~{eta} min — field-confirmed by {user.username}; "
+                                        f"order {o.code} authorised by {o.issuer}")
                     notify_citizen(db, inc, "status_C5", asset=asset.asset_code, eta=eta)
                 event(db, inc, "LAUNCH", user.username, f"{asset.asset_code} EN ROUTE (launch)")
         elif to == "ON_SCENE":
