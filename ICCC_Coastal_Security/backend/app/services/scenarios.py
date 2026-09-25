@@ -95,6 +95,8 @@ def run(db: Session, key: str, actor: str) -> dict:
         v = _pick_vessel(db, vessel_type="MOTORISED_BOAT")
         base = (v.lat, v.lon)
         v.behaviour, v.speed_kn, v.target_lat, v.target_lon = "LOITER", 0.8, base[0], base[1]
+        db.query(VesselTrackPoint).filter(VesselTrackPoint.vessel_id == v.id,
+                                          VesselTrackPoint.ts >= now - timedelta(minutes=40)).delete()
         for i in range(12):
             la, lo = move(base[0], base[1], _rng.uniform(0, 360), _rng.uniform(0.05, 0.3))
             db.add(VesselTrackPoint(vessel_id=v.id, ts=now - timedelta(minutes=33 - i * 3), lat=la, lon=lo,

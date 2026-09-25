@@ -124,7 +124,7 @@ class Gen:
         self.db.flush()
         for i, (code, name, dcode, lat, lon, aliases) in enumerate(STATIONS):
             st = self.add(Station(code=code, name=name, district_id=self.dist[dcode].id, lat=lat, lon=lon,
-                                  phone=f"0000-{600100 + i:06d} (SIM)", min_sea_ready=8, min_boats_ready=1,
+                                  phone=f"0000-{600100 + i:06d} (SIM)", min_sea_ready=4, min_boats_ready=1,
                                   backup_vhf_last_test=self.today - timedelta(days=self.r.randint(3, 25)),
                                   backup_vhf_test_interval_days=30))
             self.st[name] = st
@@ -261,7 +261,7 @@ class Gen:
                 duty = r.choices(["ON_DUTY", "STANDBY", "OFF_DUTY", "LEAVE", "TRAINING", "MEDICAL_LEAVE"],
                                  [55, 20, 10, 8, 4, 3])[0]
                 self._person(st, r.choice(["HAV", "CONST", "CONST", "ASI"]), "CREW", "Marine Crew", duty, q, exp)
-            if idx % 3 == 0:
+            for _ in range({"Talasari": 1, "Dhamra": 2, "Jambu": 1, "Siali": 1, "Puri": 2, "Arjyapalli": 1}.get(st.name, 0)):
                 self._person(st, "CONST", "UAV_PILOT", "UAV Remote Pilot", "ON_DUTY",
                              ["UAV_PILOT", "SWIMMING", "CYBER_IT", "FIRST_AID"])
             self._person(st, "CONST", "DRIVER", "Driver", r.choice(["ON_DUTY", "STANDBY"]), ["FIRST_AID"])
@@ -531,11 +531,28 @@ class Gen:
             b.mission_status, b.availability, b.current_mission_id = "PATROLLING", "DEPLOYED", m.id
             b.lat, b.lon = route[0][1], route[0][0]
             b.speed_kn = 18 if b is dh_boat else 14
-            crew = [c for c in b.crew if c.active][: b.crew_required]
+            # Crew the patrol with sea-ready qualified members (recalling off-duty staff if needed).
+            fit = []
+            for c in b.crew:
+                p = c.personnel
+                q = {x.qual_code for x in p.qualifications if x.valid_until is None or x.valid_until >= self.today}
+                if c.active and p.duty_status in {"ON_DUTY", "STANDBY", "OFF_DUTY"} and {"SWIMMING", "SEA_SURVIVAL", "BOAT_CREW"} <= q:
+                    fit.append(c)
+            if b is dh_boat and len(fit) < b.crew_required:
+                pool = [p for p in self.people_by_station[st.id] if p.duty_status in {"ON_DUTY", "STANDBY", "OFF_DUTY"}
+                        and p.id not in {c.personnel_id for c in b.crew}
+                        and {"SWIMMING", "SEA_SURVIVAL", "BOAT_CREW"} <= {x.qual_code for x in p.qualifications
+                                                                         if x.valid_until and x.valid_until >= self.today}]
+                for p in pool[: b.crew_required - len(fit)]:
+                    ca = CrewAssignment(asset_id=b.id, personnel_id=p.id, crew_role="CREW")
+                    self.db.add(ca)
+                    self.db.flush()
+                    fit.append(ca)
+            fit.sort(key=lambda c: c.crew_role != "MASTER")
+            crew = fit[: b.crew_required]
             for c in crew:
-                if c.personnel.duty_status in {"ON_DUTY", "STANDBY"}:
-                    c.personnel.duty_status = "DEPLOYED"
-                    c.personnel.current_duty = f"{m.code} on {b.asset_code}"
+                c.personnel.duty_status = "DEPLOYED"
+                c.personnel.current_duty = f"{m.code} on {b.asset_code}"
             m.crew = [c.personnel_id for c in crew]
             self.db.add(EventFeed(ts=start, category="PATROL", message=f"{st.name} MPS — Patrol launched ({b.asset_code})",
                                   station_id=st.id, ref_type="mission", ref_id=m.id))
@@ -698,5 +715,9 @@ def seed_if_empty(db: Session, seed: int, demo_password: str, pbkdf2_iterations:
     if db.query(Station).first() is not None:
         return None
     out = Gen(db, seed, demo_password, pbkdf2_iterations).run()
+    db.commit()
+    from app.services.analytics import fuse, run_detectors
+    run_detectors(db)
+    fuse(db)
     db.commit()
     return out

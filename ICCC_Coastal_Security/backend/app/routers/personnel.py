@@ -259,6 +259,7 @@ def set_qual(pid: int, body: QualIn, user=Depends(require("PERSONNEL_EDIT")), db
     audit(db, user=user, action="QUALIFICATION_UPDATED", entity_type="personnel", entity_id=p.pid, before=before,
           after={"qual_code": body.qual_code, "valid_until": body.valid_until})
     db.commit()
+    db.expire_all()
     return personnel_dict(_query(db).filter(Personnel.id == pid).first(), station_names(db), detail=True)
 
 
@@ -286,6 +287,7 @@ def add_training(pid: int, body: TrainIn, user=Depends(require("PERSONNEL_EDIT")
     audit(db, user=user, action="TRAINING_RECORDED", entity_type="personnel", entity_id=p.pid,
           after={"course": c.code, "completed_on": done, "grants": c.grants_qualification, "valid_until": due})
     db.commit()
+    db.expire_all()
     return personnel_dict(_query(db).filter(Personnel.id == pid).first(), station_names(db), detail=True)
 
 
