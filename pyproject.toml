@@ -36,6 +36,7 @@ include = [
     "setup_project.py",
     "coastal_security/**/*.py",
     "training_tests/*.py",
+    "browser_tests/*.py",
 ]
 
 [tool.ruff.lint]
