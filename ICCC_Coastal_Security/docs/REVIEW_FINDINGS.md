@@ -14,7 +14,7 @@ The ICCC implementation is a substantial synthetic workflow prototype. It should
 | SEC-05 | P2: OTP attempts and token time need tests | Invalid OTP branch increments failures without the password branch's lockout handling; JWT code uses naive UTC datetime timestamps | Verify lockout for OTP and token lifetime across host timezones, with regression tests |
 | OPS-01 | P2: audit/restore limits | Local hash chain, local evidence and JSON restore; no independent audit anchor or demonstrated DR | Test restore integrity and concurrent appends; state that full-chain rewrite or suffix removal needs an external anchor to detect |
 | QA-01 | P1: current-commit validation absent at initial review | Existing tests and historical pass counts, but no Actions run for the reviewed head | Execute isolated backend, frontend and browser CI; link exact runs; add missing negative cases |
-| DEP-01 | P2: reproducibility and dependency review incomplete | Python top-level versions pinned, transitive dependencies not locked; npm lockfiles present | Lock/hash Python transitive requirements, review advisories and licenses, retain dependency audit evidence |
+| DEP-01 | P1: dependency audit failed | CI reported affected PyJWT, python-multipart and Starlette versions, plus npm advisories including critical MapLibre; see [dependency findings](DEPENDENCY_REVIEW.md) | Compatible patched upgrades, regenerated locks and complete regression/audit runs; no suppressed checks |
 
 SEC-01 to SEC-03 probes extracted unchanged function bodies and used synthetic doubles. They establish source-logic defects, not HTTP/database exploit results. WF-01 is a source-path finding; its integration regression test remains to be written. No operational records were accessed.
 

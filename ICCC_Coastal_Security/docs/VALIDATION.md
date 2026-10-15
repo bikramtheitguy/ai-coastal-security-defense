@@ -65,4 +65,14 @@ Existing implementations are exercised by `tests/backend/test_acceptance.py` and
 | Actual hosted Lovable deployment | Separate system; read-only source reference, not validated by these tests |
 | Production security, scale and live detection quality | Not established |
 
-Add exact run links and results after CI completes. A release record must also include capability parity, dependency/provenance review, reviewed screenshots and known remaining gaps.
+A release record must also include capability parity, dependency/provenance review, reviewed screenshots and known remaining gaps. The completed code-revision CI evidence follows.
+
+## CI evidence for the implemented code
+
+Code revision `92380289331f128fe168552f4094eac1a733fd25` was checked on 15 October 2026 (GitHub's PR merge checkout incorporates main `cb3e3078336b0ea8c5105943f3ff1afd57f373b5`).
+
+- [Research/demo workflow](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38694147010): all five jobs passed, including Windows/Linux demo tests, vessel benchmark and locked dependency audit. The Linux demo suite reported 64 passed.
+- [ICCC workflow](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38694147067): backend suites passed on SQLite and PostgreSQL (53 tests each); frontend typecheck/build passed and all 8 browser tests passed.
+- ICCC dependency auditing failed. See [affected packages and remediation gates](DEPENDENCY_REVIEW.md). Existing authorization/MFA/dispatch findings remain open despite behavioral test success.
+
+These results apply to the implemented code revision above. The subsequent documentation-only update records the evidence without changing runtime code. The full local Streamlit suite stalled and was stopped; the completed clean CI jobs provide its validation evidence instead. Full ICCC execution remained unavailable locally because dependency downloads failed.

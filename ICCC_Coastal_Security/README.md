@@ -51,4 +51,6 @@ The new [synthetic incident exchange contract](../docs/INCIDENT_EXCHANGE.md) val
 
 The previous README reported September test runs. Those historical counts do not validate the current revision. Use the exact-commit CI results and [validation record](docs/VALIDATION.md); do not convert a source review or successful build into a security certification.
 
+The first CI run for this updated proposal passed the API/browser suites but failed the ICCC dependency audit. See [affected packages and remediation gates](docs/DEPENDENCY_REVIEW.md). The PR remains draft and unmerged.
+
 The [repository license](../LICENSE) governs repository-owned material. Map data attribution belongs to OpenStreetMap contributors and OpenSeaMap; third-party usage rights must be reviewed separately. Maps are not for navigation. Official programme references, emergency text and translated replies require current authoritative and native-speaker review before public use.

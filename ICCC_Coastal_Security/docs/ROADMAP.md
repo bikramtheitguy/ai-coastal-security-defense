@@ -11,7 +11,7 @@ Use this backlog with the [development process](DEVELOPMENT.md). Priorities refl
 | SEC-03/05 | P0 | Safe MFA reenrollment, OTP lockout and timezone-correct token lifetime | Open |
 | WF-01 | P0 | Dispatch promise requires attributable confirmed action; test direct/manual and field-order paths | Open |
 | SEC-04 | P0 | Loopback demo deployment, explicit non-demo guard, generated secrets and test DB isolation | Loopback/test guards in this PR; runtime fail-closed mode open |
-| DEP-01 | P1 | Python transitive lock/hashes, dependency advisories, third-party licenses and image/data attribution inventory | Open |
+| DEP-01 | P0 | Compatible patched dependencies, Python transitive lock/hashes, licenses and attribution inventory | CI audit failed; see [dependency findings](DEPENDENCY_REVIEW.md) |
 | DEMO-01 | P1 | Reproducible local walkthrough, synthetic screenshots, keyboard/mobile checks, failure/empty states and capability parity | Open after P0 security fixes |
 | DATA-02 | P1 | Import template and source register for station/asset/personnel data; validation report before persistence; no operational import by default | Planned |
 | GEO-01 | P1 | Time/bbox/pagination contracts, coordinate-quality legends, stale tracks and replay fixtures; load profile | Planned |
