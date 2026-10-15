@@ -174,7 +174,7 @@ def render_replay() -> None:
                     "y": {
                         "field": "speed_knots",
                         "type": "quantitative",
-                        "title": "Reported speed (kn)",
+                        "title": "Speed (kn)",
                         "scale": {"zero": True},
                     },
                     "color": vessel_color,
