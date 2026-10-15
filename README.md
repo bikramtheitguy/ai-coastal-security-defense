@@ -34,6 +34,10 @@ LOF, Logistic Regression, SVM, live AIS, autonomous surveillance, and AI-assiste
 
 Read the **[updated Streamlit POC](docs/STREAMLIT_POC.md)**, **[previous/current comparison](docs/STREAMLIT_POC_COMPARISON.md)** and [validation record](docs/STREAMLIT_VALIDATION.md).
 
+![Spatial evaluation lab with independently generated test voyages](docs/screenshots/evaluation-desktop.jpg)
+
+Current evaluation/theme proposal, captured in real Chromium at `1715687`. The [evaluation validation record](docs/TRAJECTORY_VALIDATION.md) documents passed checks and remaining limitations. This screenshot is from the test environment; it does not imply this proposal has been deployed. The earlier replay screenshot below is retained for comparison.
+
 ![Synthetic vessel replay with playback controls, freshness counts and explained flags](docs/screenshots/replay-desktop.jpg)
 
 Screenshot from the repository's Chromium test environment, using invented data. See the [desktop, narrow-screen and chart comparisons](docs/STREAMLIT_POC_COMPARISON.md#visual-comparison-within-the-replay-increment). This is not evidence of a hosted deployment.

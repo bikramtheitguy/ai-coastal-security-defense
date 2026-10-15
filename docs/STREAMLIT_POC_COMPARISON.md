@@ -15,7 +15,28 @@ Previous: merged PR #13 at `4a1630a`. Current: the evaluation/spatial-theme bran
 | Public/client data | Synthetic replay only | Synthetic evaluation added; client references stay local; public-source roadmap documented |
 | Operational claims | Unverified | Still unverified; synthetic holdout is not field validation |
 
-See [evaluation protocol](TRAJECTORY_EVALUATION.md) and [spatial design](DESIGN_AND_DATA_ROADMAP.md). Screenshot evidence for this increment is added after real-browser validation. The earlier comparison below is retained as development history.
+See [evaluation protocol](TRAJECTORY_EVALUATION.md), [spatial design](DESIGN_AND_DATA_ROADMAP.md) and [executed validation](TRAJECTORY_VALIDATION.md). The earlier comparison below is retained as development history.
+
+### Spatial theme: the same replay before and after
+
+| Merged PR #13 interface | PR #14 spatial interface |
+| --- | --- |
+| ![Previous replay interface](screenshots/replay-desktop.jpg) | ![Spatial replay interface](screenshots/spatial-replay-desktop.jpg) |
+| ![Previous narrow replay chart](screenshots/replay-mobile-chart.jpg) | ![Spatial narrow replay chart](screenshots/spatial-replay-mobile-chart.jpg) |
+
+Replay behaviour and synthetic fixture are preserved. Earlier screenshots come from PR #13's tested code; current screenshots come from real Chromium at `1715687`. These are test-environment captures, not proof of the hosted site's deployment.
+
+### Added evaluation lab
+
+![Evaluation scope and held-out synthetic metrics](screenshots/evaluation-desktop.jpg)
+
+| Narrow evaluation scope | Narrow method comparison |
+| --- | --- |
+| ![Evaluation on a narrow screen](screenshots/evaluation-mobile.jpg) | ![All method labels visible on narrow comparison](screenshots/evaluation-mobile-chart.jpg) |
+
+![Preserved drone experiment with spatial styling](screenshots/spatial-research-desktop.jpg)
+
+All images are unedited browser screenshots. Historical metrics are unchanged; this increment improves evaluation transparency and interface design, not the accuracy of the old classifiers.
 
 ## Historical increment: PR #12 to PR #13
 
