@@ -1,43 +1,33 @@
-# Future Integration Roadmap
+# Prioritized implementation backlog
 
-Phasing is indicative; each integration requires the owning agency's approval, data-sharing agreements and security accreditation.
-Items marked *(verify)* depend on external systems whose current interfaces must be confirmed with the owner before design.
+Use this backlog with the [development process](DEVELOPMENT.md). Priorities reflect dependencies and risk; delivery dates follow only after scope, owners and acceptance are agreed. Preserve existing capabilities throughout.
 
-## Phase 1 — Harden the demonstrator (0–3 months)
-* Replace illustrative master data with authoritative station, personnel and asset registers (one-off import + Administration workflows).
-* Native-speaker validation of the Odia, Hindi, Bengali and Telugu lexicon and replies; collect anonymised real message samples.
-* Reverse proxy with TLS/HSTS, named accounts, demo accounts disabled, secrets in a vault, CERT-In-empanelled VAPT.
-* PostgreSQL PITR backups, restore drills, runbooks; move evidence to WORM object storage.
-* Pilot at one district ICCC with parallel paper process.
+| ID | Priority | Work and acceptance | Status |
+| --- | --- | --- | --- |
+| POC-01 | P0 | Document current/proposed functionality, one demo flow, review findings and stage gates | Prepared in this PR |
+| DATA-01 | P0 | Local synthetic incident contract: jurisdiction membership, original target preserved on forwarding, source/received times, coordinate quality and human-review state; negative tests | Implemented in this PR; see root contract docs and CI |
+| QA-01 | P0 | Run backend SQLite/PostgreSQL, frontend build/typecheck and browser suite at the exact PR revision; preserve baseline research tests | CI added; results must be reviewed |
+| SEC-01/02 | P0 | Consistent object policy for incidents/conversations/evidence/orders, including cancellation; authorized actions still work | Open |
+| SEC-03/05 | P0 | Safe MFA reenrollment, OTP lockout and timezone-correct token lifetime | Open |
+| WF-01 | P0 | Dispatch promise requires attributable confirmed action; test direct/manual and field-order paths | Open |
+| SEC-04 | P0 | Loopback demo deployment, explicit non-demo guard, generated secrets and test DB isolation | Loopback/test guards in this PR; runtime fail-closed mode open |
+| DEP-01 | P1 | Python transitive lock/hashes, dependency advisories, third-party licenses and image/data attribution inventory | Open |
+| DEMO-01 | P1 | Reproducible local walkthrough, synthetic screenshots, keyboard/mobile checks, failure/empty states and capability parity | Open after P0 security fixes |
+| DATA-02 | P1 | Import template and source register for station/asset/personnel data; validation report before persistence; no operational import by default | Planned |
+| GEO-01 | P1 | Time/bbox/pagination contracts, coordinate-quality legends, stale tracks and replay fixtures; load profile | Planned |
+| API-01 | P1 | Apply reviewed incident contract through authenticated API with idempotency and outbox; wrong-scope denial tests | Planned; DATA-01 alone does not provide this |
+| ML-01 | P1 | Trajectory-aware vessel baseline and held-out per-detector false-alert/miss metrics | Planned |
+| CV-01 | P2 | Approved image/video dataset, leakage-safe split, CV baseline and false-positive/negative review | Planned |
+| CYBER-01 | P2 | Approved event schema, event-window evaluation and monitored security-event adapter | Planned |
+| AI-01 | P2 | Evidence-linked advisory summaries, privacy evaluation, human review and deterministic fallback | Planned |
+| OPS-01 | P1 | Restore drill, audit anchoring, bounded uploads, observability and incident/runbook ownership | Open |
+| INT-01 | P2 | Approved maritime/weather/registry adapters with licensing, data-owner agreement and failure tests | Planned; no external integration assumed |
+| SCALE-01 | P3 | Agreed capacity/SLO profile, jurisdiction isolation, shared storage, worker leadership, failover and measured recovery | Planned; no national-readiness claim |
 
-## Phase 2 — Live maritime picture (3–9 months)
-| Feed | Approach |
-|---|---|
-| AIS | Terrestrial/satellite AIS via approved provider or national feed *(verify)*; Kafka ingest service → `vessel_track_points` (TimescaleDB hypertable) |
-| Coastal radar chain | Track feed through the owning agency's gateway *(verify)*; correlation in the fusion service |
-| NABHMITRA / VCSS transponders | Position & SOS messages through the Department of Fisheries / ISRO system *(verify interface and data-sharing terms)* |
-| Vessel registry | National fishing-vessel registration database *(verify)* for identity checks and "My Boat" OTP |
-| UAV | Ground-control-station telemetry + video references; EO/IR detections as alerts |
-| CCTV at FLCs | VMS event/health API (status first, video references second) |
-| Weather | IMD / INCOIS bulletins and warnings *(verify feeds and licensing)* replacing simulated weather |
-| Charts | Authorised ENC service (S-57/S-101 via WMS/vector tiles) in the reserved layer slot; licensed static chart with verified georeferencing |
+P0 items gate a controlled demonstration release. A green build alone does not close security or data-provenance findings. Preserve the Lovable website as a read-only reference for this repository effort; its roadmap is not proof that matching GitHub capabilities exist.
 
-Architecture: Kafka topics per feed → Go/Rust ingest & analytics services → PostGIS/TimescaleDB → existing API (see ARCHITECTURE.md §5).
+## Next implementation PR
 
-## Phase 3 — Coordination & public channels (6–12 months)
-* **ERSS-112**: MHA describes ERSS-112 as receiving distress over channels including chatbot and WhatsApp at State PSAPs — explore
-  bi-directional incident exchange with Odisha's ERSS rather than a parallel citizen channel *(verify with MHA / State PSAP)*.
-* **MRCC / MRSC (Indian Coast Guard)**: structured SAR handoff and status sync replacing the recorded-only handoff *(verify protocol)*.
-* WhatsApp Business API (approved BSP), SMS fallback (shortcode), IVR voice with speech-to-text in Odia; native mobile app with offline SOS.
-* Approved neural translation / LLM provider behind the chatbot interface (data residency, original always preserved, human-in-the-loop unchanged).
+After this foundation, address SEC-01/02 as one focused authorization change: shared object-scope helpers, policy for unassigned/new incidents, list/detail/mutation/evidence/chat/order coverage, and both positive and negative API tests. Resolve policy ambiguities in the design before changing permissions. Keep all legitimate workflows available.
 
-## Phase 4 — Scale & intelligence (12+ months)
-* Government IdP (SSO, MFA enforcement, PKI tokens); attribute-based access for intelligence compartments.
-* SIEM/SOC integration; UEBA on privileged activity.
-* ML models for anomaly detection trained on validated historical tracks, evaluated against the rule engine before replacement.
-* Multi-site HA (Kubernetes, Patroni), DR site, materialised readiness, event-sourced audit to external WORM.
-* Inter-state / national MDA data exchange under applicable sharing frameworks *(verify)*.
-
-## Success measures to agree with the Wing
-Alert-to-verification time, verification-to-dispatch time, share of incidents with GPS-quality location, share of assets with fresh telemetry,
-readiness data accuracy (UNABLE rate), false-alert rate per detector, citizen report completion rate by language.
+MFA and dispatch confirmation follow as separate reviewable changes. Do not merge an all-at-once redesign or remove features to make a test pass.

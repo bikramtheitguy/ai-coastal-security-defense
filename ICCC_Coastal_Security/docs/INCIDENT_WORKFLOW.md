@@ -1,5 +1,7 @@
 # Incident Workflow
 
+Use this as a synthetic local exercise. The manual C5 transition currently requires an assigned asset but not field EN_ROUTE confirmation. That weaker path is an open [review finding](REVIEW_FINDINGS.md), so citizen updates are not yet guaranteed to reflect confirmed dispatch across all paths.
+
 ## 1. Lifecycle
 ```
 C0 Intake ─► C1 Provisional Alert ─► C2 Operator Acknowledged ─┬─► C3 MRCC/MRSC Notified ─┐

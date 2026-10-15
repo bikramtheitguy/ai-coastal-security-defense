@@ -1,7 +1,8 @@
 # Cybersecurity Design
 
-Status legend: **Implemented** = working in this POC and covered by tests · **Ready** = mechanism present, needs configuration /
-integration · **Planned** = production requirement not built in the POC.
+Status legend: **Implemented** = mechanism present in source, not a blanket security assurance · **Ready** = mechanism present, needs configuration / validation · **Planned** = requirement not built in the POC.
+
+The [current review](REVIEW_FINDINGS.md) identifies unresolved object-authorization, order-cancellation and MFA reenrollment defects. Consult that review and [validation evidence](VALIDATION.md) before interpreting the control inventory below.
 
 ## 1. Identity & authentication
 | Control | Status | Implementation |
@@ -15,9 +16,9 @@ integration · **Planned** = production requirement not built in the POC.
 | Government identity integration | Planned | Replace the login endpoint with SAML/OIDC against the approved Government IdP; keep the RBAC layer (roles map from IdP groups) |
 
 ## 2. Authorisation
-Rank + role + posting + jurisdiction + need-to-know — see RBAC_MATRIX.md. Enforcement is server-side on every endpoint
-(`deps.require`, `deps.require_any`, `deps.ensure_station`, recipient checks for field orders). The UI hides what a user cannot do, but
-never relies on that. **Technical privilege is separated from intelligence privilege**: `SYSTEM_ADMIN` / `CYBER_ADMIN` cannot hold
+Rank + role + posting + jurisdiction + need-to-know is the intended policy — see RBAC_MATRIX.md. Server-side helpers include
+`deps.require`, `deps.require_any`, `deps.ensure_station` and recipient checks, but they are not consistently applied to every object path.
+UI visibility is not authorization evidence. **Technical privilege is separated from intelligence privilege** in the role policy: `SYSTEM_ADMIN` / `CYBER_ADMIN` cannot hold
 `INTEL_VIEW`, and the Users API refuses to grant it. Every denial is audited with outcome `DENIED`.
 
 ## 3. Audit

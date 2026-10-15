@@ -1,0 +1,109 @@
+name: Demo baseline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Demo / ${{ matrix.os }} / Python 3.13
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            dashboard
+            data
+            models
+            notebooks
+            docs
+            tests
+            scripts
+            coastal_security
+            training_tests
+            .github
+            .devcontainer
+            .streamlit
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.1"
+          python-version: "3.13"
+          enable-cache: false
+      - run: uv sync --locked
+      - name: Check runtime and research exports
+        run: |
+          uv export --locked --no-dev --no-emit-project --output-file requirements.txt
+          uv export --locked --no-dev --group research --no-emit-project --output-file requirements-research.txt
+          git diff --exit-code -- requirements.txt requirements-research.txt
+      - run: uv run --locked ruff check .
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked pytest
+
+  vessel-training:
+    name: Vessel benchmark / ${{ matrix.os }} / Python 3.13
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            coastal_security
+            training_tests
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.1"
+          python-version: "3.13"
+          enable-cache: false
+      - run: uv sync --locked --group research
+      - run: uv run --locked --group research pytest training_tests
+      - name: Exercise the documented default benchmark
+        run: uv run --locked --group research python -m coastal_security.vessel --output artifacts/vessel-ci
+
+  dependency-audit:
+    name: Locked dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.1"
+          python-version: "3.13"
+          enable-cache: false
+      - run: uv sync --locked
+      - name: Audit demo runtime
+        run: uv run --locked pip-audit --require-hashes --disable-pip -r requirements.txt
+      - name: Audit optional research tools
+        run: uv run --locked pip-audit --require-hashes --disable-pip -r requirements-research.txt
+      - name: Audit installed development tools
+        run: uv run --locked pip-audit

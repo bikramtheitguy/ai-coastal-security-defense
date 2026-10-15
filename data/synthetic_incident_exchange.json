@@ -1,0 +1,35 @@
+{
+  "registry": {
+    "states": ["SYN-STATE-A", "SYN-STATE-B"],
+    "districts": {"SYN-DISTRICT-A": "SYN-STATE-A", "SYN-DISTRICT-B": "SYN-STATE-B"},
+    "stations": {"SYN-STATION-A": "SYN-DISTRICT-A", "SYN-STATION-B": "SYN-DISTRICT-B"}
+  },
+  "incidents": [
+    {
+      "schema_version": "coastal.incident.v1",
+      "data_class": "SYNTHETIC",
+      "incident_id": "SYN-INCIDENT-001",
+      "source_id": "SYN-CITIZEN-FIXTURE",
+      "source_time": "2026-01-01T09:00:00Z",
+      "received_time": "2026-01-01T09:00:05Z",
+      "target": {"state": "SYN-STATE-A", "district": "SYN-DISTRICT-A", "station": "SYN-STATION-A"},
+      "position": {"latitude": 0.0, "longitude": 0.0, "quality": "SIMULATED"},
+      "original_language": "en",
+      "original_message": "Synthetic exercise: fictional boat has an engine problem. No real incident.",
+      "verification": "UNVERIFIED"
+    },
+    {
+      "schema_version": "coastal.incident.v1",
+      "data_class": "SYNTHETIC",
+      "incident_id": "SYN-INCIDENT-002",
+      "source_id": "SYN-CITIZEN-FIXTURE",
+      "source_time": "2026-01-01T09:01:00Z",
+      "received_time": "2026-01-01T09:01:05Z",
+      "target": {"state": "SYN-STATE-B", "district": null, "station": null},
+      "position": {"latitude": null, "longitude": null, "quality": "UNKNOWN"},
+      "original_language": "en",
+      "original_message": "Synthetic exercise: fictional hazard report awaiting location verification.",
+      "verification": "UNVERIFIED"
+    }
+  ]
+}

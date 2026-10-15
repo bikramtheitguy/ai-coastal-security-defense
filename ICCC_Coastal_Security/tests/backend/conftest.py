@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -15,7 +16,20 @@ sys.path.insert(0, str(ROOT))
 PASSWORD = "Demo@2026"
 
 
+def validate_test_database(url: str, allow_reset: str | None):
+    """Only explicitly opted-in, local, separately named test databases may be reset."""
+    parsed = urlsplit(url)
+    if (allow_reset != "1" or parsed.scheme != "postgresql+psycopg"
+            or parsed.hostname not in {"127.0.0.1", "localhost"}
+            or not parsed.path.startswith("/iccc_test_")
+            or parsed.query or parsed.fragment):
+        raise ValueError("Schema reset requires ICCC_ALLOW_TEST_DB_RESET=1 and a local "
+                         "postgresql+psycopg database named iccc_test_*. Use a disposable database.")
+
+
 def _configure(tmp: str):
+    if os.environ.get("TEST_DATABASE_URL"):
+        validate_test_database(os.environ["TEST_DATABASE_URL"], os.environ.get("ICCC_ALLOW_TEST_DB_RESET"))
     os.environ.update({"DATABASE_URL": os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{tmp}/test.db",
                        "DATA_DIR": tmp, "SIM_ENABLED": "false", "PBKDF2_ITERATIONS": "1000",
                        "DEMO_PASSWORD": PASSWORD, "SESSION_IDLE_MINUTES": "30"})

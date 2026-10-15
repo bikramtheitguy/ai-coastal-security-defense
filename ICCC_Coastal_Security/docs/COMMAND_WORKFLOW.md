@@ -1,5 +1,7 @@
 # Operational Command Workflow
 
+This describes the intended synthetic exercise. The [review](REVIEW_FINDINGS.md) found incomplete jurisdiction/cancellation checks and a separate manual C5 path. Those defects must close before claiming the separation-of-duties guarantees below are fully enforced.
+
 ## 1. Command desk (Command & Tasking › Command Desk)
 Authorised supervisors issue three kinds of order; every order carries **priority** (FLASH / IMMEDIATE / PRIORITY / ROUTINE), **recipients**,
 the **order text**, the **issuer and rank**, optional **validity/expiry**, and timestamped transitions. All are audited.

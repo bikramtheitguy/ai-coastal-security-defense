@@ -2,6 +2,8 @@
 
 Read before any demonstration. This is a **Proof of Concept / Operational Demonstrator**; it must not be used for real operations.
 
+The [15 October source review](REVIEW_FINDINGS.md) also identifies authorization, cancellation, MFA reenrollment and manual-dispatch gaps. Keep demonstrations local and synthetic until the [acceptance gates](POC_CHARTER.md) pass. Existing features remain available for review; this does not certify their security.
+
 ## Data & integrations
 1. **All operational data is synthetic** (personnel, assets, vessels, tracks, weather, incidents, intelligence). See SYNTHETIC_DATASET.md.
 2. **Marine Police Station names and positions are illustrative**. The official list could not be retrieved during the build; replace it with

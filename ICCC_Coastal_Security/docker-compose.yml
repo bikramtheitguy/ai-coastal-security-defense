@@ -41,7 +41,7 @@ services:
     volumes:
       - app_data:/app/data            # evidence files, backups
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_BIND_HOST:-127.0.0.1}:${APP_PORT:-8000}:8000"
     restart: unless-stopped
 
 volumes:

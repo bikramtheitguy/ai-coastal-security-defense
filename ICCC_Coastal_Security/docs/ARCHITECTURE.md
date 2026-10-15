@@ -1,84 +1,60 @@
-# Architecture
+# Coastal security architecture
 
-## 1. Guiding principle
-Operational workflow first, screens second. Every component serves the chain
-**Map → Situation → Readiness → Incident → Decision → Response → Evidence → Learning**. The home screen is the map; charts and
-analytics are drill-downs, not the landing page.
+The current ICCC POC is a single application with synthetic data. Preserve its working capabilities while developing tested interfaces incrementally. The research demo, this application and the Lovable coastal dashboard remain separate systems.
 
-## 2. Component view
+## Current implementation
 
-```
- Browser (ICCC workstation / video wall / laptop / tablet)          Citizen phone (web / QR / simulated WhatsApp)
- ┌──────────────────────────────────────────────────────┐          ┌─────────────────────────────┐
- │ Next.js 15 static app (React 19, TypeScript)          │          │ /citizen  mobile-first chat │
- │  • MapLibre GL live nautical map (offline-capable)    │          └──────────────┬──────────────┘
- │  • 10 workspace groups, context panel, event feed     │                         │ /api/public/*
- └───────────────────────┬──────────────────────────────┘                         │ (rate-limited, no login)
-                         │ HTTPS (TLS at reverse proxy)  /api/* with Bearer JWT    │
- ┌───────────────────────▼─────────────────────────────────────────────────────────▼───────────┐
- │ FastAPI application (single deployable in the POC; clean internal service boundaries)         │
- │  routers/  auth · cop · readiness · personnel · assets · incidents · intel · chat · command ·   │
- │            system (analytics, health, audit, backup, scenarios, search) · admin                │
- │  deps.py   authentication, session idle timeout, permission & jurisdiction checks (audited)    │
- │  services/ readiness engine · resource recommendation · vessel analytics · multi-source fusion │
- │            chatbot (pipeline, lexicon, dialogue) · incident lifecycle + AAR · orders ·          │
- │            simulator (movement, telemetry) · scenarios · serializers                           │
- │  audit.py  tamper-evident SHA-256 hash-chained audit log                                        │
- └───────────────────────┬─────────────────────────────────────────────────────────────────────┘
-                         │ SQLAlchemy 2 (portable types)
- ┌───────────────────────▼──────────────────────┐
- │ PostgreSQL 16 + PostGIS 3.4 (compose)         │   SQLite (single-machine demo / tests)
- │  gis_assets / gis_vessels / gis_incidents     │
- │  views; vessel_track_points hypertable-ready  │
- └───────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    Citizen["Synthetic citizen exercise"] --> UI["Next.js static frontend"]
+    Staff["Local demo staff"] --> UI
+    UI --> API["FastAPI routes and session checks"]
+    API --> Services["Incident, orders, readiness, rule analytics, keyword assistance"]
+    Services --> DB["SQLite or PostgreSQL / PostGIS"]
+    Sim["Synthetic seed and simulator"] --> DB
+    Services --> Files["Local evidence and JSON backups"]
+    API --> Audit["Database hash-chain audit"]
 ```
 
-## 3. Key design decisions
+Source paths: `frontend/`, `backend/app/routers/`, `backend/app/services/`, `backend/app/models.py`, `backend/app/audit.py`, `seed/`, `docker-compose.yml`. Static frontend files are served by FastAPI; the simulator and in-memory rate limiter assume a single process. MapLibre uses public raster/seamark tiles with an approximate offline fallback.
 
-| Decision | Rationale |
-|---|---|
-| **Readiness computed on read** from relational data (no stored scores) | Guarantees propagation: a boat put under maintenance immediately changes station/district/state scores, recommendations and leadership metrics. Scores are always explainable because the reasons are produced by the same computation. |
-| **Explicit semantics** (posted / present / on duty / deployed / available / sea-ready / qualified; exists / operational / available / mission-ready) | These are not interchangeable operationally; each is a separate computed flag (`services/readiness.py`). |
-| **Provenance on every operational entity** (`ProvenanceMixin`) | Source, source time, received time, confidence, verification, classification, owner; freshness is computed and STALE values are shown as last-known, never as current truth. |
-| **Advisory AI only** | Recommendation, analytics and chatbot outputs are labelled and cannot change operational state. Tasking requires `TASK_ASSETS`; dispatch confirmation (C5) needs a field-confirmed EN ROUTE on an authorised order. |
-| **Deterministic, explainable rule engines** for analytics and language understanding | Auditable, offline, no data egress. ML/LLM components can be added behind the same interfaces (see ROADMAP). |
-| **Static-exported frontend served by the API** | One container / one process for the POC; no Node runtime in production. |
-| **No text glyphs on the map** | Map labels need a font server; using canvas-drawn icons + tooltips keeps the map fully functional offline. |
-| **Simulation engine inside the app, state in the DB** | Restart recovery is automatic; the simulator can be disabled and replaced by real feeds without code changes elsewhere. |
-| **Soft delete everywhere** | Personnel/assets/master data are deactivated/archived; history remains auditable. |
+Readiness is computed from personnel, crew, maintenance and asset records. Resource ranking uses heuristic suitability, distance and estimated travel time. Vessel rules produce cues for human verification. The language engine uses keywords/templates and preserves original text; voice uploads are not transcribed. None of these components establishes validated ML performance.
 
-## 4. Request flow example — tasking a boat
-1. Supervisor opens incident → `GET /api/incidents/{id}/recommendation` → `services/recommend.py` loads assets with crew and
-   defects, runs `asset_readiness()` per candidate, filters to mission-ready, scores and returns ranked + excluded lists with reasons,
-   weather and provenance.
-2. Supervisor chooses an asset → `POST /api/orders` → `deps.require_any` checks `TASK_ASSETS`, `ensure_station` checks jurisdiction,
-   `services/orders.create_order` re-checks mission readiness (override requires an audited reason), stores the recommendation
-   snapshot for the AAR, marks the asset TASKED, records supervisor review and an incident timeline event → audit row appended to hash chain.
-3. Field unit → `POST /api/orders/{id}/transition` (recipient check) → EN ROUTE sets the asset moving, deploys crew, confirms
-   dispatch (C5) and sends the verified citizen update → simulator moves the asset each tick → ON SCENE → COMPLETED → asset returns.
+Role/capability and jurisdiction helpers exist, but object enforcement is inconsistent. The field-order path confirms dispatch at EN_ROUTE; the manual incident C5 path has a weaker check. These are [review blockers](REVIEW_FINDINGS.md), not architecture guarantees.
 
-## 5. Service boundaries for evolution
-The `services/` modules have no HTTP dependencies and communicate through the database, making them candidates for extraction:
+## Target modules and boundaries
 
-| Candidate service | Why extract | Possible language |
-|---|---|---|
-| Track ingest & analytics (AIS/radar/UAV) | High-rate streams; CPU-bound geometry | Go or Rust consumer on Kafka |
-| Fusion / correlation | Stateful windowed joins | Rust / Flink-style stream processor |
-| Chatbot language service | Swap in approved NMT / LLM providers | Python (model serving) |
-| Readiness | Read-heavy; can be cached/materialised | Stay Python; materialise via events |
+| Module | Current foundation | Proposed next boundary |
+| --- | --- | --- |
+| Ingestion and validation | Synthetic seed/simulator; root synthetic incident contract | Versioned approved adapters, registry membership, provenance, schema quarantine and deduplication |
+| Maritime monitoring | Synthetic tracks and heuristic alerts | Time/entity-aware replay and detector evaluation, bounded track queries, reviewed alerts |
+| Geospatial awareness | MapLibre, PostGIS views, schematic fallback | Spatial indexes, bounding-box/time filters, coordinate quality, licensed layers, last-known/stale display |
+| Vision analytics | UAV resources; separate label/confidence research | Approved imagery provenance, CV inference service and image-level held-out evaluation |
+| Security events | Login/session/audit event views | Structured collection, rules and SOC export with retention/access controls |
+| Human decision support | Rule recommendations, draft AAR and keyword assistance | Evidence-linked model suggestions, uncertainty, human approval and safe refusal on insufficient evidence |
+| Training and model lifecycle | Root reproducible synthetic vessel benchmark | Dataset/model cards, immutable experiment versions, approval before promotion, drift and false-alert monitoring |
+| Identity and audit | JWT/server sessions, role matrix, partial jurisdiction checks | Centralized object policy, federated identity, safe MFA lifecycle, external audit anchoring |
+| APIs and deployment | FastAPI/static frontend and Compose | Versioned contracts, idempotent commands, observability, isolated environments and tested recovery |
+| Tests and CI | pytest/Playwright; repository baseline CI | Exact-revision ICCC jobs, negative permission tests, contract tests and release evidence |
 
-**Event streaming readiness:** state changes already produce `EventFeed` rows and audit entries at single choke points
-(`services/common.feed`, `audit.audit`). Publishing the same payloads to Kafka topics (`iccc.alerts`, `iccc.orders`, `iccc.incidents`,
-`iccc.tracks`) is an additive change in those two functions.
+## Proposed interaction model
 
-## 6. Map & chart strategy
-* Base: public OSM raster + OpenSeaMap seamarks (POC; **not for navigation**) — URLs configurable to an internal tile server.
-* Offline: approximate schematic coastline from the backend (labelled not official).
-* ENC: a layer slot is reserved in the layer model; an authorised S-57/S-101 service (e.g. via a WMS/vector-tile gateway)
-  can be added as an additional source without redesign.
-* Static chart: served as an image, deliberately not georeferenced until calibration is verified.
+Adapters validate schema, provenance, timestamps and jurisdiction before records enter a review queue. Rejected records retain a reason in a restricted quarantine, never a silently corrected operational value. Human reviewers confirm an incident; an authorized officer issues a task; the responsible field user acknowledges and confirms execution. Recommendations remain evidence attached to decisions.
 
-## 7. Deployment topology (target)
-Reverse proxy (TLS, HSTS, WAF) → 2+ app replicas (stateless; simulator disabled on all but one or replaced by ingest services) →
-PostgreSQL HA (Patroni) + PostGIS + TimescaleDB → object store for evidence (WORM) → Kafka for feeds. Kubernetes-ready: the image
-is stateless apart from `DATA_DIR` (move evidence/backups to object storage), health endpoint `/api/public/info`.
+Preserve the citizen-selected destination when forwarding a report. A forward is a separate attributed record with source/destination and acknowledgement, not a mutation of ownership. The root incident contract demonstrates this invariant using synthetic data only; application ingestion and cross-state authorization remain future work.
+
+The Lovable concepts are mapped in [the repository bridge document](../../docs/LOVABLE_CONCEPT_MAPPING.md). There is no shared database, synchronization, credential exchange or deployed API integration.
+
+## Scale and failure design
+
+Start with a tested modular application. Add workers/queues only when load and failure measurements justify them. EventFeed rows are not a durable message bus: reliable publication needs an outbox or equivalent atomic delivery strategy, idempotency, retry limits, dead-letter handling and monitoring.
+
+Multiple replicas require simulator leadership or external ingestion, shared rate limiting, concurrency-safe commands, shared evidence storage and correct session/authorization behavior. PostgreSQL HA, object storage, queues and orchestration are proposed deployment components, not an existing national-scale system.
+
+Before a pilot, define dataset size, simultaneous users, request/ingest rates, retention, latency/error targets, failover objectives and tenant-isolation tests. Agree numeric targets with owners, then measure them. Use [ROADMAP.md](ROADMAP.md) gates rather than calendar promises.
+
+## Data and model controls
+
+Record source owner, license/approval, source time, received time, coordinate quality, schema version and verification state. Retain original messages alongside interpretations. Do not treat simulated risk scores as calibrated probabilities or estimated coordinates as verified observations.
+
+Evaluate vessel rules and learned models separately. Split by time and entity; fit preprocessing on training only; select thresholds on validation only; keep test data frozen. Report precision, recall, false alerts, missed incidents, class support, calibration where relevant and analyst workload. CV needs image/video splits without scene leakage; cybersecurity needs independent labeled event windows. Existing synthetic results cannot validate any real deployment.

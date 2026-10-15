@@ -1,0 +1,9 @@
+[server]
+enableCORS = true
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#087f8c"
