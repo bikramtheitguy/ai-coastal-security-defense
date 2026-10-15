@@ -40,7 +40,7 @@ def current_user(request: Request, db: Session = Depends(db_session)) -> User:
         db.commit()
         raise HTTPException(401, "Session timed out due to inactivity")
     user = db.get(User, int(claims["sub"]))
-    if user is None or not user.active:
+    if user is None or not user.active or (not settings.is_demo and user.is_demo):
         raise HTTPException(401, "Account disabled")
     if (now - sess.last_seen).total_seconds() > 20:
         sess.last_seen = now

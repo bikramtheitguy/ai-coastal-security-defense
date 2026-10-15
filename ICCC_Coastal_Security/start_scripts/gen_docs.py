@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "backend"), str(ROOT)]
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{tempfile.mkdtemp()}/doc.db")
+os.environ.setdefault("APP_MODE", "demo")
 os.environ.setdefault("SIM_ENABLED", "false")
 
 from app.db import Base  # noqa: E402

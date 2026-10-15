@@ -13,6 +13,7 @@ if [ ! -f frontend/out/index.html ] || [ "${REBUILD_FRONTEND:-0}" = "1" ]; then
   echo "» Building frontend (static export)"
   (cd frontend && npm ci --no-audit --no-fund && NEXT_TELEMETRY_DISABLED=1 npx next build)
 fi
+export APP_MODE="${APP_MODE:-demo}"
 export DATA_DIR="${DATA_DIR:-$ROOT/data}"
 echo "» Starting on http://localhost:${PORT:-8000}  (data in $DATA_DIR; Ctrl+C to stop)"
 cd backend

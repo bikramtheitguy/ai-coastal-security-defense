@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: [["list"]],
   use: { baseURL: `http://localhost:${PORT}`, viewport: { width: 1600, height: 900 }, trace: "retain-on-failure" },
   webServer: {
-    command: `bash -c 'rm -rf /tmp/iccc_e2e && mkdir -p /tmp/iccc_e2e && cd ../../backend && DATA_DIR=/tmp/iccc_e2e SIM_ENABLED=false PBKDF2_ITERATIONS=20000 ${PY} -m uvicorn app.main:app --port ${PORT}'`,
+    command: `bash -c 'rm -rf /tmp/iccc_e2e && mkdir -p /tmp/iccc_e2e && cd ../../backend && APP_MODE=demo SEED_ON_START=true DATA_DIR=/tmp/iccc_e2e SIM_ENABLED=false PBKDF2_ITERATIONS=20000 ${PY} -m uvicorn app.main:app --port ${PORT}'`,
     url: `http://localhost:${PORT}/api/public/info`,
     timeout: 120_000,
     reuseExistingServer: false,

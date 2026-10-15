@@ -30,7 +30,7 @@ def validate_test_database(url: str, allow_reset: str | None):
 def _configure(tmp: str):
     if os.environ.get("TEST_DATABASE_URL"):
         validate_test_database(os.environ["TEST_DATABASE_URL"], os.environ.get("ICCC_ALLOW_TEST_DB_RESET"))
-    os.environ.update({"DATABASE_URL": os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{tmp}/test.db",
+    os.environ.update({"APP_MODE": "demo", "SEED_ON_START": "true", "DATABASE_URL": os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{tmp}/test.db",
                        "DATA_DIR": tmp, "SIM_ENABLED": "false", "PBKDF2_ITERATIONS": "1000",
                        "DEMO_PASSWORD": PASSWORD, "SESSION_IDLE_MINUTES": "30"})
     from app.config import settings

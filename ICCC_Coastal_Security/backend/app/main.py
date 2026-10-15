@@ -26,8 +26,14 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 
 
 def bootstrap() -> None:
+    settings.validate_startup()
     init_engine()
     create_schema()
+    if not settings.is_demo:
+        from .models import User
+        with SessionLocal() as db:
+            if db.query(User).filter(User.is_demo.is_(True)).first():
+                raise ValueError("Restricted mode requires a separate database without seeded demo accounts")
     if settings.seed_on_start:
         from seed.generate import seed_if_empty
         with SessionLocal() as db:
@@ -77,7 +83,8 @@ def create_app() -> FastAPI:
         return {"name": "ICCC Coastal Security & MDA Platform", "mode": "PROOF OF CONCEPT",
                 "data_label": "SIMULATED / POC DATA", "map_label": "LIVE PUBLIC MAP + SIMULATED OPERATIONAL DATA — NOT FOR NAVIGATION",
                 "chart_label": "LOCAL STATIC NAUTICAL REFERENCE — NOT FOR NAVIGATION",
-                "static_chart": _chart_file() is not None, "demo_accounts": True,
+                "static_chart": _chart_file() is not None, "demo_accounts": settings.is_demo,
+                "app_mode": settings.app_mode,
                 "map_tile_url": settings.map_tile_url, "seamark_tile_url": settings.seamark_tile_url,
                 "coastline": _coastline()}
 
