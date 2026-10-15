@@ -17,13 +17,17 @@ The three source datasets are described as synthetic by the original README. The
 - Saved prediction tables lack record IDs and probabilities. We can recompute classification counts, but cannot verify their original holdout membership or recompute ROC-AUC.
 - Existing pickle artifacts embed scikit-learn 1.4.2 metadata. They are not authenticated by training provenance and are not loaded by this demo.
 
-No training algorithm or historical result is changed by the demo-baseline work.
+Historical training code and results remain unchanged. The new [vessel benchmark](VESSEL_BENCHMARK.md) provides a separate corrected evaluation path with deterministic synthetic data, train-only fitting, validation-only selection and held-out test reporting. It does not repair or retroactively validate the original experiment.
 
 ## What tests establish
 
 Tests check all three Streamlit views, visible saved-result metrics, launch-directory independence, asset integrity, binary CSV validation, invalid/missing assets, explicit undefined metrics, source-data counts and basic contracts, non-destructive setup, and enabled development protections.
 
+Separate vessel tests check data contracts, deterministic generation, split boundaries, exclusion of labels/metadata from fitting, validation threshold selection, no refitting during evaluation, metric calculations, saved bundle integrity and reproducibility. They include trusted round-trip loading only of models created by the test itself. The app and benchmark CLI never load model files.
+
 They do not establish model quality, dataset realism, deployed-cloud behavior, load capacity, geospatial correctness, or security certification. Dependency audits cover supported locked demo/research dependencies; they do not clear the historical `venv/`, pickle contents, Git history, or the separate ICCC branch.
+
+The new generator invents its anomaly prevalence and speed distributions. Slow normal and anomalous observations overlap; speed alone cannot distinguish them. Its stationary synthetic test set is public and must not be reused as an independent final holdout after results inform development. Operational alert-rate estimates and real-world confidence intervals remain unavailable.
 
 ## Repository and release limits
 

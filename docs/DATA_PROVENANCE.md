@@ -17,3 +17,9 @@ The dashboard's two prediction CSVs each contain 200 rows. Their original split 
 Before adding data, record its source URL/version, license and redistribution terms, acquisition date, intended uses, approval owner, schema, units, timestamps, retention, generation seed (if synthetic), label specification and transformations. Use synthetic or explicitly approved public data. Keep credentials and restricted data out of Git, screenshots, logs and demos.
 
 Changing a manifest requires reviewing the associated data, chart/prediction consistency and tests. Do not update hashes automatically in CI merely to make integrity checks pass.
+
+## New synthetic vessel benchmark
+
+The separate `coastal_security/vessel/` generator now creates a versioned snapshot dataset with explicit distribution assumptions, labels, seed, synthetic IDs and UTC timestamps. It uses no external inputs and does not replace the original files above. Its generated data is licensed under the project MIT license. See the [complete generator specification](VESSEL_BENCHMARK.md).
+
+Each run writes a new directory under the chosen output path. Its manifest records generated-file hashes, generator version, seed, normalized source-code hashes, dependency-lock hash and runtime versions; `splits.csv` preserves train/validation/test membership and `predictions.csv` preserves test IDs and scores. This makes the new experiment traceable without retroactively supplying provenance for the historical experiments.
