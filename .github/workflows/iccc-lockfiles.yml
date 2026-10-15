@@ -38,6 +38,19 @@ jobs:
         with:
           node-version: '22'
       - run: bash start_scripts/refresh_dependencies.sh
+      - name: Preview generated locks
+        run: |
+          python - <<'PY'
+          import base64, gzip, hashlib
+          from pathlib import Path
+          for name in ("backend/requirements.txt", "backend/requirements-dev.txt", "frontend/package-lock.json"):
+              data = Path(name).read_bytes()
+              print(f"LOCK_START {name} {hashlib.sha256(data).hexdigest()}")
+              encoded = base64.b64encode(gzip.compress(data, mtime=0)).decode()
+              for start in range(0, len(encoded), 4000):
+                  print("LOCK_DATA " + encoded[start:start + 4000])
+              print("LOCK_END")
+          PY
       - name: Record provenance
         run: |
           git rev-parse HEAD > lock-provenance.txt
