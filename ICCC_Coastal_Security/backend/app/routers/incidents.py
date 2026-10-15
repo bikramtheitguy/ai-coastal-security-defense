@@ -16,7 +16,7 @@ from ..config import settings
 from ..db import db_session
 from ..deps import require
 from ..scope import (alert_query, incident_query, ensure_alert, ensure_incident,
-                     ensure_evidence, scope_station_query)
+                     ensure_evidence)
 from ..rbac import can_act_on_station
 from ..models import Alert, Asset, Evidence, Incident, Mission, Order, Vessel, VesselTrackPoint, utcnow
 from ..services.analytics import CLOSED_ALERT, TYPE_LABEL

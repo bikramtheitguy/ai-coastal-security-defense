@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from ..audit import audit
 from ..db import db_session
 from ..deps import require
+from ..scope import incident_query, conversation_query, alert_query
 from ..models import (Alert, Conversation, Incident, Observation, Place, Vessel, VesselTrackPoint, WatchListEntry,
                       utcnow)
 from ..services.analytics import CLOSED_ALERT, TYPE_LABEL, update_vessel_risk
@@ -59,7 +60,7 @@ def vessel(vid: int, hours: int = 6, user=Depends(require("INTEL_VIEW")), db: Se
                   .filter(VesselTrackPoint.vessel_id == vid, VesselTrackPoint.ts >= since).order_by(VesselTrackPoint.ts)]
     d["alerts"] = [{"id": a.id, "code": a.code, "type": a.alert_type, "type_label": TYPE_LABEL.get(a.alert_type, a.alert_type),
                     "severity": a.severity, "status": a.status, "detected_at": iso(a.detected_at), "description": a.description}
-                   for a in db.query(Alert).filter(Alert.vessel_id == vid).order_by(Alert.detected_at.desc()).limit(30)]
+                   for a in alert_query(db, user).filter(Alert.vessel_id == vid).order_by(Alert.detected_at.desc()).limit(30)]
     d["observations"] = [_obs(db, o) for o in db.query(Observation).filter(Observation.vessel_id == vid)
                          .order_by(Observation.observed_at.desc()).limit(5)]
     d["watchlist"] = [{"list": w.list_name, "reason": w.reason, "added_by": w.added_by, "added_at": iso(w.added_at)}
@@ -67,7 +68,7 @@ def vessel(vid: int, hours: int = 6, user=Depends(require("INTEL_VIEW")), db: Se
                       w.vessel_id == vid or (w.identifier or "").upper() in {(v.name or "").upper(), (v.ais_name or "").upper(),
                                                                               (v.registration or "").upper()}]
     d["incidents"] = [{"id": i.id, "code": i.code, "title": i.title, "status": i.status}
-                      for i in db.query(Incident).filter(Incident.vessel_id == vid)]
+                      for i in incident_query(db, user).filter(Incident.vessel_id == vid)]
     home = db.get(Place, v.home_flc_id) if v.home_flc_id else None
     d["home_flc"] = home.name if home else None
     audit(db, user=user, action="INTEL_VESSEL_VIEWED", entity_type="vessel", entity_id=v.vessel_code)
@@ -200,7 +201,7 @@ def remove_watch(wid: int, user=Depends(require("INTEL_EDIT")), db: Session = De
 def community(days: int = 14, user=Depends(require("INTEL_VIEW")), db: Session = Depends(db_session)):
     since = utcnow() - timedelta(days=days)
     out = []
-    for c in db.query(Conversation).filter(Conversation.created_at >= since,
+    for c in conversation_query(db, user).filter(Conversation.created_at >= since,
                                            Conversation.family.in_(["SUSPICIOUS_VESSEL", "SUSPICIOUS_LANDING", "ILLEGAL_FISHING",
                                                                     "FISHERMAN_FOLLOWED", "ILLEGAL_BOARDING", "ROBBERY",
                                                                     "HIJACKING"])).order_by(Conversation.created_at.desc()):

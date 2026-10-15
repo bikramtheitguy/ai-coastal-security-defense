@@ -1,5 +1,4 @@
 """HTTP regressions on generated fixtures: permissions do not grant every object."""
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -13,7 +12,7 @@ from conftest import PASSWORD
 
 @pytest.fixture
 def scoped(client, tmp_path):
-    tag = uuid4().hex[:12]
+    tag = uuid4().hex[:10]  # All fixture codes must fit PostgreSQL VARCHAR(24).
     with SessionLocal() as db:
         own = db.query(Station).filter(Station.name == "Dhamra").one()
         other = db.query(Station).filter(Station.district_id != own.district_id).first()
@@ -200,3 +199,28 @@ def test_explicit_cross_station_field_task_retains_incident_access(client, scope
     assert client.post(f"/api/orders/{oid}/transition", headers=h, json={"to": "ACKNOWLEDGED"}).status_code == 200
     assert client.post(f"/api/orders/{oid}/transition", headers=h, json={"to": "CANCELLED"}).status_code == 403
     assert client.get(f"/api/incidents/{scoped['objects']['own']['incident']}", headers=h).status_code == 403
+
+
+def test_legitimate_scoped_mutations_remain_available(client, scoped):
+    obj, h = scoped["objects"]["own"], scoped["h"]["station"]
+    assert client.post(f"/api/incidents/{obj['incident']}/transition", headers=h, json={"to": "C2"}).status_code == 200
+    assert client.post(f"/api/incidents/{obj['incident']}/notes", headers=h, json={"text": "Scoped verification"}).status_code == 200
+    assert client.post(f"/api/incidents/{obj['incident']}/evidence", headers=h, data={"kind": "NOTE", "description": "Synthetic note"}).status_code == 200
+    assert client.post(f"/api/chat/conversations/{obj['conversation']}/takeover", headers=h).status_code == 200
+    assert client.post(f"/api/chat/conversations/{obj['conversation']}/reply", headers=h, json={"text": "Synthetic reviewed reply"}).status_code == 200
+
+
+def test_linked_intelligence_requires_need_to_know_even_at_state_scope(client, scoped):
+    obj = scoped["objects"]["own"]
+    with SessionLocal() as db:
+        db.get(Alert, obj["alert"]).alert_type = "WATCHLIST"
+        db.get(Incident, obj["incident"]).alert_id = obj["alert"]
+        db.commit()
+    h = scoped["h"]["state"]
+    for path in [f"/api/incidents/{obj['incident']}", f"/api/chat/conversations/{obj['conversation']}",
+                 f"/api/evidence/{obj['evidence']}/download"]:
+        assert client.get(path, headers=h).status_code == 403
+    with SessionLocal() as db:
+        db.query(User).filter(User.username == scoped["users"]["state"]).one().intel_access = True
+        db.commit()
+    assert client.get(f"/api/incidents/{obj['incident']}", headers=h).status_code == 200

@@ -135,6 +135,7 @@ def transition(oid: int, body: AdvanceIn, user=Depends(require_any("ORDERS_FIELD
             db.commit()
             raise HTTPException(403, "Cancellation outside your command authority or jurisdiction")
     else:
+        ensure_order(db, user, o)
         if "ORDERS_FIELD" not in user._perms or not is_recipient(db, user, o):
             audit(db, user=user, action="ACCESS_DENIED", entity_type="order", entity_id=o.code, outcome="DENIED",
                   detail=f"not a recipient for {body.to}")
@@ -167,7 +168,7 @@ def field_console(user=Depends(require("ORDERS_FIELD")), db: Session = Depends(d
                                  for a in db.query(Asset).filter(Asset.station_id == user.station_id, Asset.active.is_(True),
                                                                  Asset.asset_type.in_(["BOAT", "TRAWLER", "RWC", "UAV"]))]
     rows = db.query(Order).order_by(Order.created_at.desc()).limit(200).all()
-    out["orders"] = [order_dict(db, o) for o in rows if is_recipient(db, user, o)]
+    out["orders"] = [order_dict(db, o) for o in rows if is_recipient(db, user, o) and can_read_order(db, user, o)]
     return out
 
 
