@@ -22,6 +22,8 @@ for name in (
     "watch-odisha-map.jpg",
     "watch-mobile.jpg",
     "watch-mobile-map.jpg",
+    "test_india_watch_scope_layers_and_evidence.jpg",
+    "test_island_scope_and_narrow_watch.jpg",
 ):
     path = directory / name
     if path.exists() and path.stat().st_size <= 250_000:

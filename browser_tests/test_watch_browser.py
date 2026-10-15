@@ -8,7 +8,11 @@ EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts/browser"
 
 
 def select(page, label, option):
-    page.get_by_role("combobox", name=label, exact=True).click()
+    control = page.get_by_role("combobox", name=label, exact=True)
+    control.evaluate("element => element.scrollIntoView({block: 'center', behavior: 'instant'})")
+    control.click()
+    if control.evaluate("element => element.tagName") == "INPUT":
+        control.fill(option)
     page.get_by_role("option", name=option, exact=True).click()
 
 
@@ -21,11 +25,11 @@ def open_watch(page):
 def rendered_map(page):
     chart = page.get_by_test_id("stVegaLiteChart")
     chart.scroll_into_view_if_needed()
-    expect(chart.locator("svg").first).to_be_visible()
+    expect(chart.locator("svg.marks")).to_be_visible()
     # A mounted SVG can still have invalid/empty geometry. Check actual map paths.
     page.wait_for_function(
         """() => {
-            const svg = document.querySelector('[data-testid="stVegaLiteChart"] svg');
+            const svg = document.querySelector('[data-testid="stVegaLiteChart"] svg.marks');
             if (!svg) return false;
             const paths = [...svg.querySelectorAll('g.mark-shape path')];
             return paths.length > 0

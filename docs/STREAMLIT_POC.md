@@ -1,14 +1,24 @@
 # Streamlit coastal analytics POC
 
-This POC adds reproducible vessel replay, human evidence review and an independent trajectory evaluation lab to the Python/Streamlit project, with a spatial-inspired UI. It is a software demonstration using invented data, not an operational coastal-security system.
+This POC combines India-focused geographic watch, reproducible vessel replay, human evidence review and an independent trajectory evaluation lab in Python/Streamlit. Geography comes from dated public sources; traffic and operational scenarios are invented. It is a software demonstration, not an operational coastal-security system.
 
-## Current increment: evaluation and spatial UI
+## Current increment: India Coastal Watch
 
-The application now provides five views. **Vessel Evaluation** adds 48 calibration and 48 held-out test voyages across six families, including benign manoeuvres and interruptions. It compares calibrated rules, fixed replay thresholds and no-alert baseline; displays precision, recall, misses and false alerts per vessel-hour; exposes matching ledgers; and exports both complete synthetic splits. See [protocol and reproducibility](TRAJECTORY_EVALUATION.md).
+The sixth view, **Coastal Watch**, adds 13 coastal states/UTs, 229 historical reference district polygons, and 44 fictional vessels. Coast and state/UT filters scope vessel counts; district selection focuses the map only. The watch preserves observation and receipt times, shows stale and unknown positions, quarantines invalid receipts, and exports evidence with reproducibility hashes.
 
-The spatial theme adds layered navy surfaces, rounded panels and clear hierarchy without external assets. Existing replay controls and all historical experiments remain available. Public geographic context and persistent authenticated operations remain proposed in the [design and data roadmap](DESIGN_AND_DATA_ROADMAP.md).
+Use **All coasts** for the overview, **Odisha** for the original eight-vessel exercise, and **Island territories** for the island cohorts. At minute 60 the all-coast picture has 44 observed vessels, one stale position, three current review flags and four rejected receipts. Move the clock to 150 to inspect stale last-known positions. Flags are illustrative review candidates, not evidence of unlawful activity.
 
-PR #13 was approved and merged on 15 October 2026 at `4a1630a25d533a415948035563608db783fe00e2`. Its post-merge baseline and Chromium workflows passed, and the hosted replay was visibly exercised. The evaluation/theme increment is separate and requires its own review before merge; it is not yet the hosted deployment. The sections below preserve the replay specification.
+The public fixtures are pinned and checked before rendering, require no credentials or external map tiles, and carry their own data licences. Mixed boundary vintages and the missing Lakshadweep district association remain explicit. The app does not infer offshore jurisdiction from a civil district polygon.
+
+See the [implementation plan and metric contract](COASTAL_WATCH_PLAN.md), [previous/current comparison and demonstration](COASTAL_WATCH_COMPARISON.md), [public-source notices](../data/coastal_watch/NOTICE.md), and [seven-platform concept roadmap](PLATFORM_CONCEPTS.md). This increment is proposed in draft PR #15; it has not been merged or deployed.
+
+## Preserved evaluation and spatial UI increment
+
+The preceding five-view application includes **Vessel Evaluation**, with 48 calibration and 48 held-out test voyages across six families, including benign manoeuvres and interruptions. It compares calibrated rules, fixed replay thresholds and no-alert baseline; displays precision, recall, misses and false alerts per vessel-hour; exposes matching ledgers; and exports both complete synthetic splits. See [protocol and reproducibility](TRAJECTORY_EVALUATION.md).
+
+The spatial theme adds layered navy surfaces, rounded panels and clear hierarchy without external assets. Existing replay controls and all historical experiments remain available. Coastal Watch now supplies geographic context; persistent authenticated operations remain proposed in the [design and data roadmap](DESIGN_AND_DATA_ROADMAP.md).
+
+PR #13 was approved and merged on 15 October 2026 at `4a1630a25d533a415948035563608db783fe00e2`. PR #14 subsequently added evaluation and the spatial theme; this increment starts from main `485357e97feecc9ed39a72ceb88009197af41910`. Historical validation records describe those revisions. They do not establish deployment of Coastal Watch. The sections below preserve the replay specification.
 
 The delivered application remains `dashboard/app.py`. The three historical research views and offline vessel benchmark are preserved. Lovable is an **external showcase hyperlink only**: no code changes, backend calls, shared data, synchronisation or deployment connection. The separate unmerged ICCC proposal in PR #10 is retained and is not a dependency or replacement application.
 

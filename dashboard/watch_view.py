@@ -147,7 +147,7 @@ def map_spec(
                         "type": "nominal",
                         "title": "Position age",
                         "scale": {"domain": ["Fresh", "Stale"], "range": ["#72dcc4", "#f0bd59"]},
-                        "legend": {"orient": "bottom"},
+                        "legend": {"orient": "bottom", "symbolSize": 80},
                     },
                     "shape": {
                         "field": "vessel_class",
@@ -157,7 +157,11 @@ def map_spec(
                             "domain": ["Cargo", "Fishing", "Service"],
                             "range": ["triangle-up", "circle", "square"],
                         },
-                        "legend": {"orient": "bottom"},
+                        "legend": {
+                            "orient": "bottom",
+                            "symbolFillColor": "#a6bdd2",
+                            "symbolSize": 80,
+                        },
                     },
                     "tooltip": [
                         {"field": "vessel_id", "title": "Vessel", "type": "nominal"},
@@ -174,6 +178,7 @@ def map_spec(
                 },
             }
         )
+    if 0 < len(state["positions"]) <= 12:
         layers.append(
             {
                 "data": {"values": state["positions"]},
@@ -309,7 +314,8 @@ def render_watch() -> None:
             "Earth (1:50 million). Generalised context, not navigation or "
             "legal boundaries. Dots are received observations; gaps are not "
             "interpolated. Amber markers are stale last-known positions. "
-            "Dashed area is fictional."
+            "Dashed area is fictional. Hover markers for identity; vessel "
+            "labels appear in cohorts of 12 or fewer."
         )
         st.caption(
             "State outlines: DataMeet / Election Commission of India via "

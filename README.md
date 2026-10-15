@@ -1,8 +1,8 @@
 # Coastal Analytics Research Demo
 
-A Python and Streamlit research demonstrator for **synthetic coastal analytics**: preserved vessel, drone and cybersecurity experiments, interactive vessel replay, human review and an independent trajectory evaluation lab in a spatial-inspired interface.
+A Python and Streamlit research demonstrator for **India-focused coastal analytics**: public coastal geography, synthetic vessel monitoring, evidence review and reproducible evaluation in a spatial UI. Vessel, drone and cybersecurity research experiments remain available.
 
-**Status: experimental. Not validated for operational decisions or production use.** Three views display saved CSVs and PNGs. Scenario Replay generates fictional timestamped tracks, explains rule flags and records session-only demo reviews. Vessel Evaluation measures missed events and false-alert workload on held-out synthetic voyages. No live feeds, model inference or operational actions are connected.
+**Status: experimental. Not validated for operational decisions or production use.** Three views display saved CSVs and PNGs. Scenario Replay explains fictional tracks and supports session-only reviews. Vessel Evaluation measures synthetic detection quality. India Coastal Watch adds dated public geography, received observations, freshness and data-quality evidence. No live feeds, model inference or operational actions are connected.
 
 [Streamlit research demo](https://ai-coastal-security-defense.streamlit.app/) · [Command-centre concept (Lovable)](https://icccodishacshq.lovable.app/) · [Installation](docs/INSTALLATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Limitations](docs/LIMITATIONS.md) · [Security](SECURITY.md)
 
@@ -34,6 +34,8 @@ The Lovable application is hosted and maintained separately. Its **only relation
 LOF, Logistic Regression, SVM, live AIS, autonomous surveillance, and AI-assisted incident analysis are **not implemented in the supported runtime**. Replay uses invented coordinates on local charts, without a navigation basemap. The separate [ICCC platform proposal in PR #10](https://github.com/bikramtheitguy/ai-coastal-security-defense/pull/10) is unmerged work and is not part of this demo.
 
 Read the **[updated Streamlit POC](docs/STREAMLIT_POC.md)**, **[previous/current comparison](docs/STREAMLIT_POC_COMPARISON.md)** and [validation record](docs/STREAMLIT_VALIDATION.md).
+
+The **[India Coastal Watch comparison](docs/COASTAL_WATCH_COMPARISON.md)** covers the latest additive increment, its screenshots, source terms and validation. The [platform concept map](docs/PLATFORM_CONCEPTS.md) distinguishes implemented ideas from future work.
 
 ![Spatial evaluation lab with independently generated test voyages](docs/screenshots/evaluation-desktop.jpg)
 

@@ -6,18 +6,27 @@ Streamlit UI -> manifest/checksum verification -> local CSV or PNG -> validated 
 
 The three preserved research views follow that path. The fourth view follows: fixed-seed synthetic tracks -> schema validation -> cursor-bounded observations -> rules/freshness -> local charts and evidence -> session review -> optional user download.
 
+The fifth view evaluates independently seeded synthetic voyages, compares detection methods and exports matching evidence. The sixth view follows: pinned public geographic fixtures + synthetic receipt stream -> integrity/contract validation -> clock-bounded acceptance or quarantine -> last-known vessel picture -> current rule evidence and snapshot export.
+
 - `dashboard/app.py`: presentation and module selection.
 - `dashboard/results.py`: file integrity, CSV contract, image decoding and pure metric calculations.
 - `dashboard/artifacts.json`: preserved baseline asset identities.
 - `dashboard/replay_view.py`: replay controls, charts, evidence and session review UI.
 - `coastal_security/replay.py`: deterministic generation, UTC/coordinate contracts, transparent rules, review transitions and fixture export CLI.
 - `data/replay/`: generated CSV and manifest; regeneration identity checked by tests.
+- `coastal_security/trajectory.py` and `dashboard/evaluation_view.py`: synthetic trajectory evaluation and its presentation.
+- `coastal_security/watch.py`: deterministic traffic, receipt causality, quarantine, freshness, scoped snapshots and evidence exports.
+- `coastal_security/geography.py` and `india.py`: pinned-source integrity, bounded geometry processing, coast/state selection and display-only polygon orientation.
+- `dashboard/watch_view.py`: India map, layers, cohort controls, vessel inspector and intake/source panels.
+- `scripts/build_india_reference.py`, `build_coastal_watch.py` and `data/coastal_watch/`: reproducible public-geography derivation, synthetic generation and third-party notices.
 - `data/`, `models/`, `notebooks/`: historical research inputs and artifacts; training is outside the supported runtime.
 - No model deserialization, database, API, ingestion worker, identity service or external data feed is used.
 
-The public demo serves synthetic artifacts only. It must not become a container for non-public operational data.
+The public demo serves synthetic operational artifacts and explicitly licensed public geographic references. It must not become a container for non-public operational data.
 
 Replay uses local charts without external map tiles. Domain logic is separate from Streamlit session state. Review events are volatile and self-attributed, not an identity or audit service. See the [POC definitions and acceptance walkthrough](STREAMLIT_POC.md).
+
+Coastal Watch's receipt validator is an offline exercise processor, not a live ingestion service. It retains observation time separately from receipt time, explains rejected records, and refuses mismatched fixture bytes. Display copies adapt polygon winding for D3 without rewriting source geometry. Historical district associations are context, not official current jurisdiction. Snapshot SHA-256 values verify content identity, not authorship or tamper-proof audit. See the [watch metric contract](COASTAL_WATCH_PLAN.md) and [platform concept sequence](PLATFORM_CONCEPTS.md).
 
 ## Current offline vessel benchmark
 

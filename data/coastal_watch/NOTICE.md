@@ -12,4 +12,6 @@ District metadata represents 2021 and advertises 736 features; the pinned simpli
 
 **Exercise:** 44 fictional vessels, receipt faults and a fictional area, generated under the project's MIT licence. A vessel's exercise state is a scenario grouping, not its registration, jurisdiction or real deployment. Speed is in knots; positions use longitude/latitude decimal degrees, OGC:CRS84. All operational values are synthetic.
 
+At rendering time only, copies of polygon rings are reordered for [D3's spherical winding convention](https://d3js.org/d3-geo). This does not change coordinate values, polygon interiors or the committed source-derived database.
+
 These files contain no client maps, supplied Drive datasets, actual AIS feed or real security incidents. Names of geographic areas are context only. Do not use this POC for navigation or operational decisions.
