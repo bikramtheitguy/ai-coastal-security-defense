@@ -1,0 +1,10 @@
+# Direct runtime requirements. Regenerate the hash-locked requirements.txt with
+# start_scripts/refresh_dependencies.sh; do not install this input in deployment.
+fastapi==0.143.1
+starlette==1.8.0
+uvicorn[standard]==0.34.2
+SQLAlchemy==2.0.40
+psycopg[binary]==3.2.6
+pydantic==2.11.3
+PyJWT==2.15.1
+python-multipart==0.0.32

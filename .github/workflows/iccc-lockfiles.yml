@@ -1,0 +1,56 @@
+name: ICCC dependency lock proposals
+
+on:
+  pull_request:
+    paths:
+      - 'ICCC_Coastal_Security/backend/*.in'
+      - 'ICCC_Coastal_Security/frontend/package.json'
+      - 'ICCC_Coastal_Security/start_scripts/refresh_dependencies.sh'
+      - '.github/workflows/iccc-lockfiles.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iccc-locks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: ICCC_Coastal_Security
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: ICCC_Coastal_Security
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: bash start_scripts/refresh_dependencies.sh
+      - name: Record provenance
+        run: |
+          git rev-parse HEAD > lock-provenance.txt
+          uv --version >> lock-provenance.txt
+          node --version >> lock-provenance.txt
+          npm --version >> lock-provenance.txt
+          sha256sum backend/requirements*.in backend/requirements*.txt frontend/package*.json >> lock-provenance.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: iccc-lock-proposals-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ICCC_Coastal_Security/backend/requirements*.txt
+            ICCC_Coastal_Security/frontend/package-lock.json
+            ICCC_Coastal_Security/lock-provenance.txt
