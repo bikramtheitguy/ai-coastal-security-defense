@@ -84,7 +84,11 @@ def browser():
 
 @pytest.fixture
 def page(browser, app_url, request):
-    context = browser.new_context(viewport={"width": 1365, "height": 900}, reduced_motion="reduce")
+    context = browser.new_context(
+        viewport={"width": 1365, "height": 900},
+        reduced_motion="reduce",
+        timezone_id="Asia/Kolkata",
+    )
     failures, external = [], []
 
     def local_only(route):

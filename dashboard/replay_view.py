@@ -116,6 +116,12 @@ def render_replay() -> None:
 
         tracks = pd.DataFrame([asdict(row) for row in visible])
         st.subheader("Fictional positions and reported speed")
+        vessel_color = {
+            "field": "vessel_id",
+            "type": "nominal",
+            "title": "Vessel",
+            "legend": {"orient": "bottom", "columns": 2},
+        }
         # Local charts avoid transmitting positions to a basemap or external tile service.
         st.vega_lite_chart(
             tracks,
@@ -134,7 +140,7 @@ def render_replay() -> None:
                         "title": "Latitude (degrees)",
                         "scale": {"zero": False},
                     },
-                    "color": {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                    "color": vessel_color,
                     "tooltip": [
                         {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
                         {"field": "observation_id", "type": "nominal", "title": "Observation"},
@@ -153,7 +159,30 @@ def render_replay() -> None:
             "Points are not connected across gaps. "
             "This geographic scatter is not a navigation chart."
         )
-        st.line_chart(tracks, x="observed_at", y="speed_knots", color="vessel_id", height=230)
+        st.vega_lite_chart(
+            tracks,
+            {
+                "mark": "line",
+                "encoding": {
+                    "x": {
+                        "field": "observed_at",
+                        "type": "temporal",
+                        "title": "Observation time (UTC)",
+                        "scale": {"type": "utc"},
+                        "axis": {"format": "%H:%M"},
+                    },
+                    "y": {
+                        "field": "speed_knots",
+                        "type": "quantitative",
+                        "title": "Reported speed (kn)",
+                        "scale": {"zero": True},
+                    },
+                    "color": vessel_color,
+                },
+            },
+            height=230,
+            width="stretch",
+        )
         st.caption(
             "Reported speed in knots. Lines do not establish continuity through missing reports."
         )
