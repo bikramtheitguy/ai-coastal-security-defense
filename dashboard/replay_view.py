@@ -133,13 +133,13 @@ def render_replay() -> None:
                         "field": "longitude",
                         "type": "quantitative",
                         "title": "Longitude (degrees)",
-                        "scale": {"zero": False},
+                        "scale": {"zero": False, "padding": 10},
                     },
                     "y": {
                         "field": "latitude",
                         "type": "quantitative",
                         "title": "Latitude (degrees)",
-                        "scale": {"zero": False},
+                        "scale": {"zero": False, "padding": 10},
                     },
                     "color": vessel_color,
                     "tooltip": [
@@ -187,7 +187,7 @@ def render_replay() -> None:
                     ],
                 },
             },
-            height=230,
+            height=320,
             width="stretch",
         )
         st.caption(
