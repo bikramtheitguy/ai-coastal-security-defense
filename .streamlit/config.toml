@@ -6,4 +6,13 @@ enableXsrfProtection = true
 gatherUsageStats = false
 
 [theme]
-primaryColor = "#087f8c"
+base = "dark"
+primaryColor = "#8cc8ff"
+backgroundColor = "#0b1424"
+secondaryBackgroundColor = "#14243a"
+textColor = "#eef4fc"
+borderColor = "#344760"
+baseRadius = "large"
+showWidgetBorder = true
+showSidebarBorder = true
+font = "sans serif"

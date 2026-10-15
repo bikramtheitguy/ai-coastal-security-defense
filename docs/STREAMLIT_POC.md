@@ -1,6 +1,14 @@
 # Streamlit coastal analytics POC
 
-This POC adds a reproducible vessel scenario and evidence review exercise to the existing Python/Streamlit project. It is a software demonstration using invented data, not an operational coastal-security system.
+This POC adds reproducible vessel replay, human evidence review and an independent trajectory evaluation lab to the Python/Streamlit project, with a spatial-inspired UI. It is a software demonstration using invented data, not an operational coastal-security system.
+
+## Current increment: evaluation and spatial UI
+
+The application now provides five views. **Vessel Evaluation** adds 48 calibration and 48 held-out test voyages across six families, including benign manoeuvres and interruptions. It compares calibrated rules, fixed replay thresholds and no-alert baseline; displays precision, recall, misses and false alerts per vessel-hour; exposes matching ledgers; and exports both complete synthetic splits. See [protocol and reproducibility](TRAJECTORY_EVALUATION.md).
+
+The spatial theme adds layered navy surfaces, rounded panels and clear hierarchy without external assets. Existing replay controls and all historical experiments remain available. Public geographic context and persistent authenticated operations remain proposed in the [design and data roadmap](DESIGN_AND_DATA_ROADMAP.md).
+
+PR #13 was approved and merged on 15 October 2026 at `4a1630a25d533a415948035563608db783fe00e2`. Its post-merge baseline and Chromium workflows passed, and the hosted replay was visibly exercised. The evaluation/theme increment is separate and requires its own review before merge; it is not yet the hosted deployment. The sections below preserve the replay specification.
 
 The delivered application remains `dashboard/app.py`. The three historical research views and offline vessel benchmark are preserved. Lovable is an **external showcase hyperlink only**: no code changes, backend calls, shared data, synchronisation or deployment connection. The separate unmerged ICCC proposal in PR #10 is retained and is not a dependency or replacement application.
 
@@ -93,6 +101,6 @@ For every future increment: define a small acceptance scenario, record data prov
 | P3 | AI-assisted summaries | Approved evidence only, citations and abstention, prompt-injection testing and mandatory human review; never independently authorise actions |
 | P3 | Multi-jurisdiction scale assessment | Workload and latency targets, tenancy, monitoring, recovery exercises, capacity tests and independent security review |
 
-The P0 automated/browser checks and screenshot inspection are complete within the [recorded validation scope](STREAMLIT_VALIDATION.md); maintainer review and deployment verification remain. P1–P3 capabilities are future work. Current legacy model limitations remain unchanged. This POC establishes reproducible software behavior on a tiny invented scenario; national-scale deployment and operational readiness are unverified.
+The replay P0 was merged and its hosted UI checked. The independent P1 synthetic event evaluation is implemented in this proposal; real-data and unseen-family validation remain outstanding. Other P1–P3 capabilities remain future work. Current legacy model limitations remain unchanged. National-scale deployment and operational readiness are unverified.
 
 See [before/after comparison](STREAMLIT_POC_COMPARISON.md), [validation record](STREAMLIT_VALIDATION.md), [architecture](ARCHITECTURE.md) and [installation](INSTALLATION.md).
