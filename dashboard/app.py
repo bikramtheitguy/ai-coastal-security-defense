@@ -1,25 +1,37 @@
-"""Streamlit viewer for the original synthetic-data demonstration artifacts."""
+"""Streamlit research views and independent synthetic scenario replay."""
+
+import sys
+from pathlib import Path
 
 import streamlit as st
 
-# Streamlit adds the entry-point directory to sys.path, even when launched elsewhere.
-from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions
+# Support absolute entry-point launches from another working directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from replay_view import render_replay  # noqa: E402
+from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions  # noqa: E402
 
 st.set_page_config(page_title="Coastal Analytics | Research Demo", layout="wide")
 st.title("Coastal Analytics Research Demo")
-st.info("SYNTHETIC DATA · Saved experimental results · Not for operational decisions")
+st.info("SYNTHETIC DATA · Research and workflow demonstrations · Not for operational decisions")
 st.caption(
-    "Explore three historical experiments. This viewer reads committed tables and charts; "
-    "it does not run inference or connect to live feeds."
+    "Explore three preserved experiments or replay a fictional vessel scenario. "
+    "No live feeds, operational actions or model inference are connected."
 )
 
 mode = st.sidebar.selectbox(
-    "Select Module", ["Drone Threats", "Vessel Anomalies", "Cyber Intrusions"]
+    "Select Module", ["Drone Threats", "Vessel Anomalies", "Cyber Intrusions", "Scenario Replay"]
 )
 st.sidebar.caption("Artifact baseline: 203d5fe · May 2025 experiments")
 st.sidebar.markdown(
     "[Source and limitations](https://github.com/bikramtheitguy/ai-coastal-security-defense)"
 )
+st.sidebar.markdown("[External coastal dashboard showcase](https://icccodishacshq.lovable.app/)")
+st.sidebar.caption("Separate website; hyperlink only. No shared backend, data or deployment.")
+
+if mode == "Scenario Replay":
+    render_replay()
+    st.stop()
+st.session_state.replay_playing = False
 
 
 def percentage(value: float | None) -> str:

@@ -2,7 +2,9 @@
 
 ## Capability and evidence boundaries
 
-This is an educational artifact viewer. It has no live feeds, vessel trajectories, computer-vision detector, network-event collector, authentication, authorization, operational audit log, incident workflow or AI assistant. Do not upload or substitute restricted operational information.
+This is an educational Streamlit application with three artifact views and a synthetic vessel replay/review exercise. It has no live feeds, computer-vision detector, network-event collector, authentication, authorization, operational audit log, persistent incident service or AI assistant. Do not upload or substitute restricted operational information.
+
+The new replay includes invented timestamped vessel positions and fixed illustrative rules. Its session-only review workflow requires acknowledgement and rationale, but reviewer labels are self-asserted, sessions can be lost, and downloaded JSON is not a tamper-proof audit record. No operational action occurs. Local geographic scatter plots are not navigation charts. Rule counts are not model-accuracy or threat-severity measures; thresholds have no representative-data calibration.
 
 The three source datasets are described as synthetic by the original README. Their generator, distribution assumptions and label rules are unknown. They cannot establish maritime or intrusion-detection effectiveness.
 
@@ -21,7 +23,7 @@ Historical training code and results remain unchanged. The new [vessel benchmark
 
 ## What tests establish
 
-Tests check all three Streamlit views, visible saved-result metrics, launch-directory independence, asset integrity, binary CSV validation, invalid/missing assets, explicit undefined metrics, source-data counts and basic contracts, non-destructive setup, and enabled development protections.
+Tests check the three preserved Streamlit views, visible saved-result metrics, launch-directory independence, asset integrity, binary CSV validation, invalid/missing assets, explicit undefined metrics, source-data counts and basic contracts, non-destructive setup, and enabled development protections. New tests cover scenario determinism, committed fixture identity, time boundaries/no future evidence, rule explanations, distance edge cases, freshness recovery, review gates/history, replay controls, charts/tables, filters and empty states.
 
 Separate vessel tests check data contracts, deterministic generation, split boundaries, exclusion of labels/metadata from fitting, validation threshold selection, no refitting during evaluation, metric calculations, saved bundle integrity and reproducibility. They include trusted round-trip loading only of models created by the test itself. The app and benchmark CLI never load model files.
 

@@ -82,7 +82,7 @@ This installs the tools for the [new vessel benchmark](VESSEL_BENCHMARK.md) and 
 
 Select this repository, the approved branch/commit and entry point `dashboard/app.py`. In advanced settings select Python 3.13. The root `requirements.txt` supplies the runtime; `.streamlit/config.toml` keeps CORS/XSRF protection enabled and disables usage statistics.
 
-Record the deployed revision and runtime in release notes, check all three views, and inspect deployment logs. A devcontainer configuration does not configure Community Cloud. This PR does not redeploy or wake the existing hosted demo.
+Record the deployed revision and runtime in release notes, check all four views (including the [Scenario Replay walkthrough](STREAMLIT_POC.md#reproduce-and-demonstrate)), and inspect deployment logs. A devcontainer configuration does not configure Community Cloud. The proposal does not itself redeploy the hosted demo. Local verification is distinct from hosted revision verification.
 
 ## Devcontainer
 
