@@ -27,6 +27,15 @@ def rendered_map(page):
     chart.scroll_into_view_if_needed()
     expect(chart.locator("svg.marks")).to_be_visible()
     # A mounted SVG can still have invalid/empty geometry. Check actual map paths.
+    diagnostic = chart.locator("svg.marks").evaluate(
+        """svg => ({width: svg.getAttribute('width'), height: svg.getAttribute('height'),
+            paths: [...svg.querySelectorAll('g.mark-shape path')].slice(0, 4).map(p => ({
+                d: (p.getAttribute('d') || '').slice(0, 100),
+                width: p.getBBox().width, height: p.getBBox().height})),
+            groups: [...svg.querySelectorAll('g')].slice(0, 6).map(g => ({
+                class: g.getAttribute('class'), transform: g.getAttribute('transform')}))})"""
+    )
+    print("WATCH_MAP_DIAGNOSTIC=" + json.dumps(diagnostic))
     page.wait_for_function(
         """() => {
             const svg = document.querySelector('[data-testid="stVegaLiteChart"] svg.marks');
@@ -87,6 +96,8 @@ def test_island_scope_and_narrow_watch(page):
             exact=True,
         )
     ).to_be_visible()
+    rendered_map(page)
+    page.screenshot(path=str(EVIDENCE / "watch-island-desktop-map.jpg"), type="jpeg", quality=80)
     page.set_viewport_size({"width": 390, "height": 844})
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
