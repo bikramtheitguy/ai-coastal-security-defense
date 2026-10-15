@@ -127,6 +127,7 @@ def render_replay() -> None:
             tracks,
             {
                 "mark": {"type": "point", "filled": True, "size": 55},
+                "params": [{"name": "position_zoom", "select": "interval", "bind": "scales"}],
                 "encoding": {
                     "x": {
                         "field": "longitude",
@@ -162,7 +163,8 @@ def render_replay() -> None:
         st.vega_lite_chart(
             tracks,
             {
-                "mark": "line",
+                "mark": {"type": "line", "point": True},
+                "params": [{"name": "speed_zoom", "select": "interval", "bind": "scales"}],
                 "encoding": {
                     "x": {
                         "field": "observed_at",
@@ -178,6 +180,11 @@ def render_replay() -> None:
                         "scale": {"zero": True},
                     },
                     "color": vessel_color,
+                    "tooltip": [
+                        {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                        {"field": "observation_id", "type": "nominal", "title": "Observation"},
+                        {"field": "speed_knots", "type": "quantitative", "title": "Speed (kn)"},
+                    ],
                 },
             },
             height=230,
