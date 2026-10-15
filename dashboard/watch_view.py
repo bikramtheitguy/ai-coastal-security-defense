@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from coastal_security.geography import EXTENT, load_bundle
-from coastal_security.india import COASTAL_STATES, scope_geometry
+from coastal_security.india import COASTAL_STATES, display_feature, scope_geometry
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
 
 
@@ -23,7 +23,14 @@ def map_spec(
 ) -> dict:
     layers = []
     # Fixed fit prevents the coast jumping as observations arrive or filters change.
-    fit = {"type": "MultiPoint", "coordinates": [[extent[0], extent[1]], [extent[2], extent[3]]]}
+    fit = {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+            "type": "MultiPoint",
+            "coordinates": [[extent[0], extent[1]], [extent[2], extent[3]]],
+        },
+    }
     grid = [
         {
             "type": "Feature",
@@ -45,7 +52,7 @@ def map_spec(
     )
     layers.append(
         {
-            "data": {"values": states},
+            "data": {"values": [display_feature(feature) for feature in states]},
             "mark": {"type": "geoshape", "fill": "#182c40", "stroke": "#60788e", "strokeWidth": 1},
             "encoding": {
                 "tooltip": {
@@ -59,7 +66,7 @@ def map_spec(
     if show_districts:
         layers.append(
             {
-                "data": {"values": districts},
+                "data": {"values": [display_feature(feature) for feature in districts]},
                 "mark": {
                     "type": "geoshape",
                     "filled": False,

@@ -21,21 +21,19 @@ def open_watch(page):
 def rendered_map(page):
     chart = page.get_by_test_id("stVegaLiteChart")
     chart.scroll_into_view_if_needed()
-    expect(chart.locator("canvas").first).to_be_visible()
-    # A mounted canvas can still be empty while Vega finishes its dataflow.
-    # Require the cool-coloured coast/observation marks, not just a background.
+    expect(chart.locator("svg").first).to_be_visible()
+    # A mounted SVG can still have invalid/empty geometry. Check actual map paths.
     page.wait_for_function(
         """() => {
-            const canvas = document.querySelector('[data-testid="stVegaLiteChart"] canvas');
-            if (!canvas || !canvas.width || !canvas.height) return false;
-            const pixels = canvas.getContext('2d').getImageData(
-                0, 0, canvas.width, canvas.height).data;
-            let marks = 0;
-            for (let i = 0; i < pixels.length; i += 4) {
-                if (pixels[i + 3] > 0 && pixels[i + 1] > 140 && pixels[i + 2] > 140
-                    && pixels[i] < pixels[i + 1] * 0.9) marks++;
-            }
-            return marks > 30;
+            const svg = document.querySelector('[data-testid="stVegaLiteChart"] svg');
+            if (!svg) return false;
+            const paths = [...svg.querySelectorAll('g.mark-shape path')];
+            return paths.length > 0
+                && paths.every(path => !/NaN|Infinity/.test(path.getAttribute('d') || ''))
+                && paths.some(path => {
+                    const box = path.getBBox();
+                    return box.width > 20 && box.height > 20;
+                });
         }"""
     )
     return chart

@@ -37,6 +37,29 @@ def polygons(geometry: dict) -> list:
     raise ValueError("Expected public polygon geometry.")
 
 
+def display_feature(feature: dict) -> dict:
+    """Copy bounded Indian polygons into D3's clockwise-exterior convention.
+
+    D3 spherical polygons use the opposite winding to RFC 7946 GeoJSON.
+    Reorder only display copies; retain the source bundle and geometry exactly.
+    This planar sign test is scoped to these small, non-antimeridian polygons.
+    """
+    groups = []
+    for rings in polygons(feature["geometry"]):
+        ordered = []
+        for index, ring in enumerate(rings):
+            twice_area = sum(
+                a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:], strict=False)
+            )
+            reverse = (index == 0 and twice_area > 0) or (index > 0 and twice_area < 0)
+            ordered.append([list(point) for point in (reversed(ring) if reverse else ring)])
+        groups.append(ordered)
+    kind = feature["geometry"]["type"]
+    return feature | {
+        "geometry": {"type": kind, "coordinates": groups[0] if kind == "Polygon" else groups}
+    }
+
+
 def bounds(geometry: dict) -> list[float]:
     points = [point for polygon in polygons(geometry) for ring in polygon for point in ring]
     return [
