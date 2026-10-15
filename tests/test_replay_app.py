@@ -16,7 +16,7 @@ def test_replay_charts_tables_filters_and_freshness_from_other_directory(tmp_pat
     monkeypatch.chdir(tmp_path)
     app = replay()
     assert [metric.value for metric in app.metric] == ["4", "0", "3"]
-    assert len(app.get("arrow_vega_lite_chart")) == 2
+    assert len(app.get("vega_lite_chart")) == 2
     assert len(app.dataframe) >= 3
     app.slider(key="replay_seek").set_value(45).run()
     assert [metric.value for metric in app.metric] == ["4", "1", "2"]
@@ -64,3 +64,4 @@ def test_play_pause_seek_step_and_module_switch():
     assert not app.session_state["replay_playing"]
     assert [metric.value for metric in app.metric] == ["200", "20.0%", "12.5%", "0.154"]
     assert not app.exception
+
