@@ -29,3 +29,11 @@ Approved feed adapters, geospatial replay, validated CV inference, model serving
 For each PR, compare the previous and proposed revision for routes, actions, roles, filters, exports, supported inputs and persisted records. Record unchanged features as well as intentional behavior changes. Test at least one successful authorized action and one denied unauthorized action for each access-control change. Never count an unconditional error or a hidden button as a completed security fix.
 
 The Lovable application has its own feature inventory and source revision. Do not infer its coverage from this table or treat a change here as a change to that application.
+
+## Dependency and session hardening increment
+
+All 110 original ICCC file paths and the existing API/browser test bodies are retained. This increment adds patched dependency locks, reproducible worker packaging and regression tests. It does not change the database schema or remove routes, roles, forms, operational layers, tasking, administration, citizen assistance or evidence workflows. MapLibre 6 requires WebGL2; target-device compatibility is an explicit installation check.
+
+Intentional security behavior: tokens must carry valid required claims and match the stored session owner; bad passwords and bad OTPs share the account lockout budget; token timestamps are UTC regardless of host timezone. Valid login, OTP authentication, logout, expiry recovery and evidence upload/download remain available. Evidence reads copy at most the configured limit plus one byte into memory after multipart parsing; this is not a comprehensive HTTP-body, storage-quota or malware-scanning control.
+
+The hosted Lovable project and bkdigital.tech are outside the implementation scope and were not changed. See the exact-revision results in [VALIDATION.md](VALIDATION.md).

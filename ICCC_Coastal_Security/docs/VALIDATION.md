@@ -76,3 +76,28 @@ Code revision `92380289331f128fe168552f4094eac1a733fd25` was checked on 15 Octob
 - ICCC dependency auditing failed. See [affected packages and remediation gates](DEPENDENCY_REVIEW.md). Existing authorization/MFA/dispatch findings remain open despite behavioral test success.
 
 These results apply to the implemented code revision above. The subsequent documentation-only update records the evidence without changing runtime code. The full local Streamlit suite stalled and was stopped; the completed clean CI jobs provide its validation evidence instead. Full ICCC execution remained unavailable locally because dependency downloads failed.
+
+## Dependency and security increment — verified 15 October 2026
+
+Tested code revision: `242855b6c60749cda216b2bbbcce5c6391d0b3ee`. The subsequent evidence-only documentation commit does not change runtime code, dependencies or tests.
+
+| Check | Result and evidence |
+| --- | --- |
+| SQLite API/security suite | 81 passed, including 28 new regressions |
+| PostgreSQL API/security suite | 81 passed, including the same regressions against the disposable service database |
+| Frontend TypeScript/static export | Passed on Node 22 |
+| Browser acceptance | 9 passed: all 8 original workflows plus attribution sanitization |
+| ICCC Python runtime dependency audit | No known vulnerabilities reported with pinned hashes; no suppressions |
+| ICCC npm runtime dependency audit | 0 vulnerabilities reported; no suppressions |
+| Root Streamlit/research/vessel checks | All 5 jobs passed, including both Windows and Linux |
+| Local source checks | 47 ICCC Python files parsed; 58 relative documentation links resolved before this evidence update; Node syntax checks passed |
+
+[ICCC CI run](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38698998481) · [Root baseline CI run](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38698998483) · [Lock proposal workflow](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38698998405).
+
+The security regressions verify required JWT claims, signatures/algorithm, expiration and future issuance, malformed subjects/session IDs, stored-session ownership, UTC lifetime under three host timezones, shared password/OTP attempt limits, lockout expiry recovery, and evidence byte/hash/download preservation with oversize rejection. The browser suite covers the full Odia synthetic incident flow, map layers and panels, role-based workspaces, login/logout, search and scenarios. The attribution test preserves safe text/links while rejecting consecutive event-handler attributes and unsafe elements.
+
+An initial MapLibre 6 build passed compilation but failed browser worker loading. The final version explicitly includes the locked package's versioned worker/shared modules and license in the static export; the existing map tests were preserved and now pass. The initial new sanitizer fixture expected text inside an element that the sanitizer intentionally removes; it was corrected to verify permitted text/links separately from blocked markup. Neither issue was hidden by weakening the original suite or disabling a capability.
+
+All 110 original ICCC file paths remain. No database schema change or migration was introduced. Source preservation and test success are evidence for these fixtures, not proof of complete operational parity on every device; MapLibre 6 requires WebGL2. Docker image execution, native Windows ICCC launchers, full dependency licensing, penetration testing, capacity and recovery remain unverified. Local package downloads were blocked by DNS; full runtime verification used isolated CI.
+
+**Release decision: remain draft/unmerged.** SEC-01/02 jurisdiction and cancellation, SEC-03 MFA reenrollment, WF-01 dispatch confirmation and SEC-04 non-demo configuration remain blockers. SEC-05's reproduced OTP/time defects and the reported runtime dependency advisories are remediated for this tested revision. Lovable and bkdigital.tech were not changed.

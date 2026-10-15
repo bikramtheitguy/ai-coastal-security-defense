@@ -65,3 +65,5 @@ Install from `backend/requirements.txt` (runtime) or `backend/requirements-dev.t
 Dependency maintainers can run `bash start_scripts/refresh_dependencies.sh` with uv 0.13.1, Node 22 and npm 10. Review the resulting diff and run the complete ICCC checks. The read-only GitHub Actions lock-proposal workflow produces checksummed candidate files and never pushes or deploys them. Its artifact and encoded log preview contain only these public dependency files.
 
 The patched MapLibre 6 map requires a WebGL2-capable browser/device. Its ESM import replaces the former default import. Existing operational layers, local reference-chart view, lists, search and tasking workflows remain in the application; test target hardware before a demonstration. There is no claim of compatibility with WebGL1-only hardware.
+
+The Next configuration copies the locked MapLibre distribution modules and upstream license into a versioned `public/vendor/` directory before build/dev. These generated files are ignored by Git and included in the static export. The map uses this same-origin worker URL; no CDN fallback is introduced. Rebuild the frontend after changing the MapLibre lock.
