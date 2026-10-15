@@ -28,7 +28,8 @@ The Lovable application is hosted and maintained separately. Its **only relation
 | Cybersecurity | Offline Random Forest on dummy packet records | No live monitoring; saved predictions miss all four positive cases |
 | Scenario replay | Four fictional tracks, 91 observations, replay controls, freshness, explained rules and human review exercise | Synthetic rules only; session history is not authenticated, persistent or tamper-proof |
 | Vessel Evaluation | Independent seeded trajectories, calibration/test separation, one-to-one event matching, false alerts per vessel-hour, comparison and evidence export | Same-family synthetic holdout; no real-world detection or national-scale claim |
-| Dashboard | Five views, including replay and evaluation, with a spatial UI theme | Research and workflow demonstration, not an operational system |
+| Coastal Watch | Indian coastal geography, 44 fictional vessels, state/coast filters, district map focus, receipt validation, freshness and evidence export | Mixed historical boundary vintages; no live feed or jurisdiction claim |
+| Dashboard | Six views, including replay, evaluation and India Coastal Watch, with a spatial UI theme | Research and workflow demonstration, not an operational system |
 
 LOF, Logistic Regression, SVM, live AIS, autonomous surveillance, and AI-assisted incident analysis are **not implemented in the supported runtime**. Replay uses invented coordinates on local charts, without a navigation basemap. The separate [ICCC platform proposal in PR #10](https://github.com/bikramtheitguy/ai-coastal-security-defense/pull/10) is unmerged work and is not part of this demo.
 
@@ -58,6 +59,8 @@ Open the local URL printed by Streamlit. No credentials or external data service
 Select **Scenario Replay** to explore the new POC. Start at minute 45 to see a stale vessel, inspect the flag evidence, and record a fictional review while paused. Downloads include the synthetic observations, provenance manifest and session review history. See the [eight-step walkthrough](docs/STREAMLIT_POC.md#reproduce-and-demonstrate).
 
 Select **Vessel Evaluation** to compare calibrated rules, fixed thresholds and a no-alert baseline across six scenario families. Inspect matching evidence and download the complete reproducible benchmark. See the [evaluation protocol](docs/TRAJECTORY_EVALUATION.md) and [spatial design and public-data roadmap](docs/DESIGN_AND_DATA_ROADMAP.md).
+
+Select **Coastal Watch** for an India-focused geographic exercise. Choose a coast and state/UT, inspect last-known vessel positions and source delays, and download the evidence available at the exercise clock. Public geography and synthetic traffic are clearly separated. See the [previous/current comparison and walkthrough](docs/COASTAL_WATCH_COMPARISON.md), [third-party data notices](data/coastal_watch/NOTICE.md), and [platform-inspired development sequence](docs/PLATFORM_CONCEPTS.md).
 
 Do not activate the committed `venv/` directory. It is a historical Linux/Python environment retained with the original repository; supported installations use a fresh `.venv/`.
 

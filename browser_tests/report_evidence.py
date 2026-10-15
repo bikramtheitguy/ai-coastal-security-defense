@@ -17,6 +17,10 @@ for name in (
     "evaluation-comparison.jpg",
     "evaluation-mobile.jpg",
     "evaluation-mobile-chart.jpg",
+    "watch-india-desktop.jpg",
+    "watch-odisha-map.jpg",
+    "watch-mobile.jpg",
+    "watch-mobile-map.jpg",
 ):
     path = directory / name
     if path.exists() and path.stat().st_size <= 250_000:
