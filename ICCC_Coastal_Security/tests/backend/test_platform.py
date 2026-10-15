@@ -46,7 +46,7 @@ def test_failed_login_lockout_and_unlock(client, login):
 def test_mfa_enrolment_and_login(client):
     r = client.post("/api/auth/login", json={"username": "dgp.demo", "password": PASSWORD})
     h = {"Authorization": "Bearer " + r.json()["token"]}
-    secret = client.post("/api/auth/mfa/enroll", headers=h).json()["secret"]
+    secret = client.post("/api/auth/mfa/enroll", headers=h, json={"current_password": PASSWORD}).json()["secret"]
     assert client.post("/api/auth/mfa/confirm", headers=h, json={"code": totp(secret)}).status_code == 200
     r = client.post("/api/auth/login", json={"username": "dgp.demo", "password": PASSWORD})
     assert r.json() == {"mfa_required": True}

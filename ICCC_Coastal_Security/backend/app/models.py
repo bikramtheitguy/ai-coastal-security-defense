@@ -660,6 +660,16 @@ class UserSession(Base):
     revoked = Column(Boolean, default=False)
 
 
+class MfaEnrollment(Base):
+    """Short-lived, session-bound replacement; active User.mfa_secret is unchanged."""
+    __tablename__ = "mfa_enrollments"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    secret = Column(String(64), nullable=False)
+    session_jti = Column(String(64), nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+
+
 class AuditLog(Base):
     __tablename__ = "audit_log"
     id = Column(Integer, primary_key=True)

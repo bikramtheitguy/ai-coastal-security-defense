@@ -10,7 +10,7 @@ from ..audit import audit
 from ..config import settings
 from ..db import db_session
 from ..deps import client_ip, current_user
-from ..models import CyberEvent, Station, User, UserSession, utcnow
+from ..models import CyberEvent, MfaEnrollment, Station, User, UserSession, utcnow
 from ..rbac import P, ROLE_INFO, permissions_for
 from ..security import (hash_password, issue_token, new_totp_secret, password_policy_errors, verify_password,
                         verify_totp)
@@ -76,7 +76,7 @@ def login(body: LoginIn, request: Request, db: Session = Depends(db_session)):
                                  f"{(u.locked_until + timedelta(hours=5, minutes=30)):%H:%M} IST or contact the administrator.")
     if u.locked_until:  # an expired lock starts a fresh attempt window
         u.failed_attempts, u.locked_until = 0, None
-    if not u.active or not verify_password(body.password, u.password_hash):
+    if not u.active or (not settings.is_demo and u.is_demo) or not verify_password(body.password, u.password_hash):
         record_login_failure(db, u, ip, "bad password", now)
         raise HTTPException(401, "Invalid username or password")
     if u.mfa_enabled:
@@ -132,14 +132,40 @@ def change_password(body: PwIn, user: User = Depends(current_user), db: Session 
     return {"ok": True}
 
 
+class MfaEnrollIn(BaseModel):
+    current_password: str
+    current_otp: str | None = None
+
+
+def check_mfa_lock(user):
+    now = utcnow()
+    if user.locked_until and user.locked_until > now:
+        raise HTTPException(423, "Account temporarily locked after authentication failures")
+    if user.locked_until:
+        user.failed_attempts, user.locked_until = 0, None
+
+
 @router.post("/mfa/enroll")
-def mfa_enroll(user: User = Depends(current_user), db: Session = Depends(db_session)):
+def mfa_enroll(body: MfaEnrollIn, user: User = Depends(current_user), db: Session = Depends(db_session)):
+    check_mfa_lock(user)
+    if (not verify_password(body.current_password, user.password_hash)
+            or (user.mfa_enabled and not verify_totp(user.mfa_secret, body.current_otp or ""))):
+        record_login_failure(db, user, user._ip, "MFA replacement reauthentication failed", utcnow())
+        raise HTTPException(401, "Reauthentication failed")
     secret = new_totp_secret()
-    user.mfa_secret = secret
-    user.mfa_enabled = False
-    audit(db, user=user, action="MFA_ENROLL_STARTED", entity_type="user", entity_id=user.id)
+    pending = db.get(MfaEnrollment, user.id)
+    if pending is None:
+        pending = MfaEnrollment(user_id=user.id)
+        db.add(pending)
+    pending.secret, pending.session_jti = secret, user._jti
+    pending.created_at = utcnow()
+    pending.expires_at = utcnow() + timedelta(minutes=10)
+    # Keep active MFA enabled throughout enrollment, interruption and failed confirmation.
+    audit(db, user=user, action="MFA_ENROLL_STARTED", entity_type="user", entity_id=user.id,
+          detail="Session-bound pending enrollment; active factor retained")
     db.commit()
-    return {"secret": secret, "otpauth_uri": f"otpauth://totp/ICCC-POC:{user.username}?secret={secret}&issuer=ICCC-POC"}
+    return {"secret": secret, "otpauth_uri": f"otpauth://totp/ICCC-POC:{user.username}?secret={secret}&issuer=ICCC-POC",
+            "expires_in_seconds": 600, "active_factor_retained": user.mfa_enabled}
 
 
 class OtpIn(BaseModel):
@@ -148,9 +174,19 @@ class OtpIn(BaseModel):
 
 @router.post("/mfa/confirm")
 def mfa_confirm(body: OtpIn, user: User = Depends(current_user), db: Session = Depends(db_session)):
-    if not user.mfa_secret or not verify_totp(user.mfa_secret, body.code):
+    check_mfa_lock(user)
+    pending = db.query(MfaEnrollment).filter(MfaEnrollment.user_id == user.id).with_for_update().first()
+    if (pending is None or pending.session_jti != user._jti or pending.expires_at <= utcnow()
+            or (user.password_changed_at and user.password_changed_at > pending.created_at)):
+        raise HTTPException(409, "No current enrollment for this session; reauthenticate and start again")
+    if not verify_totp(pending.secret, body.code):
+        record_login_failure(db, user, user._ip, "Invalid pending MFA confirmation", utcnow())
         raise HTTPException(400, "Invalid code")
-    user.mfa_enabled = True
-    audit(db, user=user, action="MFA_ENABLED", entity_type="user", entity_id=user.id)
+    user.mfa_secret, user.mfa_enabled = pending.secret, True
+    user.failed_attempts, user.locked_until = 0, None
+    db.delete(pending)
+    db.query(UserSession).filter(UserSession.user_id == user.id, UserSession.jti != user._jti).update({"revoked": True})
+    audit(db, user=user, action="MFA_ENABLED", entity_type="user", entity_id=user.id,
+          detail="Pending factor confirmed; other sessions revoked")
     db.commit()
     return {"ok": True}
