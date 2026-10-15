@@ -117,9 +117,39 @@ def render_replay() -> None:
         tracks = pd.DataFrame([asdict(row) for row in visible])
         st.subheader("Fictional positions and reported speed")
         # Local charts avoid transmitting positions to a basemap or external tile service.
-        st.scatter_chart(tracks, x="longitude", y="latitude", color="vessel_id", height=310)
+        st.vega_lite_chart(
+            tracks,
+            {
+                "mark": {"type": "point", "filled": True, "size": 55},
+                "encoding": {
+                    "x": {
+                        "field": "longitude",
+                        "type": "quantitative",
+                        "title": "Longitude (degrees)",
+                        "scale": {"zero": False},
+                    },
+                    "y": {
+                        "field": "latitude",
+                        "type": "quantitative",
+                        "title": "Latitude (degrees)",
+                        "scale": {"zero": False},
+                    },
+                    "color": {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                    "tooltip": [
+                        {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                        {"field": "observation_id", "type": "nominal", "title": "Observation"},
+                        {"field": "longitude", "type": "quantitative", "format": ".4f"},
+                        {"field": "latitude", "type": "quantitative", "format": ".4f"},
+                        {"field": "speed_knots", "type": "quantitative", "title": "Speed (kn)"},
+                    ],
+                },
+            },
+            height=310,
+            width="stretch",
+        )
         st.caption(
             "Observed positions in decimal degrees; no basemap. "
+            "Axes fit the visible observations and can change with replay time/filter. "
             "Points are not connected across gaps. "
             "This geographic scatter is not a navigation chart."
         )

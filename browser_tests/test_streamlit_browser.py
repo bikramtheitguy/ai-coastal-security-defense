@@ -48,6 +48,7 @@ def test_preserved_research_views(page, name, heading):
     module(page, name)
     expect(page.get_by_role("heading", name=heading, exact=True)).to_be_visible()
     image = page.get_by_test_id("stImage").locator("img")
+    expect(image).to_have_count(1)
     expect(image).to_be_visible()
     expect(image).to_have_js_property("complete", True)
     assert image.evaluate("image => image.naturalWidth") > 0
@@ -131,6 +132,7 @@ def test_review_validation_disposition_download_and_reset(page):
     assert data["scenario"]["rows"] == 91
     page.get_by_role("button", name="Reset replay and demo reviews").click()
     expect(page.get_by_role("heading", name="Replay clock · 00:00 UTC")).to_be_visible()
+    page.get_by_text("Session review history and export", exact=True).click()
     expect(
         page.get_by_text("No demo reviews recorded in this session.", exact=True)
     ).to_be_visible()
