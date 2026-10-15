@@ -7,12 +7,22 @@ import streamlit as st
 
 # Support absolute entry-point launches from another working directory.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evaluation_view import render_evaluation  # noqa: E402
 from replay_view import render_replay  # noqa: E402
 from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions  # noqa: E402
+from spatial_style import apply_spatial_style  # noqa: E402
 
 st.set_page_config(page_title="Coastal Analytics | Research Demo", layout="wide")
+apply_spatial_style()
 mode = st.sidebar.selectbox(
-    "Select Module", ["Drone Threats", "Vessel Anomalies", "Cyber Intrusions", "Scenario Replay"]
+    "Select Module",
+    [
+        "Drone Threats",
+        "Vessel Anomalies",
+        "Cyber Intrusions",
+        "Scenario Replay",
+        "Vessel Evaluation",
+    ],
 )
 st.sidebar.caption("Artifact baseline: 203d5fe · May 2025 experiments")
 st.sidebar.markdown(
@@ -21,6 +31,9 @@ st.sidebar.markdown(
 st.sidebar.markdown("[External coastal dashboard showcase](https://icccodishacshq.lovable.app/)")
 st.sidebar.caption("Separate website; hyperlink only. No shared backend, data or deployment.")
 
+if mode == "Vessel Evaluation":
+    render_evaluation()
+    st.stop()
 if mode == "Scenario Replay":
     render_replay()
     st.stop()

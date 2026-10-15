@@ -59,6 +59,55 @@ def test_preserved_research_views(page, name, heading):
     elif name == "Cyber Intrusions":
         expect(page.get_by_test_id("stMetricValue")).to_have_text(["200", "0.0%", "0.0%", "0.000"])
     expect(page.get_by_test_id("stException")).to_have_count(0)
+    if name == "Drone Threats":
+        capture(page, "spatial-research-desktop.jpg")
+
+
+def test_evaluation_filters_evidence_and_download(page, tmp_path):
+    module(page, "Vessel Evaluation")
+    expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
+    expect(page.get_by_test_id("stMetricValue")).to_have_count(3)
+    chart = page.get_by_test_id("stVegaLiteChart")
+    expect(chart.locator("canvas, svg").first).to_be_visible()
+    capture(page, "evaluation-desktop.jpg")
+    page.get_by_role("combobox", name="Scenario family").click()
+    print("EVALUATION_OPTIONS_JSON=" + json.dumps(page.get_by_role("option").all_text_contents()))
+    page.get_by_role("option", name="Steady transit", exact=True).click()
+    expect(page.get_by_test_id("stMetricValue")).to_have_text(["Undefined", "Undefined", "0.000"])
+    page.get_by_role("tab", name="Inspect evidence").click()
+    expect(page.get_by_text("No alerts in this selection.", exact=True)).to_be_visible()
+    page.get_by_role("tab", name="Protocol & provenance").click()
+    expect(page.get_by_role("heading", name="Frozen selection protocol")).to_be_visible()
+    with page.expect_download() as result:
+        page.get_by_role("button", name="Download complete synthetic benchmark (JSON)").click()
+    target = tmp_path / "report.json"
+    result.value.save_as(target)
+    report = json.loads(target.read_bytes())
+    assert report["synthetic"] is True and len(report["evaluations"]) == 84
+    assert report["calibration_seed"] != report["test_seed"]
+    page.get_by_role("tab", name="Compare methods").click()
+    chart.scroll_into_view_if_needed()
+    capture(page, "evaluation-comparison.jpg")
+    expect(page.get_by_test_id("stException")).to_have_count(0)
+
+
+def test_spatial_evaluation_narrow_layout(page):
+    module(page, "Vessel Evaluation")
+    expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
+    page.set_viewport_size({"width": 390, "height": 844})
+    collapse = page.get_by_role("button", name="Collapse sidebar")
+    if collapse.is_visible():
+        collapse.click()
+    expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
+    capture(page, "evaluation-mobile.jpg")
+    chart = page.get_by_test_id("stVegaLiteChart")
+    chart.scroll_into_view_if_needed()
+    expect(chart.locator("canvas, svg").first).to_be_visible()
+    box = chart.bounding_box()
+    assert box and box["width"] <= 390 and box["x"] >= 0
+    capture(page, "evaluation-mobile-chart.jpg")
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2")
+    expect(page.get_by_test_id("stException")).to_have_count(0)
 
 
 def test_replay_render_seek_autoplay_pause_and_end(page):

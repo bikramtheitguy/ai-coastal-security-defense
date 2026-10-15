@@ -1,5 +1,45 @@
 # Previous and current POC: side-by-side
 
+## Latest increment: merged replay versus evaluation proposal
+
+Previous: merged PR #13 at `4a1630a`. Current: the evaluation/spatial-theme branch containing this document, pending its own review and deployment.
+
+| Area | Previous merged replay | Current proposal |
+| --- | --- | --- |
+| Views | Three saved experiments and Scenario Replay | All four preserved, plus Vessel Evaluation |
+| Visual design | Default Streamlit surfaces with teal accent | Layered navy spatial theme, rounded cards, restrained blue and responsive hierarchy |
+| Evaluation data | Four designed replay tracks, unsuitable as an independent test | Separate 48-vessel calibration and 48-vessel test suites, disjoint dates and seeds |
+| False-alert evidence | Illustrative flags with no quality estimate | One-to-one event scoring, duplicate burden, misses and FP per vessel-hour |
+| Comparisons | No replay threshold benchmark | Calibrated rules, fixed threshold baseline and no-alert baseline |
+| Transparency | Replay evidence and session-review export | Added selection protocol, all matching ledgers and complete benchmark download |
+| Public/client data | Synthetic replay only | Synthetic evaluation added; client references stay local; public-source roadmap documented |
+| Operational claims | Unverified | Still unverified; synthetic holdout is not field validation |
+
+See [evaluation protocol](TRAJECTORY_EVALUATION.md), [spatial design](DESIGN_AND_DATA_ROADMAP.md) and [executed validation](TRAJECTORY_VALIDATION.md). The earlier comparison below is retained as development history.
+
+### Spatial theme: the same replay before and after
+
+| Merged PR #13 interface | PR #14 spatial interface |
+| --- | --- |
+| ![Previous replay interface](screenshots/replay-desktop.jpg) | ![Spatial replay interface](screenshots/spatial-replay-desktop.jpg) |
+| ![Previous narrow replay chart](screenshots/replay-mobile-chart.jpg) | ![Spatial narrow replay chart](screenshots/spatial-replay-mobile-chart.jpg) |
+
+Replay behaviour and synthetic fixture are preserved. Earlier screenshots come from PR #13's tested code; current screenshots come from real Chromium at `1715687`. These are test-environment captures, not proof of the hosted site's deployment.
+
+### Added evaluation lab
+
+![Evaluation scope and held-out synthetic metrics](screenshots/evaluation-desktop.jpg)
+
+| Narrow evaluation scope | Narrow method comparison |
+| --- | --- |
+| ![Evaluation on a narrow screen](screenshots/evaluation-mobile.jpg) | ![All method labels visible on narrow comparison](screenshots/evaluation-mobile-chart.jpg) |
+
+![Preserved drone experiment with spatial styling](screenshots/spatial-research-desktop.jpg)
+
+All images are unedited browser screenshots. Historical metrics are unchanged; this increment improves evaluation transparency and interface design, not the accuracy of the old classifiers.
+
+## Historical increment: PR #12 to PR #13
+
 Previous Streamlit baseline: GitHub main commit `cb3e3078336b0ea8c5105943f3ff1afd57f373b5` (merged PR #12). Current: the Streamlit scenario replay proposal containing this document. The current source is the branch/commit shown by GitHub; this comparison does not imply it has been deployed.
 
 | Capability | Previous Streamlit baseline | Current Streamlit proposal |
