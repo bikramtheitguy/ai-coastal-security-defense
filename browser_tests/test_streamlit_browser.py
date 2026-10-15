@@ -70,6 +70,8 @@ def test_replay_render_seek_autoplay_pause_and_end(page):
     expect(page.get_by_test_id("stDataFrame")).to_have_count(3)
     page.get_by_role("heading", name="Replay clock · 01:00 UTC").scroll_into_view_if_needed()
     capture(page, "replay-desktop.jpg")
+    charts.first.scroll_into_view_if_needed()
+    capture(page, "replay-chart.jpg")
     seek(page, 45)
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["4", "1", "2"])
     page.get_by_role("button", name="Play", exact=True).click()
@@ -104,9 +106,8 @@ def test_review_validation_disposition_download_and_reset(page):
     page.get_by_role("textbox", name="Review rationale (synthetic exercise only)").fill(
         "Checked the invented speed change and source rows."
     )
-    page.get_by_role(
-        "checkbox", name="I reviewed the displayed evidence and its limitations"
-    ).check()
+    page.get_by_text("I reviewed the displayed evidence and its limitations", exact=True).click()
+    expect(page.get_by_role("checkbox")).to_be_checked()
     submit.click()
     expect(page.get_by_text(re.compile(r"^Review status: In review\."))).to_be_visible()
     page.get_by_role("combobox", name="Next demo status").click()
@@ -114,9 +115,8 @@ def test_review_validation_disposition_download_and_reset(page):
     page.get_by_role("textbox", name="Review rationale (synthetic exercise only)").fill(
         "Known injected test condition; demonstration closed."
     )
-    page.get_by_role(
-        "checkbox", name="I reviewed the displayed evidence and its limitations"
-    ).check()
+    page.get_by_text("I reviewed the displayed evidence and its limitations", exact=True).click()
+    expect(page.get_by_role("checkbox")).to_be_checked()
     submit.click()
     status = page.get_by_text(re.compile(r"^Review status: Dismissed\."))
     expect(status).to_be_visible()
@@ -152,6 +152,7 @@ def test_narrow_layout_and_synthetic_downloads(page):
         expect(chart.locator("canvas, svg").first).to_be_visible()
         box = chart.bounding_box()
         assert box and box["width"] <= 390
+    capture(page, "replay-mobile-chart.jpg")
     page.get_by_text("Scenario provenance and downloads", exact=True).click()
     with page.expect_download() as pending:
         page.get_by_role("button", name="Download full synthetic observations").click()

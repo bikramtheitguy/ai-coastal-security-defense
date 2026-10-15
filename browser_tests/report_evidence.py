@@ -6,7 +6,13 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 directory = root / "artifacts/browser"
-for name in ("replay-desktop.jpg", "review-desktop.jpg", "replay-mobile.jpg"):
+for name in (
+    "replay-desktop.jpg",
+    "review-desktop.jpg",
+    "replay-mobile.jpg",
+    "replay-chart.jpg",
+    "replay-mobile-chart.jpg",
+):
     path = directory / name
     if path.exists() and path.stat().st_size <= 250_000:
         print(

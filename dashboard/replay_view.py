@@ -31,6 +31,12 @@ def _pause() -> None:
     st.session_state.replay_playing = False
 
 
+def _toggle_playback() -> None:
+    # Callbacks run before the script renders, keeping the button label in sync.
+    st.session_state.replay_playing = not st.session_state.replay_playing
+    st.session_state.replay_tick = time.monotonic()
+
+
 def _seek() -> None:
     st.session_state.replay_minute = st.session_state.replay_seek
     _pause()
@@ -44,12 +50,9 @@ def _reset() -> None:
 
 
 def render_replay() -> None:
-    st.header("Synthetic vessel scenario replay")
+    st.title("Synthetic vessel scenario replay")
     st.caption("Four fictional vessels · 1 Jan 2026 UTC · Rule-based flags · Session-only review")
-    st.info(
-        "SYNTHETIC DATA · Invented positions and events. Flags identify conditions to inspect; "
-        "they do not identify threats or authorise action."
-    )
+    st.info("SYNTHETIC DATA · Flags need human review · Not for operational decisions")
     for key, value in {
         "replay_minute": 60,
         "replay_playing": False,
@@ -66,21 +69,17 @@ def render_replay() -> None:
         "Seek to minute (pauses replay)", 0, END_MINUTE, step=5, key="replay_seek", on_change=_seek
     )
     controls = st.columns(3)
-    if controls[0].button(
-        "Pause" if st.session_state.replay_playing else "Play", key="replay_play"
-    ):
-        st.session_state.replay_playing = not st.session_state.replay_playing
-        st.session_state.replay_tick = time.monotonic()
+    controls[0].button(
+        "Pause" if st.session_state.replay_playing else "Play",
+        key="replay_play",
+        on_click=_toggle_playback,
+    )
     if controls[1].button(
         "Step +5 min", disabled=st.session_state.replay_playing, key="replay_step"
     ):
         st.session_state.replay_minute = min(END_MINUTE, st.session_state.replay_minute + 5)
     controls[2].button("Reset replay and demo reviews", on_click=_reset, key="replay_reset")
-    st.caption(
-        "Playback advances five simulated minutes per second while this view is open. "
-        "Seek selects a time; the current replay clock is shown below. "
-        "Reset clears this session's reviews."
-    )
+    st.caption("One second plays five simulated minutes. Reset clears this session's reviews.")
 
     @st.fragment(run_every=1 if st.session_state.replay_playing else None)
     def frame() -> None:

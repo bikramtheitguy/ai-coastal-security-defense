@@ -11,13 +11,6 @@ from replay_view import render_replay  # noqa: E402
 from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions  # noqa: E402
 
 st.set_page_config(page_title="Coastal Analytics | Research Demo", layout="wide")
-st.title("Coastal Analytics Research Demo")
-st.info("SYNTHETIC DATA · Research and workflow demonstrations · Not for operational decisions")
-st.caption(
-    "Explore three preserved experiments or replay a fictional vessel scenario. "
-    "No live feeds, operational actions or model inference are connected."
-)
-
 mode = st.sidebar.selectbox(
     "Select Module", ["Drone Threats", "Vessel Anomalies", "Cyber Intrusions", "Scenario Replay"]
 )
@@ -32,6 +25,12 @@ if mode == "Scenario Replay":
     render_replay()
     st.stop()
 st.session_state.replay_playing = False
+st.title("Coastal Analytics Research Demo")
+st.info("SYNTHETIC DATA · Research and workflow demonstrations · Not for operational decisions")
+st.caption(
+    "Explore three preserved experiments or replay a fictional vessel scenario. "
+    "No live feeds, operational actions or model inference are connected."
+)
 
 
 def percentage(value: float | None) -> str:

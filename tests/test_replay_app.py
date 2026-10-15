@@ -53,9 +53,11 @@ def test_play_pause_seek_step_and_module_switch():
     app = replay()
     app.button(key="replay_play").click().run()
     assert app.session_state["replay_playing"]
+    assert app.button(key="replay_play").label == "Pause"
     assert next(button for button in app.button if button.label == "Record demo review").disabled
     app.button(key="replay_play").click().run()
     assert not app.session_state["replay_playing"]
+    assert app.button(key="replay_play").label == "Play"
     app.slider(key="replay_seek").set_value(0).run()
     app.button(key="replay_step").click().run()
     assert app.session_state["replay_minute"] == 5
