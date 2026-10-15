@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source_commit": "203d5fe1ce71aac44e7ae7d55683aa45fd8591d0",
+  "provenance": "Original README describes synthetic data; generator, labeling rules, seed and split IDs are unavailable.",
+  "assets": {
+    "cyber_confusion_matrix_phase1.png": {
+      "sha256": "d43141faed168f95b089cdd0c469632ca6ed1fd7644ee135f892e091c4d4ae81"
+    },
+    "cyber_intrusion_predictions_phase1.csv": {
+      "sha256": "99e8f5b4952d8858b06e0f2ea13b9a99b1def47f32eeb1c36581948877f5aaec"
+    },
+    "drone_threat_predictions_phase1.csv": {
+      "sha256": "bde47e870496707de3aa41904f81225e0de7d5e4cb7bcaea3a992487b602b157"
+    },
+    "feature_importance_phase1.png": {
+      "sha256": "878b8c3b0dd85187c0b649e6603f8d842017bfa2793b4edb8237cc44856236aa"
+    },
+    "vessel_anomalies_phase1.png": {
+      "sha256": "140734b4db1b3a4a920eec40b1803158cb040ad4cb86d321a48e5541ed0de162"
+    }
+  },
+  "datasets": {
+    "cyber_data.csv": {
+      "sha256": "1b62116b8ba887ecec87140348087309fbfd261c609f939427526fc56f1a8b08"
+    },
+    "drone_data.csv": {
+      "sha256": "f7752e6f1194bca0092a47eb6dc0515642de461d13bc3db84a21455d8a3f4e34"
+    },
+    "vessel_data.csv": {
+      "sha256": "685a9ab4ab38cc7d3999b198276e46dd71a80da2987e654c0910170a0334448b"
+    }
+  }
+}
