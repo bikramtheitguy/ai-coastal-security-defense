@@ -17,6 +17,7 @@ Previous Streamlit baseline: GitHub main commit `cb3e3078336b0ea8c5105943f3ff1af
 | Audit/identity | No operational identity/audit service | Still no operational service; self-asserted labels and volatile session history explicitly labelled |
 | Synthetic provenance | Original generators unknown; separate benchmark traceable | Additional committed replay CSV, fixed seed, generator, MIT terms and SHA-256 manifest |
 | Dependencies | Locked Python 3.13 runtime | Same dependency declarations and lockfiles; no new services |
+| Verification | Existing artifact/helper/AppTest and benchmark checks | 60 Linux demo tests; 59 Windows tests plus 1 platform skip; 20 benchmark tests per OS; server startup and dependency audits passed |
 | Lovable relationship | Showcase link plus hypothetical integration language | External hyperlink only; integration proposals withdrawn from current architecture |
 | PR #10 | Unmerged separate ICCC application proposal | Preserved separately; not imported, expanded or deployed by this increment |
 | Readiness | Experimental; not operationally validated | Reproducible workflow POC; still not operationally or nationally validated |
