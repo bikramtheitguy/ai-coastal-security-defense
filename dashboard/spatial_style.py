@@ -26,7 +26,9 @@ def apply_spatial_style():
     }
     [data-testid="stMetricValue"] { font-variant-numeric: tabular-nums; }
     [data-testid="stVerticalBlockBorderWrapper"] { border-radius: 16px; }
-    [data-testid="stCaptionContainer"] { color: #b8c8dc; }
+    [data-testid="stCaptionContainer"],
+    [data-testid="stCaptionContainer"] p { color: #b8c8dc !important; }
+    [data-testid="stAlert"] p { color: #eef4fc; }
     button, input, textarea { font-variant-numeric: tabular-nums; }
     @media (max-width: 640px) {
       [data-testid="stMainBlockContainer"] { padding-left: 1rem; padding-right: 1rem; }

@@ -90,15 +90,15 @@ def render_evaluation():
                 "height": 280,
                 "mark": {"type": "bar"},
                 "encoding": {
-                    "x": {
+                    "y": {
                         "field": "Method",
                         "type": "nominal",
-                        "axis": {"labelAngle": 0, "labelLimit": 200},
+                        "axis": {"labelLimit": 155},
                         "sort": [r["method"] for r in rows],
                         "title": None,
                     },
-                    "xOffset": {"field": "Outcome"},
-                    "y": {
+                    "yOffset": {"field": "Outcome"},
+                    "x": {
                         "field": "Events",
                         "type": "quantitative",
                         "scale": {"zero": True},
@@ -109,7 +109,7 @@ def render_evaluation():
                         "type": "nominal",
                         "scale": {
                             "domain": ["Detected", "Missed", "False alerts"],
-                            "range": ["#315a95", "#9e6c15", "#78828f"],
+                            "range": ["#72a7e5", "#e8b64f", "#9eacbf"],
                         },
                         "legend": {"orient": "top", "columns": 2, "title": None},
                     },

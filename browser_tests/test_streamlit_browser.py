@@ -70,9 +70,8 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
     chart = page.get_by_test_id("stVegaLiteChart")
     expect(chart.locator("canvas, svg").first).to_be_visible()
     capture(page, "evaluation-desktop.jpg")
-    chart.scroll_into_view_if_needed()
-    capture(page, "evaluation-comparison.jpg")
     page.get_by_role("combobox", name="Scenario family").click()
+    print("EVALUATION_OPTIONS_JSON=" + json.dumps(page.get_by_role("option").all_text_contents()))
     page.get_by_role("option", name="Steady transit", exact=True).click()
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["Undefined", "Undefined", "0.000"])
     page.get_by_role("tab", name="Inspect evidence").click()
@@ -86,6 +85,9 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
     report = json.loads(target.read_bytes())
     assert report["synthetic"] is True and len(report["evaluations"]) == 84
     assert report["calibration_seed"] != report["test_seed"]
+    page.get_by_role("tab", name="Compare methods").click()
+    chart.scroll_into_view_if_needed()
+    capture(page, "evaluation-comparison.jpg")
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 
