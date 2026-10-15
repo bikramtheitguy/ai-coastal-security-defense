@@ -33,6 +33,10 @@ LOF, Logistic Regression, SVM, live AIS, autonomous surveillance, and AI-assiste
 
 Read the **[updated Streamlit POC](docs/STREAMLIT_POC.md)**, **[previous/current comparison](docs/STREAMLIT_POC_COMPARISON.md)** and [validation record](docs/STREAMLIT_VALIDATION.md).
 
+![Synthetic vessel replay with playback controls, freshness counts and explained flags](docs/screenshots/replay-desktop.jpg)
+
+Screenshot from the repository's Chromium test environment, using invented data. See the [desktop, narrow-screen and chart comparisons](docs/STREAMLIT_POC_COMPARISON.md#visual-comparison-within-the-replay-increment). This is not evidence of a hosted deployment.
+
 ## Run the demo
 
 Use Python **3.13** and [uv](https://docs.astral.sh/uv/getting-started/installation/) **0.13.1**.
@@ -87,8 +91,9 @@ models/                  Original serialized research models; never loaded by th
 notebooks/               Legacy experiments and notebook outputs; known limitations remain
 tests/                   Demo, data-contract, integrity and setup tests
 training_tests/          Vessel benchmark isolation, metrics and reproducibility tests
+browser_tests/           Isolated Chromium UI tests and hashed test-tool lock
 docs/                    Installation, architecture, limitations and provenance
-.github/workflows/       Demo checks and dependency auditing
+.github/workflows/       Demo/benchmark checks, Chromium QA and dependency auditing
 pyproject.toml            Runtime, development and optional research dependency groups
 uv.lock                  Universal dependency lock
 requirements.txt         Hashed runtime export for pip and Streamlit Community Cloud
@@ -105,7 +110,7 @@ uv run --locked ruff format --check .
 uv run --locked pytest
 ```
 
-CI checks the demo and new vessel benchmark on Windows and Linux with Python 3.13, verifies dependency exports, and audits runtime and research dependencies. Passing checks establish software behavior on synthetic examples, not operational model validity. See [verification scope](docs/LIMITATIONS.md).
+CI checks the demo and new vessel benchmark on Windows and Linux with Python 3.13, verifies dependency exports, and audits runtime and research dependencies. A separate [Chromium workflow](docs/BROWSER_QA.md) checks the real UI, downloads and narrow layout and retains traces/screenshots. Passing checks establish software behavior on synthetic examples, not operational model validity. See [verification scope](docs/LIMITATIONS.md).
 
 ## Next milestones
 

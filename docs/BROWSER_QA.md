@@ -37,9 +37,9 @@ Do not disable host protections when loopback access is denied. GitHub Actions p
 - Narrow layout: controls, plots, page overflow and synthetic CSV/manifest downloads.
 - Isolation: unexpected external HTTP requests and browser JavaScript errors fail tests.
 
-Desktop size is 1365 × 900; narrow size is 390 × 844. Viewport emulation is not physical-phone validation. Firefox, Safari/WebKit, assistive technology, concurrent reviewers and operational workloads remain outside this check.
+Desktop size is 1365 × 900; narrow size is 390 × 844. Browser timezone is Asia/Kolkata so screenshot review can also check that the explicitly UTC speed axis remains UTC. Viewport emulation is not physical-phone validation. Firefox, Safari/WebKit, assistive technology, concurrent reviewers and operational workloads remain outside this check.
 
-The workflow uploads `streamlit-browser-evidence`: screenshots, traces, visible text, server logs, browser version and JUnit results, retained for 14 days. Bounded JPEG previews of the synthetic UI are also emitted into its log for remote visual inspection. Download needed bundles before expiry; these are test evidence, not release archives.
+The workflow uploads `streamlit-browser-evidence`: screenshots, traces, visible text, server logs, browser version and JUnit results, retained for 14 days. Bounded JPEG previews of the synthetic UI are also emitted into its log for remote visual inspection. Download needed bundles before expiry; these are test evidence, not release archives. Selected unedited screenshots are committed in `docs/screenshots/` for the durable [before/after comparison](STREAMLIT_POC_COMPARISON.md#visual-comparison-within-the-replay-increment); their exact source revisions and runs are recorded there.
 
 Refresh the lock deliberately, review its diff, and audit before accepting:
 

@@ -55,6 +55,8 @@ uv run --locked pip-audit --require-hashes --disable-pip -r requirements-researc
 
 The demo, new vessel benchmark, helpers and their tests are linted. Legacy training scripts are preserved and have known defects; passing CI is not an operational validation claim. The Bash wrapper is tested on Linux. Benchmark tests require the research dependency group and run separately with `uv run --locked --group research pytest training_tests`.
 
+Real Chromium tests run in an isolated browser environment: see [browser setup, coverage and evidence](BROWSER_QA.md). They exercise desktop/narrow layouts, playback, review and downloads against a local Streamlit process. GitHub Actions supplies this environment when host policy prevents local socket use; do not disable host protections to run the tests.
+
 ## Dependency updates
 
 Use uv 0.13.1. Review direct-version changes in `pyproject.toml`, then:

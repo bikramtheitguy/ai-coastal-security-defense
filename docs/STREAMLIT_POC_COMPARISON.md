@@ -16,11 +16,35 @@ Previous Streamlit baseline: GitHub main commit `cb3e3078336b0ea8c5105943f3ff1af
 | Human review | No Streamlit review exercise | Evidence acknowledgement, constrained transitions, rationale, session history and JSON export |
 | Audit/identity | No operational identity/audit service | Still no operational service; self-asserted labels and volatile session history explicitly labelled |
 | Synthetic provenance | Original generators unknown; separate benchmark traceable | Additional committed replay CSV, fixed seed, generator, MIT terms and SHA-256 manifest |
-| Dependencies | Locked Python 3.13 runtime | Same dependency declarations and lockfiles; no new services |
-| Verification | Existing artifact/helper/AppTest and benchmark checks | 60 Linux demo tests; 59 Windows tests plus 1 platform skip; 20 benchmark tests per OS; server startup and dependency audits passed |
+| Dependencies | Locked Python 3.13 runtime | Same application/research dependencies and locks; separate hashed browser-test tooling; no new services |
+| Verification | Existing artifact/helper/AppTest and benchmark checks | Expanded domain/AppTest/server checks plus six real Chromium cases, desktop/narrow screenshots and tested downloads; exact results in the validation record |
 | Lovable relationship | Showcase link plus hypothetical integration language | External hyperlink only; integration proposals withdrawn from current architecture |
 | PR #10 | Unmerged separate ICCC application proposal | Preserved separately; not imported, expanded or deployed by this increment |
 | Readiness | Experimental; not operationally validated | Reproducible workflow POC; still not operationally or nationally validated |
+
+## Visual comparison within the replay increment
+
+The baseline on main has no Scenario Replay screen; the capability table above compares that baseline with this proposal. The images below compare the **first replay implementation** with the **browser-verified refinement**, at the same synthetic minute 60. They are actual Chromium screenshots of the Streamlit app, not mockups or images of the Lovable website.
+
+Desktop and narrow-screen before images come from `715281c` ([run 38766629549](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38766629549)). The chart before image comes from `3830d6a` ([run 38767327664](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38767327664)). After images come from `f0fdae9` ([run 38769794911](https://github.com/bikramtheitguy/ai-coastal-security-defense/actions/runs/38769794911)). These images document development; the earlier runs exposed issues and are not claimed as passing releases.
+
+| Desktop before | Desktop after |
+| --- | --- |
+| ![Before: repeated headings and notices push the replay clock down](screenshots/replay-desktop-before.jpg) | ![After: one heading and notice, with controls, clock and metrics visible](screenshots/replay-desktop.jpg) |
+
+The refined layout exposes the replay clock and summary counts earlier. Play/Pause now updates its visible label correctly through a Streamlit callback; that behavior is checked by AppTest and Chromium.
+
+| Position chart before | Position chart after |
+| --- | --- |
+| ![Before: zero-based axes compress vessel positions into one corner](screenshots/replay-chart-before.jpg) | ![After: fitted axes expose the fictional positions and the injected position error](screenshots/replay-chart.jpg) |
+
+Longitude/latitude axes fit the visible observations and label their units. Observation tooltips support evidence inspection. Both charts use a two-column legend so all vessel labels fit on narrow screens. The speed axis uses explicit 24-hour UTC times even when the browser uses Asia/Kolkata. Axis ranges can change; this is a geographic scatter, without a basemap or guaranteed geographic aspect ratio.
+
+| Narrow screen before | Narrow screen after |
+| --- | --- |
+| ![Before narrow view with duplicate page headings](screenshots/replay-mobile-before.jpg) | ![After narrow view with one heading and visible playback controls](screenshots/replay-mobile.jpg) |
+
+The 390 × 844 viewport checks page overflow, chart sizing and downloads. It is browser viewport emulation, not physical-phone testing. Review evidence and the speed chart are also captured in [review](screenshots/review-desktop.jpg) and [narrow chart](screenshots/replay-mobile-chart.jpg) screenshots. See [validation results and remaining limits](STREAMLIT_VALIDATION.md).
 
 ## PR #10 context, preserved separately
 

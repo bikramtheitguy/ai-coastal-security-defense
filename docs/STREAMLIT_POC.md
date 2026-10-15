@@ -16,7 +16,7 @@ The delivered application remains `dashboard/app.py`. The three historical resea
 
 Select **Scenario Replay** in the existing module selector. Play/pause, step five minutes, seek to a replay time, and filter vessels. Playback advances one step per second while the view is active; it does not simulate background ingestion or catch up after a disconnected browser. The replay stops at 01:55. The seek control is a destination selector; the displayed replay clock is authoritative during playback.
 
-Positions appear on a longitude/latitude scatter plot. A second chart shows reported speed over time. The table identifies each last observation and its age relative to the replay clock. These plots have no navigation basemap. Speed lines may span missing reports; they are not evidence of continuous observations.
+Positions appear on a longitude/latitude scatter plot, with axes fitted to the visible observations and tooltips identifying each observation. Axis ranges change with replay time and vessel selection; the plot does not preserve geographic aspect ratio. A second chart shows reported speed over time. The table identifies each last observation and its age relative to the replay clock. These plots have no navigation basemap. Speed lines may span missing reports; they are not evidence of continuous observations.
 
 | Measure | Definition | Interpretation |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ Regenerate the fixture pack into a **new** directory:
 uv run --locked --no-dev python -m coastal_security.replay --output artifacts/replay-check
 ```
 
-The generator refuses to overwrite an existing directory. Tests compare regenerated CSV bytes and manifest values to the committed pack. No dependencies were added; the existing locked runtime supports this view.
+The generator refuses to overwrite an existing directory. Tests compare regenerated CSV bytes and manifest values to the committed pack. No application runtime dependencies were added; the existing locked runtime supports this view. The separate [browser QA environment](BROWSER_QA.md) uses hash-locked Playwright and pytest tooling.
 
 ## Architecture and increment process
 
@@ -84,7 +84,7 @@ For every future increment: define a small acceptance scenario, record data prov
 
 | Priority | Increment | Acceptance gate |
 | --- | --- | --- |
-| P0 | Validate and review this Streamlit replay increment | Local UI checks and Windows/Linux CI; human review of the draft PR before merge/deployment |
+| P0 | Review and release this Streamlit replay increment | Windows/Linux CI, real-browser checks and screenshot review; maintainer approval before merge, then a separately verified hosted revision |
 | P1 | Independent trajectory evaluation suite | Separate scenario families, grouped temporal holdouts, rule calibration, false-alert rate by vessel-hour, missed-event counts; no tuning on final evaluation |
 | P1 | Drone and cyber reproducible pipelines | Documented synthetic generators, train-only preprocessing, saved split IDs/scores, baselines and class-sensitive metrics; genuine imagery needed before claiming computer vision |
 | P2 | Approved public maritime adapters | Explicit licence/approval, source and ingestion timestamps, UTC/unit/schema validation, deduplication, quarantine and reproducible recorded fixtures |
@@ -93,6 +93,6 @@ For every future increment: define a small acceptance scenario, record data prov
 | P3 | AI-assisted summaries | Approved evidence only, citations and abstention, prompt-injection testing and mandatory human review; never independently authorise actions |
 | P3 | Multi-jurisdiction scale assessment | Workload and latency targets, tenancy, monitoring, recovery exercises, capacity tests and independent security review |
 
-None of the future gates are satisfied by this demonstration. Current legacy model limitations remain unchanged. This POC establishes reproducible software behavior on a tiny invented scenario; national-scale deployment and operational readiness are unverified.
+The P0 automated/browser checks and screenshot inspection are complete within the [recorded validation scope](STREAMLIT_VALIDATION.md); maintainer review and deployment verification remain. P1–P3 capabilities are future work. Current legacy model limitations remain unchanged. This POC establishes reproducible software behavior on a tiny invented scenario; national-scale deployment and operational readiness are unverified.
 
 See [before/after comparison](STREAMLIT_POC_COMPARISON.md), [validation record](STREAMLIT_VALIDATION.md), [architecture](ARCHITECTURE.md) and [installation](INSTALLATION.md).

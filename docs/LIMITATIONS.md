@@ -27,6 +27,8 @@ Tests check the three preserved Streamlit views, visible saved-result metrics, l
 
 Separate vessel tests check data contracts, deterministic generation, split boundaries, exclusion of labels/metadata from fitting, validation threshold selection, no refitting during evaluation, metric calculations, saved bundle integrity and reproducibility. They include trusted round-trip loading only of models created by the test itself. The app and benchmark CLI never load model files.
 
+[Real Chromium checks](BROWSER_QA.md) also exercise desktop/narrow layouts, playback, review and downloads. Screenshots were visually inspected. This is Linux browser automation and viewport emulation, not physical-device, accessibility, cross-browser or hosted-deployment validation. See the [exact revisions and results](STREAMLIT_VALIDATION.md).
+
 They do not establish model quality, dataset realism, deployed-cloud behavior, load capacity, geospatial correctness, or security certification. Dependency audits cover supported locked demo/research dependencies; they do not clear the historical `venv/`, pickle contents, Git history, or the separate ICCC branch.
 
 The new generator invents its anomaly prevalence and speed distributions. Slow normal and anomalous observations overlap; speed alone cannot distinguish them. Its stationary synthetic test set is public and must not be reused as an independent final holdout after results inform development. Operational alert-rate estimates and real-world confidence intervals remain unavailable.
