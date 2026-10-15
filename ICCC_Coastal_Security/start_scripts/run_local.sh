@@ -8,7 +8,7 @@ if [ ! -x .venv/bin/python ]; then
   python3 -m venv .venv
 fi
 echo "» Installing backend dependencies"
-.venv/bin/pip install -q -r backend/requirements-dev.txt
+.venv/bin/pip install -q --require-hashes -r backend/requirements-dev.txt
 if [ ! -f frontend/out/index.html ] || [ "${REBUILD_FRONTEND:-0}" = "1" ]; then
   echo "» Building frontend (static export)"
   (cd frontend && npm ci --no-audit --no-fund && NEXT_TELEMETRY_DISABLED=1 npx next build)

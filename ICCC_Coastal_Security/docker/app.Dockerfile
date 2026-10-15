@@ -20,7 +20,7 @@ COPY docker/certs/ /usr/local/share/ca-certificates/extra/
 RUN (ls /usr/local/share/ca-certificates/extra/*.crt >/dev/null 2>&1 && update-ca-certificates) || true
 ENV PIP_CERT=/etc/ssl/certs/ca-certificates.crt REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 COPY backend/requirements.txt backend/requirements.txt
-RUN pip install -r backend/requirements.txt && useradd --create-home --uid 10001 iccc
+RUN pip install --require-hashes -r backend/requirements.txt && useradd --create-home --uid 10001 iccc
 COPY backend/ backend/
 COPY seed/ seed/
 COPY assets/ assets/

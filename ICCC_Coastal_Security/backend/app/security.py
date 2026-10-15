@@ -14,7 +14,7 @@ import secrets
 import struct
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import jwt
 
@@ -58,14 +58,22 @@ def password_policy_errors(password: str) -> list[str]:
 
 def issue_token(user_id: int, username: str, role: str) -> tuple[str, str]:
     jti = uuid.uuid4().hex
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     payload = {"sub": str(user_id), "usr": username, "role": role, "jti": jti,
                "iat": int(now.timestamp()), "exp": int((now + timedelta(minutes=settings.jwt_ttl_minutes)).timestamp())}
     return jwt.encode(payload, settings.secret_key, algorithm=ALGO), jti
 
 
 def decode_token(token: str) -> dict:
-    return jwt.decode(token, settings.secret_key, algorithms=[ALGO])
+    claims = jwt.decode(token, settings.secret_key, algorithms=[ALGO],
+                        options={"require": ["sub", "jti", "iat", "exp"]})
+    subject = claims["sub"]
+    if (not isinstance(subject, str) or not subject.isascii() or not subject.isdigit()
+            or len(subject) > 19 or not 0 < int(subject) <= 2**63 - 1):
+        raise jwt.InvalidTokenError("Invalid session subject")
+    if not isinstance(claims["jti"], str) or not 1 <= len(claims["jti"]) <= 64:
+        raise jwt.InvalidTokenError("Invalid session identifier")
+    return claims
 
 
 # ---------------------------------------------------------------- TOTP (RFC 6238)

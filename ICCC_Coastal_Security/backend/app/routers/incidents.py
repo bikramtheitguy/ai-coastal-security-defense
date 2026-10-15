@@ -298,7 +298,8 @@ async def upload_evidence(iid: int, kind: str = Form(...), description: str = Fo
                  custody_status="COLLECTED",
                  custody_log=[{"ts": iso(now), "by": user.username, "status": "COLLECTED", "note": "Uploaded"}])
     if file is not None:
-        data = await file.read()
+        # UploadFile may spool to disk. Bound the extra in-memory copy as well.
+        data = await file.read(MAX_EVIDENCE_BYTES + 1)
         if len(data) > MAX_EVIDENCE_BYTES:
             raise HTTPException(413, "File exceeds 25 MB POC limit")
         ext = Path(file.filename or "").suffix.lower()

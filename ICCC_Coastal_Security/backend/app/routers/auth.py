@@ -41,6 +41,21 @@ def user_payload(db: Session, u: User) -> dict:
             "session_idle_minutes": settings.session_idle_minutes}
 
 
+def record_login_failure(db: Session, user: User, ip: str, reason: str, now) -> None:
+    """Apply the same bounded account lockout to password and second-factor failures."""
+    user.failed_attempts = (user.failed_attempts or 0) + 1
+    locked = user.failed_attempts >= settings.max_failed_logins
+    if locked:
+        user.locked_until = now + timedelta(minutes=settings.lockout_minutes)
+    detail = f"{reason} (attempt {user.failed_attempts})" + ("; account locked" if locked else "")
+    db.add(CyberEvent(event_type="ACCOUNT_LOCKOUT" if locked else "FAILED_LOGIN",
+                      severity="MEDIUM" if locked else "LOW", source_ip=ip, target=user.username,
+                      detail=detail))
+    audit(db, action="LOGIN_FAILED", entity_type="user", entity_id=user.id, outcome="FAILED",
+          username=user.username, role=user.role, ip=ip, detail=detail)
+    db.commit()
+
+
 @router.post("/login")
 def login(body: LoginIn, request: Request, db: Session = Depends(db_session)):
     ip = client_ip(request)
@@ -59,28 +74,16 @@ def login(body: LoginIn, request: Request, db: Session = Depends(db_session)):
         db.commit()
         raise HTTPException(423, f"Account locked after repeated failures. Try again after "
                                  f"{(u.locked_until + timedelta(hours=5, minutes=30)):%H:%M} IST or contact the administrator.")
+    if u.locked_until:  # an expired lock starts a fresh attempt window
+        u.failed_attempts, u.locked_until = 0, None
     if not u.active or not verify_password(body.password, u.password_hash):
-        u.failed_attempts = (u.failed_attempts or 0) + 1
-        detail = f"bad password (attempt {u.failed_attempts})"
-        if u.failed_attempts >= settings.max_failed_logins:
-            u.locked_until = now + timedelta(minutes=settings.lockout_minutes)
-            detail += "; account locked"
-            db.add(CyberEvent(event_type="ACCOUNT_LOCKOUT", severity="MEDIUM", source_ip=ip, target=u.username,
-                              detail=f"{u.failed_attempts} failed logins"))
-        else:
-            db.add(CyberEvent(event_type="FAILED_LOGIN", severity="LOW", source_ip=ip, target=u.username, detail=detail))
-        audit(db, action="LOGIN_FAILED", entity_type="user", entity_id=u.id, outcome="FAILED", username=u.username,
-              role=u.role, ip=ip, detail=detail)
-        db.commit()
+        record_login_failure(db, u, ip, "bad password", now)
         raise HTTPException(401, "Invalid username or password")
     if u.mfa_enabled:
         if not body.otp:
             return {"mfa_required": True}
         if not verify_totp(u.mfa_secret, body.otp):
-            u.failed_attempts = (u.failed_attempts or 0) + 1
-            audit(db, action="LOGIN_FAILED", entity_type="user", entity_id=u.id, outcome="FAILED", username=u.username,
-                  role=u.role, ip=ip, detail="invalid MFA code")
-            db.commit()
+            record_login_failure(db, u, ip, "invalid MFA code", now)
             raise HTTPException(401, "Invalid MFA code")
     token, jti = issue_token(u.id, u.username, u.role)
     db.add(UserSession(jti=jti, user_id=u.id, ip=ip, user_agent=(request.headers.get("user-agent") or "")[:200]))

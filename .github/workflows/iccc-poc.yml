@@ -59,7 +59,13 @@ jobs:
           python-version: '3.11'
           enable-cache: false
       - run: uv venv --python 3.11
-      - run: uv pip install --python .venv/bin/python -r backend/requirements-dev.txt
+      - run: uv pip install --python .venv/bin/python --require-hashes -r backend/requirements-dev.txt
+      - name: Verify Python lock inputs
+        if: matrix.database == 'sqlite'
+        run: |
+          uv pip compile backend/requirements.in --python-version 3.11 --universal --generate-hashes --no-header --quiet --output-file backend/requirements.txt
+          uv pip compile backend/requirements-dev.in --constraint backend/requirements.txt --python-version 3.11 --universal --generate-hashes --no-header --quiet --output-file backend/requirements-dev.txt
+          git diff --exit-code -- backend/requirements.txt backend/requirements-dev.txt
       - run: .venv/bin/python -m pytest tests/backend -q
 
   browser:
@@ -83,7 +89,7 @@ jobs:
         with:
           node-version: '22'
       - run: uv venv --python 3.11
-      - run: uv pip install --python .venv/bin/python -r backend/requirements-dev.txt
+      - run: uv pip install --python .venv/bin/python --require-hashes -r backend/requirements-dev.txt
       - run: echo "PYTHON=$PWD/.venv/bin/python" >> "$GITHUB_ENV"
       - run: npm ci --no-audit --no-fund
         working-directory: ICCC_Coastal_Security/frontend
@@ -116,7 +122,7 @@ jobs:
         with:
           node-version: '22'
       - name: Audit backend requirements
-        run: uvx --from pip-audit==2.10.1 pip-audit -r backend/requirements.txt
+        run: uvx --from pip-audit==2.10.1 pip-audit --require-hashes --disable-pip --no-deps -r backend/requirements.txt
       - name: Audit frontend runtime
         if: ${{ !cancelled() }}
         run: npm audit --omit=dev --audit-level=high

@@ -18,7 +18,7 @@ Stop with `docker compose -p iccc-poc-demo down`; named volumes are retained. Fo
 
 ## Local Python and Node
 
-The existing scripts target Python 3.11+ and Node 22 with Bash on Linux/WSL. They are separate from the repository root's Python 3.13/uv research environment.
+The existing scripts target Python 3.11 (CI-verified) and Node 22 with Bash on Linux/WSL. They are separate from the repository root's Python 3.13/uv research environment.
 
 ```bash
 cd ICCC_Coastal_Security
@@ -57,3 +57,11 @@ Use the Python executable from that environment for the [tests](VALIDATION.md). 
 A missing frontend requires `npm ci` and `npm run build` in `frontend/`. Unreachable tiles should show the labelled schematic fallback; this is not an authoritative chart. SQLite contention under concurrent writes needs investigation or the local PostgreSQL stack, not a production-readiness claim.
 
 For an approved TLS-inspecting proxy, the existing Docker build accepts CA certificates in `docker/certs/`; do not disable certificate verification. No Kubernetes, live AIS key, paid AI provider or operational dataset is needed for this POC.
+
+## Locked dependencies and map compatibility
+
+Install from `backend/requirements.txt` (runtime) or `backend/requirements-dev.txt` (tests) with `pip install --require-hashes -r <file>`. Both files include transitive packages and hashes; the `.in` files are maintenance inputs, not installation targets. Docker, the local launcher and CI use the checked-in locks. Use `npm ci` for the frontend.
+
+Dependency maintainers can run `bash start_scripts/refresh_dependencies.sh` with uv 0.13.1, Node 22 and npm 10. Review the resulting diff and run the complete ICCC checks. The read-only GitHub Actions lock-proposal workflow produces checksummed candidate files and never pushes or deploys them. Its artifact and encoded log preview contain only these public dependency files.
+
+The patched MapLibre 6 map requires a WebGL2-capable browser/device. Its ESM import replaces the former default import. Existing operational layers, local reference-chart view, lists, search and tasking workflows remain in the application; test target hardware before a demonstration. There is no claim of compatibility with WebGL1-only hardware.

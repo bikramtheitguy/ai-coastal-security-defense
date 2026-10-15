@@ -32,7 +32,7 @@ def current_user(request: Request, db: Session = Depends(db_session)) -> User:
     except jwt.PyJWTError:
         raise HTTPException(401, "Invalid token")
     sess = db.query(UserSession).filter(UserSession.jti == claims.get("jti")).first()
-    if sess is None or sess.revoked:
+    if sess is None or sess.revoked or sess.user_id != int(claims["sub"]):
         raise HTTPException(401, "Session revoked")
     now = utcnow()
     if now - sess.last_seen > timedelta(minutes=settings.session_idle_minutes):
