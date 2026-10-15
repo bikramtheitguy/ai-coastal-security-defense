@@ -1,0 +1,65 @@
+name: Streamlit browser QA
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: streamlit-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            dashboard
+            coastal_security
+            data
+            browser_tests
+            .streamlit
+            .github
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.1"
+          python-version: "3.13"
+          enable-cache: false
+      - run: uv sync --locked
+      - name: Verify browser-tool lock matches its inputs
+        run: |
+          uv pip compile --python-version 3.13 --universal --generate-hashes browser_tests/requirements.in --output-file browser_tests/requirements.txt
+          git diff --exit-code -- browser_tests/requirements.txt
+      - name: Install isolated browser test tooling with hashes
+        run: |
+          uv venv .browser-venv --python 3.13
+          uv pip sync --python .browser-venv/bin/python --require-hashes browser_tests/requirements.txt
+          .browser-venv/bin/python -m playwright install --with-deps chromium
+      - name: Lint and audit browser tooling
+        run: |
+          uv run --locked ruff check browser_tests
+          uv run --locked ruff format --check browser_tests
+          uv run --locked pip-audit --require-hashes --disable-pip -r browser_tests/requirements.txt
+      - name: Test real Chromium desktop and narrow layouts
+        env:
+          STREAMLIT_PYTHON: ${{ github.workspace }}/.venv/bin/python
+        run: .browser-venv/bin/python -m pytest browser_tests -v --junitxml=artifacts/browser/results.xml
+      - name: Expose synthetic preview evidence
+        if: always()
+        run: uv run --locked python browser_tests/report_evidence.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: streamlit-browser-evidence
+          path: |
+            artifacts/browser/
+            browser_tests/requirements.txt
+          retention-days: 14

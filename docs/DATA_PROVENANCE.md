@@ -23,3 +23,9 @@ Changing a manifest requires reviewing the associated data, chart/prediction con
 The separate `coastal_security/vessel/` generator now creates a versioned snapshot dataset with explicit distribution assumptions, labels, seed, synthetic IDs and UTC timestamps. It uses no external inputs and does not replace the original files above. Its generated data is licensed under the project MIT license. See the [complete generator specification](VESSEL_BENCHMARK.md).
 
 Each run writes a new directory under the chosen output path. Its manifest records generated-file hashes, generator version, seed, normalized source-code hashes, dependency-lock hash and runtime versions; `splits.csv` preserves train/validation/test membership and `predictions.csv` preserves test IDs and scores. This makes the new experiment traceable without retroactively supplying provenance for the historical experiments.
+
+## Synthetic Streamlit replay pack
+
+`data/replay/observations.csv` contains 91 invented observations of four fictional DEMO vessels. `coastal_security/replay.py` generates them using fixed seed 20261015 and UTC times on 1 January 2026. Latitude/longitude are invented decimal-degree positions, speed is in knots, and every row is labelled `synthetic`. No public or restricted operational source was copied. Generated fixtures are covered by the project's MIT licence.
+
+`data/replay/manifest.json` records the scenario version, seed, time range, row/vessel counts and CSV SHA-256. Tests regenerate the pack and compare its bytes/manifest. The [POC](STREAMLIT_POC.md) documents all injected conditions and threshold assumptions. These intentionally constructed regression examples are not a representative training or evaluation dataset. The runtime regenerates the same pack; it does not ingest arbitrary CSV uploads. The repository revision identifies the generator source; preserve this revision with exported files when reviewing a run.

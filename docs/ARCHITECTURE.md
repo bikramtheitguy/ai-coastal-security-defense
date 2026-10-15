@@ -4,13 +4,20 @@
 
 Streamlit UI -> manifest/checksum verification -> local CSV or PNG -> validated labels and recomputed metrics -> rendered research results.
 
+The three preserved research views follow that path. The fourth view follows: fixed-seed synthetic tracks -> schema validation -> cursor-bounded observations -> rules/freshness -> local charts and evidence -> session review -> optional user download.
+
 - `dashboard/app.py`: presentation and module selection.
 - `dashboard/results.py`: file integrity, CSV contract, image decoding and pure metric calculations.
 - `dashboard/artifacts.json`: preserved baseline asset identities.
+- `dashboard/replay_view.py`: replay controls, charts, evidence and session review UI.
+- `coastal_security/replay.py`: deterministic generation, UTC/coordinate contracts, transparent rules, review transitions and fixture export CLI.
+- `data/replay/`: generated CSV and manifest; regeneration identity checked by tests.
 - `data/`, `models/`, `notebooks/`: historical research inputs and artifacts; training is outside the supported runtime.
 - No model deserialization, database, API, ingestion worker, identity service or external data feed is used.
 
 The public demo serves synthetic artifacts only. It must not become a container for non-public operational data.
+
+Replay uses local charts without external map tiles. Domain logic is separate from Streamlit session state. Review events are volatile and self-attributed, not an identity or audit service. See the [POC definitions and acceptance walkthrough](STREAMLIT_POC.md).
 
 ## Current offline vessel benchmark
 
@@ -27,11 +34,11 @@ Proposed internal boundaries:
 | Boundary | Responsibilities |
 | --- | --- |
 | contracts and ingestion | Typed schemas, units, UTC event/ingestion times, source provenance, retries, deduplication, checkpoints |
-| maritime and geospatial | Timestamped tracks, contextual rules, anomaly evaluation, CRS/unit correctness, PostGIS queries and replay |
+| maritime and geospatial | Extend the implemented synthetic replay with approved layers, evaluated contextual rules, CRS/unit correctness and spatial storage |
 | vision | Approved media, annotations, detector inference, tracking, uncertainty and scene-isolated evaluation |
 | security events | Normalized approved logs, correlation, alert evaluation and analyst feedback |
 | model lifecycle | Train-only preprocessing, untouched evaluation, data/split/code hashes, registry, promotion and rollback |
-| incident review | Evidence, status transitions, reviewer rationale and audit history |
+| incident review | Extend the session exercise with authenticated review, persistent evidence/status/rationale and protected audit history |
 | AI assistance | Permission-aware evidence retrieval, cited draft summaries, abstention and mandatory human review |
 | API and platform | Versioned contracts, OIDC, server-side authorization, migrations, telemetry and recovery |
 | quality | Unit, integration, geospatial, authorization, model and UI tests |
@@ -40,17 +47,15 @@ Start with a modular Python application and independent training/background jobs
 
 ## Separate ICCC proposal
 
-PR #10 contains unmerged FastAPI/Next.js/PostGIS scaffolding and tests. It needs an independent security and runtime review before selective adoption. Its claims and test files are not evidence that this Streamlit baseline implements those capabilities.
+PR #10 contains a separate unmerged FastAPI/Next.js ICCC proposal. It is preserved independently and is not a dependency or replacement for this Streamlit project. Earlier test results are recorded in the [comparison](STREAMLIT_POC_COMPARISON.md#pr-10-context-preserved-separately); they are not evidence that Streamlit implements those capabilities. Any future reuse needs explicit scope and independent review.
 
 ## Related Lovable prototype
 
-The [command-centre dashboard](https://icccodishacshq.lovable.app/) is a separate Lovable application with a React/TanStack interface, Supabase-backed workflows and MapLibre maps. Its intended hierarchy spans national, state, district and station views. This is distinct from both the Streamlit artifact viewer and the unmerged PR #10 proposal.
+The [coastal dashboard showcase](https://icccodishacshq.lovable.app/) is a separately maintained website. The only relationship to this Streamlit repository is this external hyperlink. It is not the application developed here.
 
-There is currently no integration between that application and this repository's Python models. The link is provided for prototype review, not as evidence of operational approval, national-scale performance or a safe destination for real incident submissions.
+Do not connect repositories, synchronise code, call its backend, share data/credentials, change its settings or deploy to it. Earlier hypothetical integration proposals are withdrawn from this project's architecture. The link does not establish operational approval, national-scale performance or a safe destination for real incident submissions.
 
-A proposed integration would send versioned, validated analysis results through an authenticated API into a human review queue. Each result should carry a source identifier, observation time, model/version, score semantics, limitations and evidence references. The UI should distinguish simulated, approved live and stale data. Model outputs must not independently verify reports or authorise actions.
-
-Before integrating, create a separate read-only demonstration with synthetic fixtures; verify server and database permissions for every role and jurisdiction; define privacy and retention boundaries; and demonstrate load, recovery and audit requirements. Production deployment and approved maritime feeds require separate decisions and validation.
+Future data adapters and model services, if approved, belong to this independent Python/Streamlit architecture. `bkdigital.tech` is outside this project scope.
 
 ## Decisions for this baseline
 

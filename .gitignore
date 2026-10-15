@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.browser-venv/
 .conda/
 .ipynb_checkpoints/
 .vscode/

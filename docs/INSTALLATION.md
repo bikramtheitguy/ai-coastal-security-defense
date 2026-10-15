@@ -55,6 +55,8 @@ uv run --locked pip-audit --require-hashes --disable-pip -r requirements-researc
 
 The demo, new vessel benchmark, helpers and their tests are linted. Legacy training scripts are preserved and have known defects; passing CI is not an operational validation claim. The Bash wrapper is tested on Linux. Benchmark tests require the research dependency group and run separately with `uv run --locked --group research pytest training_tests`.
 
+Real Chromium tests run in an isolated browser environment: see [browser setup, coverage and evidence](BROWSER_QA.md). They exercise desktop/narrow layouts, playback, review and downloads against a local Streamlit process. GitHub Actions supplies this environment when host policy prevents local socket use; do not disable host protections to run the tests.
+
 ## Dependency updates
 
 Use uv 0.13.1. Review direct-version changes in `pyproject.toml`, then:
@@ -82,7 +84,7 @@ This installs the tools for the [new vessel benchmark](VESSEL_BENCHMARK.md) and 
 
 Select this repository, the approved branch/commit and entry point `dashboard/app.py`. In advanced settings select Python 3.13. The root `requirements.txt` supplies the runtime; `.streamlit/config.toml` keeps CORS/XSRF protection enabled and disables usage statistics.
 
-Record the deployed revision and runtime in release notes, check all three views, and inspect deployment logs. A devcontainer configuration does not configure Community Cloud. This PR does not redeploy or wake the existing hosted demo.
+Record the deployed revision and runtime in release notes, check all four views (including the [Scenario Replay walkthrough](STREAMLIT_POC.md#reproduce-and-demonstrate)), and inspect deployment logs. A devcontainer configuration does not configure Community Cloud. The proposal does not itself redeploy the hosted demo. Local verification is distinct from hosted revision verification.
 
 ## Devcontainer
 

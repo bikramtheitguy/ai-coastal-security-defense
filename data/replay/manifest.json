@@ -1,0 +1,13 @@
+{
+  "scenario": "synthetic-coastal-replay-v1",
+  "source": "synthetic",
+  "seed": 20261015,
+  "start_utc": "2026-01-01T00:00:00+00:00",
+  "end_utc": "2026-01-01T01:55:00+00:00",
+  "rows": 91,
+  "vessels": 4,
+  "csv_sha256": "b3fa2823d203b657682ce57b5136214b86018c983771a351d9869609121be479",
+  "generator": "coastal_security/replay.py",
+  "license": "MIT",
+  "limitations": "Invented coordinates, speeds and reporting gaps; not AIS or detection validation."
+}
