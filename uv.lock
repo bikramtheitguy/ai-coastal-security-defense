@@ -27,6 +27,7 @@ research = [
     { name = "joblib" },
     { name = "matplotlib" },
     { name = "notebook" },
+    { name = "numpy" },
     { name = "scikit-learn" },
     { name = "seaborn" },
 ]
@@ -48,6 +49,7 @@ research = [
     { name = "joblib", specifier = "==1.6.0" },
     { name = "matplotlib", specifier = "==3.11.2" },
     { name = "notebook", specifier = "==7.6.3" },
+    { name = "numpy", specifier = "==2.5.4" },
     { name = "scikit-learn", specifier = "==1.9.1" },
     { name = "seaborn", specifier = "==0.13.2" },
 ]

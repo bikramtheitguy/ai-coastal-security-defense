@@ -4,15 +4,26 @@ A Python and Streamlit research demonstrator for exploring **saved synthetic-dat
 
 **Status: experimental. Not validated for operational decisions or production use.** The dashboard reads committed CSVs and PNGs; it does not run inference, receive live feeds, or control equipment.
 
-[Hosted demo](https://ai-coastal-security-defense.streamlit.app/) · [Installation](docs/INSTALLATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Limitations](docs/LIMITATIONS.md) · [Security](SECURITY.md)
+[Streamlit research demo](https://ai-coastal-security-defense.streamlit.app/) · [Command-centre concept (Lovable)](https://icccodishacshq.lovable.app/) · [Installation](docs/INSTALLATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Limitations](docs/LIMITATIONS.md) · [Security](SECURITY.md)
 
 The hosted demo may sleep. This repository does not establish which revision is currently deployed.
+
+## Related command-centre dashboard
+
+**[Explore the coastal command-centre concept built with Lovable](https://icccodishacshq.lovable.app/)**
+
+This separate prototype explores citizen reporting, jurisdiction-based staff views, geospatial situational awareness and AI-assisted briefings with human review. The long-term ambition is a national, state, district and station hierarchy. National-scale capacity, operational readiness and official endorsement have not been established by this repository.
+
+The public landing and reporting pages can be viewed without an account; staff views require authorised access. The linked site's reporting forms are not a sandbox verified by this repository. Use the link for interface review only: do not submit real incidents, personal details or restricted information during a demonstration.
+
+The Lovable application is hosted and maintained separately. Its source, deployment and database are not included in this checkout, and it is not connected to the Python models or benchmark. Linking the two projects does not establish an implemented integration. See the [architecture relationship and proposed integration](docs/ARCHITECTURE.md#related-lovable-prototype).
 
 ## What exists
 
 | Module | Implemented | Limitations |
 | --- | --- | --- |
 | Vessel anomalies | Offline Isolation Forest research code and a saved geographic scatterplot | Invalid tuning-label mapping and in-sample evaluation; one observation per vessel, no timestamps or tracking |
+| Vessel benchmark | New deterministic synthetic generator, isolated train/validation/test evaluation, saved pipeline and traceable experiment bundle | Speed-only synthetic snapshots; no operational validation or trajectories |
 | Drone observations | Offline Random Forest on supplied object labels and confidence scores | No image/video detector; weak saved positive-class results |
 | Cybersecurity | Offline Random Forest on dummy packet records | No live monitoring; saved predictions miss all four positive cases |
 | Dashboard | Three views, validated saved assets, recomputed metrics, clear errors | An artifact viewer, not an operational system |
@@ -47,14 +58,28 @@ Both saved classifiers fall below an always-negative accuracy baseline. Accuracy
 
 The [artifact manifest](dashboard/artifacts.json) records SHA-256 digests of the original CSVs and charts. Tests verify integrity and metric consistency. Original training split IDs, scores, labeling rules, generator code and seeds were not saved. Checksums do not recover that provenance.
 
+## Reproducible vessel benchmark
+
+A separate [vessel-speed benchmark](docs/VESSEL_BENCHMARK.md) now generates documented synthetic observations, fits on training data only, selects a model and threshold using validation data, and evaluates a disjoint test period. It reports false alerts, missed anomalies, ranking metrics and baselines, and records IDs, scores, source hashes and runtime versions.
+
+```bash
+uv sync --locked --group research
+uv run --locked --group research python -m coastal_security.vessel --output artifacts/vessel-demo
+uv run --locked --group research pytest training_tests
+```
+
+Use a new output directory for each run. This benchmark does not replace the historical dashboard plot or establish real-world detection quality. Slow ordinary and anomalous scenarios intentionally overlap, illustrating the limits of speed-only detection.
+
 ## Repository map
 
 ```text
 dashboard/               Streamlit viewer, result helpers, saved artifacts and manifest
+coastal_security/vessel/  New synthetic generator, training, evaluation and experiment CLI
 data/                    Original datasets described as synthetic
 models/                  Original serialized research models; never loaded by the demo
 notebooks/               Legacy experiments and notebook outputs; known limitations remain
 tests/                   Demo, data-contract, integrity and setup tests
+training_tests/          Vessel benchmark isolation, metrics and reproducibility tests
 docs/                    Installation, architecture, limitations and provenance
 .github/workflows/       Demo checks and dependency auditing
 pyproject.toml            Runtime, development and optional research dependency groups
@@ -73,13 +98,13 @@ uv run --locked ruff format --check .
 uv run --locked pytest
 ```
 
-CI checks Windows and Linux on Python 3.13, verifies dependency exports, and audits runtime and optional research dependencies. CI results describe the demo baseline, not the scientific validity of the legacy models. See [verification scope](docs/LIMITATIONS.md).
+CI checks the demo and new vessel benchmark on Windows and Linux with Python 3.13, verifies dependency exports, and audits runtime and research dependencies. Passing checks establish software behavior on synthetic examples, not operational model validity. See [verification scope](docs/LIMITATIONS.md).
 
 ## Next milestones
 
-1. Repair vessel scoring and introduce untouched evaluation data.
-2. Document or regenerate deterministic synthetic data with explicit labels and provenance.
-3. Extract reusable training pipelines; record splits, parameters, probabilities and model metadata.
+1. Extend vessel evaluation to approved representative data with predefined acceptance criteria.
+2. Add grouped temporal evaluation for vessel trajectories and contextual geospatial features.
+3. Introduce reproducible drone/cyber pipelines with documented data provenance and saved preprocessing.
 4. Add geospatial replay and approved-source adapters.
 5. Evaluate genuine computer vision and event-monitoring pipelines.
 6. Introduce evidence-linked AI assistance with human review.

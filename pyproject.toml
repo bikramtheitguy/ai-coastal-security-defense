@@ -10,6 +10,7 @@ dev = ["pytest==9.1.1", "ruff==0.17.0", "pip-audit==2.10.1"]
 # Exploratory tools: legacy training methodology is not validated.
 research = [
     "joblib==1.6.0",
+    "numpy==2.5.4",
     "matplotlib==3.11.2",
     "notebook==7.6.3",
     "scikit-learn==1.9.1",
@@ -28,7 +29,14 @@ addopts = "-ra"
 [tool.ruff]
 target-version = "py313"
 line-length = 100
-include = ["dashboard/*.py", "tests/*.py", "scripts/*.py", "setup_project.py"]
+include = [
+    "dashboard/*.py",
+    "tests/*.py",
+    "scripts/*.py",
+    "setup_project.py",
+    "coastal_security/**/*.py",
+    "training_tests/*.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

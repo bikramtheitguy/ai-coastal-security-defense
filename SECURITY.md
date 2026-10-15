@@ -2,7 +2,7 @@
 
 ## Scope and supported use
 
-This repository is an experimental synthetic-data demonstrator, not an operational security product. The supported path is the documented clean demo environment. There are no security-supported stable releases yet.
+This repository is an experimental synthetic-data demonstrator, not an operational security product. Supported paths are the documented clean demo environment and offline synthetic vessel benchmark. There are no security-supported stable releases yet.
 
 The historical `venv/`, serialized models, legacy training workflows and unmerged platform branch are outside the validated demo path. Do not expose Jupyter or reuse committed environments as a service.
 
@@ -18,7 +18,7 @@ Include affected revision, component, expected/actual behavior and a minimal syn
 - Keep CORS and XSRF protection enabled; do not solve deployment issues by disabling them.
 - Store deployment credentials outside Git. `.env` and Streamlit secrets files are ignored.
 - Use only synthetic or explicitly approved public demo data.
-- Never deserialize arbitrary uploaded/downloaded pickle or Joblib files. The demo does not load model artifacts.
+- Never deserialize arbitrary uploaded/downloaded pickle or Joblib files. The demo and benchmark CLI do not load model artifacts. The benchmark writes a newly fitted Joblib pipeline; treat it as executable pickle content and load only trusted local output in its recorded environment. Tests load only models they just trained themselves.
 - Check provider/data/model licenses and provenance before adding integrations or assets.
 - Keep CI tokens read-only for untrusted PR checks and pin Actions references to immutable commits.
 - Do not run legacy training scripts against important files: they can overwrite historical outputs.

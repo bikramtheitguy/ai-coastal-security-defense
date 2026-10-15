@@ -53,7 +53,7 @@ uv run --locked pip-audit --require-hashes --disable-pip -r requirements.txt
 uv run --locked pip-audit --require-hashes --disable-pip -r requirements-research.txt
 ```
 
-Only the supported demo/helpers/tests are linted. Legacy training scripts are preserved and have known defects; passing demo CI is not a training validation claim. The Bash wrapper is tested on Linux.
+The demo, new vessel benchmark, helpers and their tests are linted. Legacy training scripts are preserved and have known defects; passing CI is not an operational validation claim. The Bash wrapper is tested on Linux. Benchmark tests require the research dependency group and run separately with `uv run --locked --group research pytest training_tests`.
 
 ## Dependency updates
 
@@ -76,7 +76,7 @@ uv sync --locked --group research
 uv run --locked --group research jupyter notebook notebooks/
 ```
 
-This installs current exploratory tooling; it does **not** reproduce the original scikit-learn 1.4.2 models. Do not deserialize historical pickle files in the new environment. The vessel scorer, train/evaluation separation, paths and script generator still need repair before a supported training command can be offered. See [limitations](LIMITATIONS.md).
+This installs the tools for the [new vessel benchmark](VESSEL_BENCHMARK.md) and optional exploration; it does **not** reproduce the original scikit-learn 1.4.2 models. Do not deserialize historical pickle files in the new environment. The legacy vessel scorer, evaluation, paths and script generator still have known defects. Use the new benchmark command rather than running those legacy scripts; see [limitations](LIMITATIONS.md).
 
 ## Streamlit Community Cloud
 
