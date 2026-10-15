@@ -32,4 +32,21 @@ Builders verify upstream hashes and refuse existing output targets. Compare gene
 
 ## Verification
 
-Pure tests cover receipt causality, state/coast cohorts, delayed reports, duplicate semantics, invalid data, unknown/stale states, asset tampering, geometry holes and export hashes. AppTest and Chromium checks exercise the Streamlit controls and preserved modules in CI. Runtime validation status must be recorded against the PR commit before merge; this document alone does not assert that deployment passed.
+The [validation record](COASTAL_WATCH_VALIDATION.md) records successful Linux/Windows tests, benchmark runs, dependency audits and 10 Chromium checks at `aba8de1`. The screenshot evidence below comes from that Chromium run. This proposed increment has not been merged or deployed.
+
+## Side-by-side visual comparison
+
+The previous evaluation view remains available. The new view adds geographic observation handling alongside it; no capability is removed.
+
+| Previous: PR14 evaluation view | Current proposal: India Coastal Watch |
+|---|---|
+| ![Preserved spatial evaluation view](screenshots/evaluation-desktop.jpg) | ![India watch controls and scoped counts](screenshots/watch-india-desktop.jpg) |
+| Synthetic methodology and false-alert comparison | Public geographic context and receipt-aware vessel picture |
+
+| National overview | Odisha district reference layer |
+|---|---|
+| ![Public coastal geography and synthetic national exercise cohorts](screenshots/watch-india-map.jpg) | ![Odisha reference districts and fictional vessel observations](screenshots/watch-odisha-map.jpg) |
+
+![Lakshadweep exercise at 390-pixel mobile width](screenshots/watch-mobile-map.jpg)
+
+Screenshots show public reference geography and synthetic traffic only. The mobile island view retains the source gap notice elsewhere in the page; visible island outlines do not imply complete district coverage. Historical evaluation screenshots retain their original validation context.

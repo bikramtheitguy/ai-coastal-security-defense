@@ -12,6 +12,8 @@ The public fixtures are pinned and checked before rendering, require no credenti
 
 See the [implementation plan and metric contract](COASTAL_WATCH_PLAN.md), [previous/current comparison and demonstration](COASTAL_WATCH_COMPARISON.md), [public-source notices](../data/coastal_watch/NOTICE.md), and [seven-platform concept roadmap](PLATFORM_CONCEPTS.md). This increment is proposed in draft PR #15; it has not been merged or deployed.
 
+The [Coastal Watch validation record](COASTAL_WATCH_VALIDATION.md) records passing cross-platform and real-browser checks. It is separate from hosted deployment verification.
+
 ## Preserved evaluation and spatial UI increment
 
 The preceding five-view application includes **Vessel Evaluation**, with 48 calibration and 48 held-out test voyages across six families, including benign manoeuvres and interruptions. It compares calibrated rules, fixed replay thresholds and no-alert baseline; displays precision, recall, misses and false alerts per vessel-hour; exposes matching ledgers; and exports both complete synthetic splits. See [protocol and reproducibility](TRAJECTORY_EVALUATION.md).
