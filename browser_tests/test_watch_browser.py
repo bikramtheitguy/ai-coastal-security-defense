@@ -18,17 +18,42 @@ def open_watch(page):
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["44", "1", "3", "4"])
 
 
+def rendered_map(page):
+    chart = page.get_by_test_id("stVegaLiteChart")
+    chart.scroll_into_view_if_needed()
+    expect(chart.locator("canvas").first).to_be_visible()
+    # A mounted canvas can still be empty while Vega finishes its dataflow.
+    # Require the cool-coloured coast/observation marks, not just a background.
+    page.wait_for_function(
+        """() => {
+            const canvas = document.querySelector('[data-testid="stVegaLiteChart"] canvas');
+            if (!canvas || !canvas.width || !canvas.height) return false;
+            const pixels = canvas.getContext('2d').getImageData(
+                0, 0, canvas.width, canvas.height).data;
+            let marks = 0;
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i + 3] > 0 && pixels[i + 1] > 140 && pixels[i + 2] > 140
+                    && pixels[i] < pixels[i + 1] * 0.9) marks++;
+            }
+            return marks > 30;
+        }"""
+    )
+    return chart
+
+
 def test_india_watch_scope_layers_and_evidence(page, tmp_path):
     open_watch(page)
     page.screenshot(path=str(EVIDENCE / "watch-india-desktop.jpg"), type="jpeg", quality=80)
+    rendered_map(page)
+    page.screenshot(path=str(EVIDENCE / "watch-india-map.jpg"), type="jpeg", quality=80)
     select(page, "State / Union Territory", "Odisha")
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["8", "1", "3", "4"])
-    page.get_by_role("checkbox", name="Reference districts", exact=True).check()
-    chart = page.get_by_test_id("stVegaLiteChart")
-    chart.scroll_into_view_if_needed()
-    expect(chart.locator("canvas, svg").first).to_be_visible()
+    page.get_by_text("Reference districts", exact=True).click()
+    expect(page.get_by_role("checkbox", name="Reference districts", exact=True)).to_be_checked()
+    rendered_map(page)
     page.screenshot(path=str(EVIDENCE / "watch-odisha-map.jpg"), type="jpeg", quality=80)
-    page.get_by_role("checkbox", name="Observation history", exact=True).uncheck()
+    page.get_by_text("Observation history", exact=True).click()
+    expect(page.get_by_role("checkbox", name="Observation history", exact=True)).not_to_be_checked()
     page.get_by_role("tab", name="Intake quality", exact=True).click()
     expect(page.get_by_text("86 received = 82 accepted + 4 rejected.", exact=True)).to_be_visible()
     page.get_by_role("tab", name="Sources & export", exact=True).click()
@@ -64,11 +89,16 @@ def test_island_scope_and_narrow_watch(page):
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
+    page.wait_for_function(
+        """() => {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            return !sidebar || sidebar.getBoundingClientRect().right <= 1;
+        }"""
+    )
     expect(page.get_by_role("heading", name="India Coastal Watch", exact=True)).to_be_visible()
     page.screenshot(path=str(EVIDENCE / "watch-mobile.jpg"), type="jpeg", quality=80)
-    chart = page.get_by_test_id("stVegaLiteChart")
-    chart.scroll_into_view_if_needed()
-    expect(chart.locator("canvas, svg").first).to_be_visible()
+    rendered_map(page)
     page.screenshot(path=str(EVIDENCE / "watch-mobile-map.jpg"), type="jpeg", quality=80)
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     expect(page.get_by_test_id("stException")).to_have_count(0)

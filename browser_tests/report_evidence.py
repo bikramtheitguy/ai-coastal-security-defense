@@ -18,6 +18,7 @@ for name in (
     "evaluation-mobile.jpg",
     "evaluation-mobile-chart.jpg",
     "watch-india-desktop.jpg",
+    "watch-india-map.jpg",
     "watch-odisha-map.jpg",
     "watch-mobile.jpg",
     "watch-mobile-map.jpg",
