@@ -3,13 +3,16 @@ import { login } from "./helpers.mjs";
 
 test("map attribution sanitization preserves text and removes consecutive event attributes", async ({ page }) => {
   await login(page, "supervisor.iccc");
-  await page.waitForFunction(() => window.__iccc_map?.getLayer("stations-s"));
+  await page.waitForFunction(() => {
+    const map = window.__iccc_map;
+    return map?.getLayer("stations-s") && map.queryRenderedFeatures({ layers: ["stations-s"] }).length > 0;
+  });
   await page.evaluate(() => {
     window.__iccc_attribution_executed = false;
     const map = window.__iccc_map;
     map.addSource("synthetic-attribution-test", {
       type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
+      data: { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [86.2, 20.25] } },
       attribution: '<details open onload="void(0)" ontoggle="window.__iccc_attribution_executed=true">Synthetic attribution</details>',
     });
     map.addLayer({ id: "synthetic-attribution-test", type: "circle", source: "synthetic-attribution-test" });

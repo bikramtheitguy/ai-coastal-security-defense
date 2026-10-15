@@ -18,7 +18,7 @@ export const LAYER_LABELS: [LayerKey, string, string][] = [
   ["stations", "Marine Police Stations", "#4a90d9"], ["boats", "Boats / trawlers / RWC", "#34a567"], ["uavs", "UAVs", "#9b7fd4"],
   ["vehicles", "Patrol vehicles", "#8193a8"], ["sensors", "Comms & sensors (assets)", "#8193a8"], ["vessels", "Vessel picture", "#b4c1d1"],
   ["incidents", "Incidents", "#d9493e"], ["alerts", "Alerts", "#d9a21b"], ["routes", "Active patrol routes / drone missions", "#4a90d9"],
-  ["orders", "Movement orders (asset Ã¢â€ â€™ destination)", "#d9a21b"], ["zones_restricted", "Restricted zones (SIM)", "#d9493e"],
+  ["orders", "Movement orders (asset â†’ destination)", "#d9a21b"], ["zones_restricted", "Restricted zones (SIM)", "#d9493e"],
   ["zones_watch", "Watch zones (SIM)", "#d9a21b"], ["zones_sar", "SAR sectors (SIM)", "#4a90d9"],
   ["infrastructure", "FLCs, harbours, ports, jetties", "#6fb3c9"], ["geography", "Islands, river mouths, estuaries, creeks", "#5f8f6b"],
   ["security_places", "Vulnerable landings / sensitive installations", "#d97a3e"], ["comms_places", "Towers, radar, CCTV sites", "#8193a8"],
@@ -128,7 +128,7 @@ function build(s: any, vesselFilter: string) {
   const byType = (types: string[]) => assets.filter((a: any) => types.includes(a.asset_type));
   const assetFeat = (a: any, prefix: string) => pt(a.lon, a.lat, {
     kind: "asset", id: a.id, icon: `${prefix}-${a.readiness?.colour ?? "GREY"}`, rot: a.heading ?? 0,
-    label: `${a.asset_code} Ã‚Â· ${a.mission_status.replace(/_/g, " ")} Ã‚Â· ${a.readiness?.colour ?? ""}${a.readiness?.stale ? " Ã‚Â· STALE" : ""}`,
+    label: `${a.asset_code} Â· ${a.mission_status.replace(/_/g, " ")} Â· ${a.readiness?.colour ?? ""}${a.readiness?.stale ? " Â· STALE" : ""}`,
   });
   let vessels = s.vessels ?? [];
   if (vesselFilter === "dark") vessels = vessels.filter((v: any) => v.dark || !v.ais_active);
@@ -139,31 +139,31 @@ function build(s: any, vesselFilter: string) {
   for (const p of s.places ?? []) {
     const g = PLACE_GROUP[p.place_type] ?? "infrastructure";
     (places[g] ??= []).push(pt(p.lon, p.lat, { kind: "place", id: p.id, icon: `pl-${p.place_type}-${p.status === "OPERATIONAL" ? "ok" : "bad"}`,
-      label: `${p.name}${p.status !== "OPERATIONAL" ? ` Ã‚Â· ${p.status}` : ""}` }));
+      label: `${p.name}${p.status !== "OPERATIONAL" ? ` Â· ${p.status}` : ""}` }));
   }
   const zone = (t: string) => fc((s.zones ?? []).filter((z: any) => z.zone_type === t).map((z: any) => ({
     type: "Feature", geometry: { type: "Polygon", coordinates: [z.polygon] }, properties: { kind: "zone", id: z.id, label: z.name } })));
   const assetById = Object.fromEntries(assets.map((a: any) => [a.id, a]));
   return {
     stations: fc((s.stations ?? []).map((x: any) => pt(x.lon, x.lat, { kind: "station", id: x.id, icon: `station-${x.readiness?.colour ?? "GREY"}`,
-      label: `${x.name} MPS Ã‚Â· readiness ${x.readiness?.score ?? "?"}% ${x.readiness?.colour ?? ""}` }))),
+      label: `${x.name} MPS Â· readiness ${x.readiness?.score ?? "?"}% ${x.readiness?.colour ?? ""}` }))),
     boats: fc(byType(["BOAT", "TRAWLER", "RWC"]).map((a: any) => assetFeat(a, "boat"))),
     uavs: fc(byType(["UAV"]).map((a: any) => assetFeat(a, "uav"))),
     vehicles: fc(byType(["VEHICLE"]).map((a: any) => assetFeat(a, "veh"))),
     sensors: fc(byType(["COMMS", "SENSOR"]).map((a: any) => assetFeat(a, "sensor"))),
     vessels: fc(vessels.map((v: any) => pt(v.lon, v.lat, { kind: "vessel", id: v.id, icon: vIcon(v), rot: v.course ?? 0,
-      label: `${v.name ?? v.vessel_code} Ã‚Â· ${v.vessel_type.replace(/_/g, " ")} Ã‚Â· ${v.speed_kn} kn${v.dark ? " Ã‚Â· NO IDENTITY" : ""}${v.is_toi ? " Ã‚Â· TOI" : ""}` }))),
+      label: `${v.name ?? v.vessel_code} Â· ${v.vessel_type.replace(/_/g, " ")} Â· ${v.speed_kn} kn${v.dark ? " Â· NO IDENTITY" : ""}${v.is_toi ? " Â· TOI" : ""}` }))),
     incidents: fc((s.incidents ?? []).filter((i: any) => i.lat != null).map((i: any) => pt(i.lon, i.lat, { kind: "incident", id: i.id, icon: `inc-${i.priority}`,
-      label: `${i.code} ${i.priority} Ã‚Â· ${i.title} Ã‚Â· ${i.status_label}` }))),
+      label: `${i.code} ${i.priority} Â· ${i.title} Â· ${i.status_label}` }))),
     alerts: fc((s.alerts ?? []).filter((a: any) => a.lat != null).map((a: any) => pt(a.lon, a.lat, { kind: "alert", id: a.id, icon: "alert",
-      label: `${a.code} Ã‚Â· ${a.type_label}${a.is_exercise ? " Ã‚Â· EXERCISE" : ""}` }))),
+      label: `${a.code} Â· ${a.type_label}${a.is_exercise ? " Â· EXERCISE" : ""}` }))),
     routes: fc((s.routes ?? []).map((r: any) => ({ type: "Feature", geometry: { type: "LineString", coordinates: [...r.route, r.route[0]] },
       properties: { kind: "route", label: `${r.code} ${r.asset_code ?? ""}`, uav: r.mission_type === "UAV_MISSION" } }))),
     orders: fc((s.orders ?? []).filter((o: any) => o.dest_lat != null && assetById[o.asset_id]).map((o: any) => ({
       type: "Feature", geometry: { type: "LineString", coordinates: [[assetById[o.asset_id].lon, assetById[o.asset_id].lat], [o.dest_lon, o.dest_lat]] },
-      properties: { kind: "order", label: `${o.code} ${o.asset_code} Ã¢â€ â€™ ${o.incident_code ?? "destination"} Ã‚Â· ${o.status}` } }))),
+      properties: { kind: "order", label: `${o.code} ${o.asset_code} â†’ ${o.incident_code ?? "destination"} Â· ${o.status}` } }))),
     zones_restricted: zone("RESTRICTED"), zones_watch: zone("WATCH"), zones_sar: zone("SAR_SECTOR"),
-    weather: fc((s.weather ?? []).map((w: any) => pt(w.lon + 0.35, w.lat - 0.1, { kind: "weather", label: `${w.district}: ${w.condition}, wind ${w.wind_kn} kn, waves ${w.wave_m} m${w.warning_level !== "NONE" ? " Ã‚Â· " + w.warning_level : ""} (SIMULATED)`,
+    weather: fc((s.weather ?? []).map((w: any) => pt(w.lon + 0.35, w.lat - 0.1, { kind: "weather", label: `${w.district}: ${w.condition}, wind ${w.wind_kn} kn, waves ${w.wave_m} m${w.warning_level !== "NONE" ? " Â· " + w.warning_level : ""} (SIMULATED)`,
       warn: w.warning_level }))),
     ...Object.fromEntries(["infrastructure", "geography", "security_places", "comms_places", "shelters"].map((k) => [k, fc(places[k] ?? [])])),
   } as Record<LayerKey, any>;
@@ -179,6 +179,7 @@ export default function MapView(p: Props) {
 
   useEffect(() => {
     if (!el.current || map.current) return;
+    maplibregl.setWorkerUrl(`/vendor/maplibre-${maplibregl.getVersion()}/maplibre-gl-worker.mjs`);
     const coast: number[][] = p.info?.coastline ?? [];
     const land = coast.length ? [[...coast, [87.9, 21.9], [87.9, 23.0], [84.2, 23.0], [84.2, 18.8], coast[0]]] : [];
     const m = new maplibregl.Map({
@@ -188,9 +189,9 @@ export default function MapView(p: Props) {
         version: 8,
         sources: {
           osm: { type: "raster", tiles: [p.info?.map_tile_url ?? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 18,
-            attribution: "Ã‚Â© OpenStreetMap contributors" },
+            attribution: "Â© OpenStreetMap contributors" },
           seamark: { type: "raster", tiles: [p.info?.seamark_tile_url ?? "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 18,
-            attribution: "Seamarks Ã‚Â© OpenSeaMap" },
+            attribution: "Seamarks Â© OpenSeaMap" },
           land: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: land.length ? land : [[[0, 0], [0, 0.1], [0.1, 0], [0, 0]]] } } as any },
         },
         layers: [

@@ -2,7 +2,7 @@
   "name": "iccc-coastal-security-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "ICCC Coastal Security & MDA Platform (POC) \u00e2\u20ac\u201d frontend. SIMULATED / POC DATA.",
+  "description": "ICCC Coastal Security & MDA Platform (POC) \u2014 frontend. SIMULATED / POC DATA.",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
