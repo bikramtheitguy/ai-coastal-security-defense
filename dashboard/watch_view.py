@@ -197,6 +197,10 @@ def map_spec(
             "encoding": position | {"text": {"field": "label"}},
         }
     )
+    # Off-scope coastlines and labels must not enlarge Vega's automatic padding.
+    # Otherwise a narrow island viewport can collapse the projection scale to zero.
+    for layer in layers:
+        layer["mark"]["clip"] = True
     return {
         "projection": {"type": "mercator", "fit": fit},
         "layer": layers,
