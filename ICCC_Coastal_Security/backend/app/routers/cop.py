@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from ..db import db_session
 from ..deps import require
+from ..scope import (incident_query, alert_query, can_read_order, ensure_incident,
+                     ensure_alert, feed_visible)
 from ..models import (Alert, Asset, DataSource, District, EventFeed, Incident, Mission, Order, Place, Station, Vessel,
                       WeatherReport, Zone, utcnow)
 from ..services.analytics import CLOSED_ALERT, TYPE_LABEL
@@ -37,11 +39,11 @@ def snapshot(user=Depends(require("COP_VIEW")), db: Session = Depends(db_session
         r = cache.get(a.id) or asset_readiness(db, a)
         assets.append(asset_dict(a, r, names, missions.get(a.current_mission_id)))
     vessels = [vessel_dict(v, intel) for v in db.query(Vessel).filter(Vessel.active.is_(True), Vessel.lat.isnot(None))]
-    incidents = [incident_dict(db, i) for i in db.query(Incident).filter(Incident.status.in_(OPEN_STATUSES))
+    incidents = [incident_dict(db, i) for i in incident_query(db, user).filter(Incident.status.in_(OPEN_STATUSES))
                  if "INCIDENT_VIEW" in user._perms]
     alerts = []
     if "INCIDENT_VIEW" in user._perms or intel:
-        for a in db.query(Alert).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).order_by(Alert.detected_at.desc()).limit(200):
+        for a in alert_query(db, user).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).order_by(Alert.detected_at.desc()).limit(200):
             if a.alert_type in INTEL_ONLY_ALERTS and not intel:
                 continue
             alerts.append({"id": a.id, "code": a.code, "alert_type": a.alert_type, "type_label": TYPE_LABEL.get(a.alert_type, a.alert_type),
@@ -56,7 +58,7 @@ def snapshot(user=Depends(require("COP_VIEW")), db: Session = Depends(db_session
             a = db.get(Asset, m.asset_id)
             routes.append({"id": m.id, "code": m.code, "mission_type": m.mission_type, "asset_code": a.asset_code if a else None,
                            "route": m.route})
-    orders = [order_dict(db, o) for o in db.query(Order).filter(Order.status.in_(ACTIVE_ORDERS))]
+    orders = [order_dict(db, o) for o in db.query(Order).filter(Order.status.in_(ACTIVE_ORDERS)) if can_read_order(db, user, o)]
     places = [place_dict(p) for p in db.query(Place).filter(Place.active.is_(True))]
     weather = []
     for w in db.query(WeatherReport):
@@ -79,7 +81,7 @@ def event_feed(since_id: int = 0, limit: int = 60, user=Depends(require("COP_VIE
     q = db.query(EventFeed).filter(EventFeed.id > since_id)
     if "INTEL_VIEW" not in user._perms:
         q = q.filter(EventFeed.restricted.is_(False))
-    rows = q.order_by(EventFeed.id.desc()).limit(min(limit, 200)).all()
+    rows = [e for e in q.order_by(EventFeed.id.desc()) if feed_visible(db, user, e)][:max(0, min(limit, 200))]
     return [{"id": e.id, "ts": iso(e.ts), "category": e.category, "severity": e.severity, "message": e.message,
              "station_id": e.station_id, "ref_type": e.ref_type, "ref_id": e.ref_id} for e in rows]
 
@@ -128,7 +130,7 @@ def object_detail(kind: str, oid: int, user=Depends(require("COP_VIEW")), db: Se
         r = asset_readiness(db, a)
         d = asset_dict(a, r, None, m, detail=True)
         order = db.query(Order).filter(Order.asset_id == a.id, Order.status.in_(ACTIVE_ORDERS)).first()
-        d["active_order"] = order_dict(db, order) if order else None
+        d["active_order"] = order_dict(db, order) if order and can_read_order(db, user, order) else None
         d["route"] = m.route if m else None
         d["actions"] = _actions(user, "asset")
         return {"kind": "asset", "data": d}
@@ -146,7 +148,7 @@ def object_detail(kind: str, oid: int, user=Depends(require("COP_VIEW")), db: Se
         if intel:
             d["alerts"] = [{"code": a.code, "type": TYPE_LABEL.get(a.alert_type, a.alert_type), "severity": a.severity,
                             "status": a.status, "detected_at": iso(a.detected_at)}
-                           for a in db.query(Alert).filter(Alert.vessel_id == v.id).order_by(Alert.detected_at.desc()).limit(10)]
+                           for a in alert_query(db, user).filter(Alert.vessel_id == v.id).order_by(Alert.detected_at.desc()).limit(10)]
         near = sorted(db.query(Station).all(), key=lambda s: haversine_nm(v.lat, v.lon, s.lat, s.lon))[0]
         d["nearest_station"] = {"name": near.name, "distance_nm": round(haversine_nm(v.lat, v.lon, near.lat, near.lon), 1)}
         d["actions"] = _actions(user, "vessel")
@@ -157,11 +159,13 @@ def object_detail(kind: str, oid: int, user=Depends(require("COP_VIEW")), db: Se
         i = db.get(Incident, oid)
         if not i:
             raise HTTPException(404)
+        ensure_incident(db, user, i)
         return {"kind": "incident", "data": {**incident_dict(db, i, full=True), "actions": _actions(user, "incident")}}
     if kind == "alert":
         a = db.get(Alert, oid)
         if not a or (a.alert_type in INTEL_ONLY_ALERTS and not intel):
             raise HTTPException(404)
+        ensure_alert(db, user, a)
         return {"kind": "alert", "data": {"id": a.id, "code": a.code, "type_label": TYPE_LABEL.get(a.alert_type, a.alert_type),
                                           "alert_type": a.alert_type, "severity": a.severity, "title": a.title,
                                           "description": a.description, "position": fmt_latlon(a.lat, a.lon),

@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from ..audit import audit
 from ..db import db_session
 from ..deps import ensure_station, require, require_any
+from ..scope import (can_read_order, ensure_order, order_in_scope, ensure_incident,
+                     validate_order_targets, scope_station_query)
 from ..models import Asset, Incident, Mission, Order, Personnel, Station
 from ..services.orders import ACTIVE, MOVEMENT_TYPES, OrderError, advance, create_order, is_recipient, order_dict
 from ..services.readiness import asset_readiness
@@ -26,7 +28,7 @@ def orders(scope: str = "active", user=Depends(require_any("ORDERS_ISSUE", "TASK
         q = q.filter(Order.status.in_(ACTIVE))
     elif scope == "completed":
         q = q.filter(Order.status.in_(["COMPLETED", "CANCELLED", "UNABLE"]))
-    rows = q.order_by(Order.created_at.desc()).limit(300).all()
+    rows = [o for o in q.order_by(Order.created_at.desc()) if can_read_order(db, user, o)][:300]
     if scope == "mine" or ("ORDERS_ISSUE" not in user._perms and "TASK_ASSETS" not in user._perms):
         rows = [o for o in rows if is_recipient(db, user, o) or o.issuer == user.username]
     return [order_dict(db, o) for o in rows]
@@ -59,6 +61,7 @@ def issue(body: OrderIn, user=Depends(require_any("ORDERS_ISSUE", "TASK_ASSETS")
         raise HTTPException(403, f"Not authorised: {body.order_type} requires {needed}")
     if not body.instruction.strip():
         raise HTTPException(400, "Order instruction is required")
+    validate_order_targets(db, user, body)
     rec = None
     if body.asset_id:
         a = db.get(Asset, body.asset_id)
@@ -78,7 +81,7 @@ def issue(body: OrderIn, user=Depends(require_any("ORDERS_ISSUE", "TASK_ASSETS")
             inc = db.get(Incident, body.incident_id)
             lat, lon = (inc.lat, inc.lon) if inc else (None, None)
         if lat is not None:
-            rec = recommend(db, lat, lon)
+            rec = recommend(db, lat, lon, user=user)
             rec = {"label": rec["label"], "recommended": [{k: x[k] for k in ("asset_id", "asset_code", "rank", "distance_nm",
                                                                              "eta_min", "suitability")}
                                                          for x in rec["recommended"]]}
@@ -107,6 +110,7 @@ def get_order(oid: int, user=Depends(require_any("ORDERS_ISSUE", "TASK_ASSETS", 
     o = db.get(Order, oid)
     if not o:
         raise HTTPException(404)
+    ensure_order(db, user, o)
     d = order_dict(db, o)
     d["recommendation_snapshot"] = o.recommendation_snapshot
     return d
@@ -124,8 +128,12 @@ def transition(oid: int, body: AdvanceIn, user=Depends(require_any("ORDERS_FIELD
     if not o:
         raise HTTPException(404)
     if body.to == "CANCELLED":
-        if not ({"TASK_ASSETS", "ORDERS_ISSUE"} & user._perms):
-            raise HTTPException(403, "Only an authorised issuing officer may cancel an order")
+        needed = "TASK_ASSETS" if o.order_type in MOVEMENT_TYPES else "ORDERS_ISSUE"
+        if needed not in user._perms or not order_in_scope(db, user, o):
+            audit(db, user=user, action="ACCESS_DENIED", entity_type="order", entity_id=o.code,
+                  outcome="DENIED", detail="Cancellation requires command capability and all targets in jurisdiction")
+            db.commit()
+            raise HTTPException(403, "Cancellation outside your command authority or jurisdiction")
     else:
         if "ORDERS_FIELD" not in user._perms or not is_recipient(db, user, o):
             audit(db, user=user, action="ACCESS_DENIED", entity_type="order", entity_id=o.code, outcome="DENIED",
@@ -168,19 +176,20 @@ def recommend_for(incident_id: int | None = None, lat: float | None = None, lon:
                   user=Depends(require_any("TASK_ASSETS", "ORDERS_ISSUE", "INCIDENT_VIEW")), db: Session = Depends(db_session)):
     if incident_id:
         inc = db.get(Incident, incident_id)
-        if not inc or inc.lat is None:
+        ensure_incident(db, user, inc)
+        if inc.lat is None:
             raise HTTPException(409, "Incident location unknown")
         lat, lon = inc.lat, inc.lon
     if lat is None or lon is None:
         raise HTTPException(400, "incident_id or lat/lon required")
-    return recommend(db, lat, lon)
+    return recommend(db, lat, lon, user=user)
 
 
 @router.get("/command/recipients")
 def recipients(user=Depends(require_any("ORDERS_ISSUE", "TASK_ASSETS")), db: Session = Depends(db_session)):
-    st = [{"kind": "STATION", "id": s.id, "label": f"{s.name} MPS"} for s in db.query(Station).order_by(Station.name)]
+    st = [{"kind": "STATION", "id": s.id, "label": f"{s.name} MPS"} for s in scope_station_query(db, user, db.query(Station), Station.id).order_by(Station.name)]
     ppl = [{"kind": "PERSONNEL", "id": p.id, "label": f"{p.rank} {p.name} ({p.pid})", "station_id": p.station_id}
-           for p in db.query(Personnel).filter(Personnel.active.is_(True)).order_by(Personnel.name)]
+           for p in scope_station_query(db, user, db.query(Personnel), Personnel.station_id).filter(Personnel.active.is_(True)).order_by(Personnel.name)]
     ast = [{"kind": "ASSET", "id": a.id, "label": a.asset_code, "station_id": a.station_id}
-           for a in db.query(Asset).filter(Asset.active.is_(True)).order_by(Asset.asset_code)]
+           for a in scope_station_query(db, user, db.query(Asset), Asset.station_id).filter(Asset.active.is_(True)).order_by(Asset.asset_code)]
     return {"stations": st, "personnel": ppl, "assets": ast, "label": LABEL}

@@ -129,10 +129,14 @@ def station_scope(db, user) -> set[int] | None:
     from .models import Station
     if user.jurisdiction == "STATE":
         return None
-    if user.jurisdiction == "DISTRICT" and user.district_id:
+    if user.jurisdiction == "DISTRICT":
+        if not user.district_id:
+            return set()
         return {sid for (sid,) in db.query(Station.id).filter(Station.district_id == user.district_id)}
-    if user.station_id:
-        return {user.station_id}
+    if user.jurisdiction in {"STATION", "UNIT"} and user.station_id:
+        station = db.get(Station, user.station_id)
+        if station and (not user.district_id or station.district_id == user.district_id):
+            return {station.id}
     return set()
 
 

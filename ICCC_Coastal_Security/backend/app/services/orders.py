@@ -133,6 +133,11 @@ def advance(db: Session, o: Order, to: str, user, note: str | None = None) -> Or
         raise OrderError("A reason is required when reporting UNABLE")
     asset = db.get(Asset, o.asset_id) if o.asset_id else None
     inc = db.get(Incident, o.incident_id) if o.incident_id else None
+    if to == "EN_ROUTE" and inc is not None:
+        if inc.status not in {"C2", "C3", "C4", "C5"} or not inc.human_verified:
+            raise OrderError("Verify the incident before confirming dispatch")
+        if inc.assigned_asset_id != o.asset_id:
+            raise OrderError("Order resource no longer matches the incident assignment")
     now = utcnow()
     _t(o, to, user.username, note)
     if to == "ACKNOWLEDGED":
@@ -152,9 +157,9 @@ def advance(db: Session, o: Order, to: str, user, note: str | None = None) -> Or
                 inc.launch_at = inc.launch_at or now
                 eta = round(haversine_nm(asset.lat, asset.lon, o.dest_lat, o.dest_lon) / (asset.cruise_speed_kn or 18) * 60)
                 if inc.status in {"C2", "C3", "C4"}:
-                    inc_transition(db, inc, "C5", "system",
-                                   note=f"{asset.asset_code} EN ROUTE, ETA ~{eta} min — field-confirmed by {user.username}; "
-                                        f"order {o.code} authorised by {o.issuer}")
+                    inc_transition(db, inc, "C5", user,
+                                   note=f"{asset.asset_code} EN ROUTE, ETA ~{eta} min; confirmed by {user.username}; "
+                                        f"order {o.code} authorised by {o.issuer}; {note or 'Field console confirmation'}")
                     notify_citizen(db, inc, "status_C5", asset=asset.asset_code, eta=eta)
                 event(db, inc, "LAUNCH", user.username, f"{asset.asset_code} EN ROUTE (launch)")
         elif to == "ON_SCENE":

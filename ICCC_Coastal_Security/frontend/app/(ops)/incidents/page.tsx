@@ -124,6 +124,17 @@ function IncidentWorkspace({ id, tab: initialTab, onChange }: { id: number; tab:
       if (!note) return;
       if (to === "C4") extra.agency = note;
     }
+    if (to === "C5") {
+      const accepted = (orders.data ?? []).filter((o) => o.incident_id === i.id && o.status === "ACCEPTED");
+      if (!accepted.length) { setErr("A linked movement order must be accepted before manual dispatch confirmation."); return; }
+      const chosen = accepted.length === 1 ? accepted[0].id : Number(prompt("Accepted order ID"));
+      if (!accepted.some((o) => o.id === chosen)) return;
+      const method = prompt("Confirmation method: VHF, PHONE or FIELD_REPORT", "VHF");
+      if (!method) return;
+      note = prompt("Who confirmed departure? Include the call/message reference (recorded in the audit log).");
+      if (!note?.trim()) return;
+      extra.order_id = chosen; extra.confirmation_method = method.toUpperCase();
+    }
     if (to === "C6" && !extra.outcome) { extra.outcome = prompt("Outcome (e.g. all persons safe, towed to harbour)") ?? ""; if (!extra.outcome) return; }
     if (to === "C7") { note = prompt("Closure notes", i.outcome ?? "") ?? ""; }
     try { await post(`/api/incidents/${i.id}/transition`, { to, note, ...extra }); d.reload(); onChange?.(); } catch (e: any) { setErr(e.message); }
@@ -144,7 +155,7 @@ function IncidentWorkspace({ id, tab: initialTab, onChange }: { id: number; tab:
         {btn("C3", "MRCC/MRSC notified", "INCIDENT_VERIFY")}
         {btn("C4", "Other agency notified", "INCIDENT_VERIFY")}
         {["C2", "C3", "C4"].includes(i.status) && can("TASK_ASSETS") && <button className="btn sm primary" onClick={() => setTask(true)} data-testid="task-resource">Task resource</button>}
-        {btn("C5", "Confirm dispatch (manual)", "TASK_ASSETS")}
+        {btn("C5", "Record dispatch confirmation", "TASK_ASSETS")}
         {btn("C6", "Record outcome: persons safe", "INCIDENT_VERIFY")}
         {btn("C7", "Close incident", "INCIDENT_CLOSE", "primary")}
         {btn("C8", "Mark unverified / duplicate", "INCIDENT_VERIFY", "ghost")}

@@ -14,6 +14,7 @@ from ..audit import audit
 from ..config import settings
 from ..db import db_session
 from ..deps import client_ip, require
+from ..scope import conversation_query, ensure_conversation
 from ..models import (Conversation, ConversationMessage, Evidence, Incident, KnowledgeArticle, Place, Station, Vessel,
                       utcnow)
 from ..services.chatbot import engine
@@ -110,7 +111,7 @@ def poll(token: str, db: Session = Depends(db_session)):
 @router.post("/api/public/chat/{token}/media", dependencies=[Depends(rate_limit)])
 async def media(token: str, kind: str = Form("PHOTO"), file: UploadFile = File(...), db: Session = Depends(db_session)):
     c = _conv(db, token)
-    data = await file.read()
+    data = await file.read(10 * 1024 * 1024 + 1)
     if len(data) > 10 * 1024 * 1024:
         raise HTTPException(413, "Max 10 MB")
     ext = Path(file.filename or "").suffix.lower()
@@ -145,6 +146,8 @@ async def media(token: str, kind: str = Form("PHOTO"), file: UploadFile = File(.
 @router.get("/api/public/myboat", dependencies=[Depends(rate_limit)])
 def my_boat(registration: str, mobile: str, db: Session = Depends(db_session)):
     """'My Boat' profile. Owner mobile must match the registry (POC stand-in for OTP verification)."""
+    if not settings.is_demo:
+        raise HTTPException(409, "My Boat demo verification requires APP_MODE=demo; approved owner verification is not integrated")
     v = db.query(Vessel).filter(Vessel.registration == registration.strip().upper()).first()
     if not v or not v.owner_mobile or v.owner_mobile[-10:] != mobile.strip()[-10:]:
         raise HTTPException(404, "No boat found for this registration and mobile number")
@@ -170,6 +173,8 @@ class WaIn(BaseModel):
 @router.post("/api/public/chat/webhook/whatsapp-sim", dependencies=[Depends(rate_limit)])
 def whatsapp_sim(body: WaIn, db: Session = Depends(db_session)):
     """SIMULATED WhatsApp-style webhook: one open conversation per sender number. No real WhatsApp integration."""
+    if not settings.is_demo:
+        raise HTTPException(409, "Simulated webhook requires APP_MODE=demo")
     c = (db.query(Conversation).filter(Conversation.citizen_mobile == body.from_, Conversation.channel == "WHATSAPP_SIM",
                                        Conversation.status != "CLOSED").order_by(Conversation.id.desc()).first())
     if c is None:
@@ -182,7 +187,7 @@ def whatsapp_sim(body: WaIn, db: Session = Depends(db_session)):
 # ------------------------------------------------------------------ operator side
 @router.get("/api/chat/conversations")
 def conversations(queue: str = "all", user=Depends(require("CHAT_VIEW")), db: Session = Depends(db_session)):
-    q = db.query(Conversation)
+    q = conversation_query(db, user)
     if queue == "distress":
         q = q.filter(Conversation.priority.in_(["L1", "L2"]), Conversation.status != "CLOSED")
     elif queue == "active":
@@ -201,6 +206,7 @@ def conversation(cid: int, user=Depends(require("CHAT_VIEW")), db: Session = Dep
     c = db.get(Conversation, cid)
     if not c:
         raise HTTPException(404)
+    ensure_conversation(db, user, c)
     return engine.conversation_dict(db, c, with_messages=True)
 
 
@@ -209,6 +215,7 @@ def takeover(cid: int, user=Depends(require("CHAT_OPERATE")), db: Session = Depe
     c = db.get(Conversation, cid)
     if not c:
         raise HTTPException(404)
+    ensure_conversation(db, user, c)
     engine.takeover(db, c, user)
     audit(db, user=user, action="CHAT_HUMAN_TAKEOVER", entity_type="conversation", entity_id=c.code)
     db.commit()
@@ -220,6 +227,7 @@ def release(cid: int, user=Depends(require("CHAT_OPERATE")), db: Session = Depen
     c = db.get(Conversation, cid)
     if not c:
         raise HTTPException(404)
+    ensure_conversation(db, user, c)
     engine.release(db, c, user)
     audit(db, user=user, action="CHAT_RELEASED", entity_type="conversation", entity_id=c.code)
     db.commit()
@@ -247,6 +255,7 @@ def reply(cid: int, body: ReplyIn, user=Depends(require("CHAT_OPERATE")), db: Se
     c = db.get(Conversation, cid)
     if not c:
         raise HTTPException(404)
+    ensure_conversation(db, user, c)
     if c.status != "HUMAN_TAKEOVER":
         raise HTTPException(409, "Take over the conversation before replying")
     if body.template and body.template not in OPERATOR_TEMPLATES:
@@ -269,7 +278,8 @@ class HandoffIn(BaseModel):
 def mrcc_handoff(cid: int, body: HandoffIn, user=Depends(require("CHAT_OPERATE")), db: Session = Depends(db_session)):
     """Records a handoff to MRCC/MRSC (SIMULATED - no live coordination link in the POC)."""
     c = db.get(Conversation, cid)
-    if not c or not c.incident_id:
+    ensure_conversation(db, user, c)
+    if not c.incident_id:
         raise HTTPException(409, "Conversation has no incident to hand off")
     inc = db.get(Incident, c.incident_id)
     if inc.status in {"C0", "C1"}:
@@ -292,8 +302,9 @@ def mrcc_handoff(cid: int, body: HandoffIn, user=Depends(require("CHAT_OPERATE")
 
 @router.get("/api/chat/analytics")
 def chat_analytics(user=Depends(require("CHAT_VIEW")), db: Session = Depends(db_session)):
-    convs = db.query(Conversation).all()
-    msgs = db.query(ConversationMessage).filter(ConversationMessage.sender == "CITIZEN").all()
+    convs = conversation_query(db, user).all()
+    msgs = db.query(ConversationMessage).filter(ConversationMessage.sender == "CITIZEN",
+                ConversationMessage.conversation_id.in_([c.id for c in convs])).all()
     return {"conversations": len(convs), "by_language": Counter(c.language for c in convs),
             "by_channel": Counter(c.channel for c in convs), "by_priority": Counter(c.priority or "none" for c in convs),
             "by_family": Counter(FAMILIES.get(c.family, (c.family or "unclassified",))[0] for c in convs),

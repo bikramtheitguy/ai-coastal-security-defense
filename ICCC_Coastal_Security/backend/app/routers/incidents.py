@@ -15,7 +15,10 @@ from ..audit import audit
 from ..config import settings
 from ..db import db_session
 from ..deps import require
-from ..models import Alert, Asset, Evidence, Incident, Mission, Vessel, VesselTrackPoint, utcnow
+from ..scope import (alert_query, incident_query, ensure_alert, ensure_incident,
+                     ensure_evidence, scope_station_query)
+from ..rbac import can_act_on_station
+from ..models import Alert, Asset, Evidence, Incident, Mission, Order, Vessel, VesselTrackPoint, utcnow
 from ..services.analytics import CLOSED_ALERT, TYPE_LABEL
 from ..services.common import feed, iso, next_code, provenance
 from ..services.incidents import (OPEN_STATUSES, STATUS_LABEL, LifecycleError, create_incident, event,
@@ -33,7 +36,7 @@ ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".mp4", ".mov", ".webm"
 def alerts(status: str = "open", alert_type: str | None = None, limit: int = 200,
            user=Depends(require("INCIDENT_VIEW")), db: Session = Depends(db_session)):
     intel = "INTEL_VIEW" in user._perms
-    q = db.query(Alert)
+    q = alert_query(db, user)
     if status == "open":
         q = q.filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"}))
     if alert_type:
@@ -59,6 +62,7 @@ def ack_alert(aid: int, user=Depends(require("INCIDENT_VERIFY")), db: Session = 
     a = db.get(Alert, aid)
     if not a:
         raise HTTPException(404)
+    ensure_alert(db, user, a)
     a.status, a.acknowledged_by, a.acknowledged_at = "ACKNOWLEDGED", user.username, utcnow()
     audit(db, user=user, action="ALERT_ACKNOWLEDGED", entity_type="alert", entity_id=a.code)
     feed(db, "ALERT", f"{a.code} acknowledged by {user.username} — verification started", station_id=a.station_id,
@@ -72,6 +76,7 @@ def dismiss_alert(aid: int, body: AlertAction, user=Depends(require("INCIDENT_VE
     a = db.get(Alert, aid)
     if not a:
         raise HTTPException(404)
+    ensure_alert(db, user, a)
     if not body.reason:
         raise HTTPException(400, "A reason is required to dismiss an alert (risk override is audited)")
     before = {"status": a.status, "risk": a.risk}
@@ -90,7 +95,9 @@ def escalate_alert(aid: int, user=Depends(require("INCIDENT_CREATE")), db: Sessi
     a = db.get(Alert, aid)
     if not a:
         raise HTTPException(404)
+    ensure_alert(db, user, a)
     if a.incident_id:
+        ensure_incident(db, user, db.get(Incident, a.incident_id))
         return {"incident_id": a.incident_id}
     v = db.get(Vessel, a.vessel_id) if a.vessel_id else None
     fam = "SUSPICIOUS_VESSEL" if a.alert_type not in {"WEATHER"} else "CYCLONE_DISTRESS"
@@ -101,6 +108,8 @@ def escalate_alert(aid: int, user=Depends(require("INCIDENT_CREATE")), db: Sessi
                           alert_id=a.id, classification=f"POSSIBLE {TYPE_LABEL.get(a.alert_type, a.alert_type).upper()} — requires verification",
                           confidence=a.confidence or 0.5, risk=a.risk or 0.5, detected_at=a.detected_at,
                           is_exercise=a.is_exercise)
+    # Preserve the source alert's owning jurisdiction, not a new nearest-point guess.
+    inc.station_id = a.station_id
     a.incident_id, a.status = inc.id, "ESCALATED"
     audit(db, user=user, action="ALERT_ESCALATED", entity_type="alert", entity_id=a.code, after={"incident": inc.code})
     db.commit()
@@ -111,7 +120,7 @@ def escalate_alert(aid: int, user=Depends(require("INCIDENT_CREATE")), db: Sessi
 @router.get("/incidents")
 def incidents(status: str = "open", priority: str | None = None, family: str | None = None, days: int = 90,
               user=Depends(require("INCIDENT_VIEW")), db: Session = Depends(db_session)):
-    q = db.query(Incident)
+    q = incident_query(db, user)
     if status == "open":
         q = q.filter(Incident.status.in_(OPEN_STATUSES))
     elif status == "closed":
@@ -140,17 +149,39 @@ class IncidentIn(BaseModel):
     persons_onboard: int | None = None
     vessel_id: int | None = None
     source: str = "MANUAL"
+    station_id: int | None = None
 
 
 @router.post("/incidents")
 def create(body: IncidentIn, user=Depends(require("INCIDENT_CREATE")), db: Session = Depends(db_session)):
     if body.priority not in {"L1", "L2", "L3", "L4"}:
         raise HTTPException(400, "priority must be L1..L4")
+    from ..models import Station
+    from ..services.analytics import nearest_station_id
+    if (body.lat is None) != (body.lon is None):
+        raise HTTPException(400, "Provide both latitude and longitude")
+    target_station = body.station_id
+    if target_station is None and body.lat is not None:
+        target_station = nearest_station_id(db, body.lat, body.lon)
+    if target_station is None:
+        target_station = user.station_id
+    if target_station is not None and db.get(Station, target_station) is None:
+        raise HTTPException(400, "Unknown station")
+    if not can_act_on_station(db, user, target_station):
+        from ..deps import ensure_station
+        ensure_station(db, user, target_station, "create incident")
+    if body.vessel_id:
+        vessel = db.get(Vessel, body.vessel_id)
+        if not vessel:
+            raise HTTPException(404, "Vessel not found")
+        from ..deps import ensure_station
+        ensure_station(db, user, vessel.station_id, "link vessel")
     inc = create_incident(db, title=body.title, family=body.family, priority=body.priority, source=body.source,
                           actor=user.username, lat=body.lat, lon=body.lon, location_desc=body.location_desc,
                           location_confidence="REPORTED" if body.lat is not None else "UNKNOWN",
                           description=body.description, persons_onboard=body.persons_onboard, vessel_id=body.vessel_id,
                           classification=body.family.replace("_", " ").title())
+    inc.station_id = target_station
     audit(db, user=user, action="INCIDENT_CREATED", entity_type="incident", entity_id=inc.code, after=body.model_dump())
     db.commit()
     return incident_dict(db, inc, full=True)
@@ -161,6 +192,7 @@ def get_incident(iid: int, user=Depends(require("INCIDENT_VIEW")), db: Session =
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     return incident_dict(db, inc, full=True)
 
 
@@ -173,6 +205,8 @@ class TransitionIn(BaseModel):
     note: str | None = None
     outcome: str | None = None
     agency: str | None = None
+    order_id: int | None = None
+    confirmation_method: str | None = None
 
 
 @router.post("/incidents/{iid}/transition")
@@ -180,23 +214,39 @@ def do_transition(iid: int, body: TransitionIn, user=Depends(require("INCIDENT_V
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     perm = TRANSITION_PERMS.get(body.to)
     if perm is None or perm not in user._perms:
         audit(db, user=user, action="ACCESS_DENIED", entity_type="incident", entity_id=inc.code, outcome="DENIED",
               detail=f"transition to {body.to} requires {perm}")
         db.commit()
         raise HTTPException(403, f"Not authorised: {body.to} ({STATUS_LABEL.get(body.to)}) requires {perm}")
-    if body.to == "C5" and not inc.assigned_asset_id:
-        raise HTTPException(409, "Dispatch can only be confirmed for a tasked resource (issue a movement order first)")
+    if body.to == "C5":
+        from ..scope import order_in_scope
+        from ..services.orders import advance, MOVEMENT_TYPES, OrderError
+        order = db.get(Order, body.order_id) if body.order_id else None
+        if (order is None or order.incident_id != inc.id or order.asset_id != inc.assigned_asset_id
+                or order.order_type not in MOVEMENT_TYPES or order.status != "ACCEPTED"
+                or inc.status not in {"C2", "C3", "C4"}):
+            raise HTTPException(409, "Manual dispatch needs an ACCEPTED movement order linked to this verified incident")
+        if not order_in_scope(db, user, order):
+            raise HTTPException(403, "Order outside your command jurisdiction")
+        if body.confirmation_method not in {"VHF", "PHONE", "FIELD_REPORT"} or not (body.note or "").strip():
+            raise HTTPException(400, "Record confirmation method and who confirmed departure, with a reference")
+        note = f"MANUAL {body.confirmation_method} confirmation recorded by {user.username}: {body.note.strip()}"
+        try:
+            advance(db, order, "EN_ROUTE", user, note)
+        except OrderError as exc:
+            raise HTTPException(409, str(exc))
+        audit(db, user=user, action="DISPATCH_CONFIRMED_MANUAL", entity_type="incident", entity_id=inc.code,
+              after={"order": order.code, "method": body.confirmation_method, "status": inc.status}, detail=note)
+        db.commit()
+        return incident_dict(db, inc, full=True)
     before = {"status": inc.status}
     try:
         transition(db, inc, body.to, user, body.note, outcome=body.outcome, agency=body.agency)
     except LifecycleError as e:
         raise HTTPException(409, str(e))
-    if body.to == "C5":
-        from ..services.incidents import notify_citizen
-        a = db.get(Asset, inc.assigned_asset_id)
-        notify_citizen(db, inc, "status_C5", asset=a.asset_code if a else "unit", eta="—")
     audit(db, user=user, action="INCIDENT_STATUS_CHANGED" if body.to != "C7" else "INCIDENT_CLOSED",
           entity_type="incident", entity_id=inc.code, before=before,
           after={"status": inc.status, "outcome": inc.outcome}, detail=body.note)
@@ -213,6 +263,7 @@ def supervisor_review(iid: int, body: AlertAction, user=Depends(require("INCIDEN
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     inc.supervisor_reviewed_at, inc.supervisor_reviewed_by = utcnow(), user.username
     event(db, inc, "SUPERVISOR_REVIEW", user.username, body.reason or "Reviewed")
     audit(db, user=user, action="SUPERVISOR_REVIEW", entity_type="incident", entity_id=inc.code, detail=body.reason)
@@ -231,6 +282,7 @@ def add_note(iid: int, body: NoteIn, user=Depends(require("INCIDENT_VERIFY")), d
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     before = {"priority": inc.priority, "outcome": inc.outcome}
     if body.kind == "RESPONSE":
         inc.response_notes = ((inc.response_notes or "") + f"\n[{user.username}] {body.text}").strip()
@@ -250,14 +302,15 @@ def incident_recommendation(iid: int, user=Depends(require("INCIDENT_VIEW")), db
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     if inc.lat is None:
         raise HTTPException(409, "Incident location unknown — obtain location before resource recommendation")
-    return recommend(db, inc.lat, inc.lon)
+    return recommend(db, inc.lat, inc.lon, user=user)
 
 
 @router.get("/recommend")
 def recommend_point(lat: float, lon: float, user=Depends(require("INCIDENT_VIEW")), db: Session = Depends(db_session)):
-    return recommend(db, lat, lon)
+    return recommend(db, lat, lon, user=user)
 
 
 @router.get("/incidents/{iid}/aar")
@@ -265,6 +318,7 @@ def get_aar(iid: int, user=Depends(require("INCIDENT_VIEW")), db: Session = Depe
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     return inc.aar or generate_aar(db, inc)
 
 
@@ -278,6 +332,7 @@ def _ev(e: Evidence) -> dict:
 
 @router.get("/incidents/{iid}/evidence")
 def list_evidence(iid: int, user=Depends(require("EVIDENCE_VIEW")), db: Session = Depends(db_session)):
+    ensure_incident(db, user, db.get(Incident, iid))
     return [_ev(e) for e in db.query(Evidence).filter(Evidence.incident_id == iid).order_by(Evidence.id)]
 
 
@@ -288,6 +343,7 @@ async def upload_evidence(iid: int, kind: str = Form(...), description: str = Fo
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     kinds = {"PHOTO", "VIDEO", "VOICE", "SCREENSHOT", "TRACK", "UAV", "CCTV_REF", "NOTE"}
     if kind not in kinds:
         raise HTTPException(400, f"kind must be one of {sorted(kinds)}")
@@ -330,6 +386,7 @@ def preserve_track(iid: int, user=Depends(require("EVIDENCE_UPLOAD")), db: Sessi
     inc = db.get(Incident, iid)
     if not inc:
         raise HTTPException(404)
+    ensure_incident(db, user, inc)
     start = (inc.detected_at or utcnow()) - timedelta(hours=2)
     payload: dict = {"incident": inc.code, "window_start": iso(start), "window_end": iso(utcnow()), "tracks": {}}
     if inc.vessel_id:
@@ -367,6 +424,7 @@ def custody(eid: int, body: CustodyIn, user=Depends(require("EVIDENCE_UPLOAD")),
     e = db.get(Evidence, eid)
     if not e:
         raise HTTPException(404)
+    ensure_evidence(db, user, e)
     if body.status not in {"COLLECTED", "SEALED", "TRANSFERRED", "RELEASED"}:
         raise HTTPException(400, "Invalid custody status")
     e.custody_status = body.status
@@ -382,6 +440,7 @@ def verify_evidence(eid: int, user=Depends(require("EVIDENCE_VIEW")), db: Sessio
     e = db.get(Evidence, eid)
     if not e:
         raise HTTPException(404)
+    ensure_evidence(db, user, e)
     if not e.storage_path or not Path(e.storage_path).exists():
         return {"code": e.code, "verifiable": False, "reason": "No stored file (note-type evidence)"}
     actual = hashlib.sha256(Path(e.storage_path).read_bytes()).hexdigest()
@@ -392,7 +451,8 @@ def verify_evidence(eid: int, user=Depends(require("EVIDENCE_VIEW")), db: Sessio
 @router.get("/evidence/{eid}/download")
 def download_evidence(eid: int, user=Depends(require("EVIDENCE_VIEW")), db: Session = Depends(db_session)):
     e = db.get(Evidence, eid)
-    if not e or not e.storage_path or not Path(e.storage_path).exists():
+    ensure_evidence(db, user, e)
+    if not e.storage_path or not Path(e.storage_path).exists():
         raise HTTPException(404)
     audit(db, user=user, action="EVIDENCE_ACCESSED", entity_type="evidence", entity_id=e.code)
     db.commit()

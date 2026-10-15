@@ -28,7 +28,7 @@ def nearest_stations(db: Session, lat: float, lon: float, n: int = 3) -> list[di
 
 
 def recommend(db: Session, lat: float, lon: float, *, asset_types: set[str] | None = None,
-              include_uav: bool = True, limit: int = 5, exclude_asset_ids: set[int] | None = None) -> dict:
+              include_uav: bool = True, limit: int = 5, exclude_asset_ids: set[int] | None = None, user=None) -> dict:
     types = set(asset_types or MARITIME_TYPES)
     if include_uav:
         types.add("UAV")
@@ -39,6 +39,10 @@ def recommend(db: Session, lat: float, lon: float, *, asset_types: set[str] | No
                        .selectinload(Personnel.qualifications), selectinload(Asset.defects)).all())
     ranked, excluded = [], []
     for a in assets:
+        if user is not None:
+            from ..rbac import can_act_on_station
+            if not can_act_on_station(db, user, a.station_id):
+                continue
         if exclude_asset_ids and a.id in exclude_asset_ids:
             continue
         if a.lat is None:

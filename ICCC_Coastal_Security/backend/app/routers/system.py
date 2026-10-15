@@ -16,6 +16,7 @@ from ..audit import audit, verify_chain
 from ..config import settings
 from ..db import Base, db_session, get_engine
 from ..deps import current_user, require, require_any
+from ..scope import incident_query, alert_query
 from ..models import (Alert, Asset, AuditLog, BackupRecord, CyberEvent, DataSource, Incident, Mission, Personnel, Station,
                       User, UserSession, Vessel, WeatherReport, utcnow)
 from ..services import scenarios, simulator
@@ -41,9 +42,9 @@ def leadership(user=Depends(require("ANALYTICS_VIEW")), db: Session = Depends(db
     uav_ready = sum(1 for a in uavs if cache.get(a.id) and cache[a.id].mission_ready)
     pc = state["personnel"]
     active_patrols = db.query(Mission).filter(Mission.status == "ACTIVE").count()
-    open_alerts = db.query(Alert).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).count()
+    open_alerts = alert_query(db, user).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).count()
     high_risk = db.query(Vessel).filter(Vessel.risk_level == "HIGH", Vessel.active.is_(True)).count()
-    open_inc = db.query(Incident).filter(Incident.status.in_(OPEN_STATUSES)).all()
+    open_inc = incident_query(db, user).filter(Incident.status.in_(OPEN_STATUSES)).all()
     stations = db.query(Station).all()
     comms_ok = sum(1 for s in stations if s.vhf_base_status == "OPERATIONAL" and s.network_primary == "ONLINE")
     weather = db.query(WeatherReport).all()
@@ -93,7 +94,7 @@ def leadership(user=Depends(require("ANALYTICS_VIEW")), db: Session = Depends(db
 @router.get("/analytics/operations")
 def operations(days: int = 30, user=Depends(require("ANALYTICS_VIEW")), db: Session = Depends(db_session)):
     since = utcnow() - timedelta(days=days)
-    incs = db.query(Incident).filter(Incident.detected_at >= since).all()
+    incs = incident_query(db, user).filter(Incident.detected_at >= since).all()
 
     def mins(a, b):
         return (b - a).total_seconds() / 60 if a and b else None
@@ -124,7 +125,7 @@ def operations(days: int = 30, user=Depends(require("ANALYTICS_VIEW")), db: Sess
         p["boardings"] += m.boardings or 0
         if m.started_at:
             p["hours"] = round(p["hours"] + ((m.ended_at or utcnow()) - m.started_at).total_seconds() / 3600, 1)
-    alerts = db.query(Alert).filter(Alert.detected_at >= since).all()
+    alerts = alert_query(db, user).filter(Alert.detected_at >= since).all()
     return {
         "window_days": days,
         "response_times": {k: stats(v) for k, v in rt.items()},
@@ -355,6 +356,8 @@ def scenario_list(user=Depends(require("SCENARIO_RUN"))):
 
 @router.post("/scenarios/{key}")
 def scenario_run(key: str, user=Depends(require("SCENARIO_RUN")), db: Session = Depends(db_session)):
+    if not settings.is_demo:
+        raise HTTPException(409, "Synthetic scenario injection requires APP_MODE=demo")
     if key not in scenarios.CATALOGUE:
         raise HTTPException(404, "Unknown scenario")
     res = scenarios.run(db, key, user.username)
@@ -371,6 +374,8 @@ class TickIn(BaseModel):
 
 @router.post("/system/sim/tick")
 def sim_tick(body: TickIn, user=Depends(require("SCENARIO_RUN")), db: Session = Depends(db_session)):
+    if not settings.is_demo:
+        raise HTTPException(409, "Simulation ticks require APP_MODE=demo")
     out = None
     for i in range(max(1, min(body.ticks, 500))):
         out = simulator.tick(db, body.seconds, run_analytics=body.analytics and i == body.ticks - 1)
@@ -401,9 +406,9 @@ def search(q: str, user=Depends(require("COP_VIEW")), db: Session = Depends(db_s
                     "label": x.name or x.vessel_code, "sub": (x.registration if "INTEL_VIEW" in p else x.vessel_type),
                     "route": f"/cop?focus=vessel:{x.id}"})
     if "INCIDENT_VIEW" in p:
-        for x in db.query(Incident).filter(or_(Incident.code.ilike(like), Incident.title.ilike(like))).limit(8):
+        for x in incident_query(db, user).filter(or_(Incident.code.ilike(like), Incident.title.ilike(like))).limit(8):
             out.append({"type": "incident", "id": x.id, "label": x.code, "sub": x.title, "route": f"/incidents?id={x.id}"})
-        for x in db.query(Alert).filter(or_(Alert.code.ilike(like), Alert.title.ilike(like))).limit(5):
+        for x in alert_query(db, user).filter(or_(Alert.code.ilike(like), Alert.title.ilike(like))).limit(5):
             out.append({"type": "alert", "id": x.id, "label": x.code, "sub": x.title, "route": f"/cop?focus=alert:{x.id}"})
     if "ASSET_VIEW" in p:
         for x in db.query(Mission).filter(Mission.code.ilike(like)).limit(5):
@@ -424,8 +429,8 @@ def status_bar(user=Depends(current_user), db: Session = Depends(db_session)):
                "colour": {"NONE": "GREEN", "ADVISORY": "AMBER", "WARNING": "RED", "CYCLONE_ALERT": "RED"}[worst.warning_level],
                "text": worst.warning_text}}
     if "INCIDENT_VIEW" in user._perms:
-        out["alerts"] = db.query(Alert).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).count()
-        opn = db.query(Incident.priority).filter(Incident.status.in_(OPEN_STATUSES)).all()
+        out["alerts"] = alert_query(db, user).filter(Alert.status.notin_(CLOSED_ALERT | {"LINKED"})).count()
+        opn = incident_query(db, user).with_entities(Incident.priority).filter(Incident.status.in_(OPEN_STATUSES)).all()
         out["l1"] = sum(1 for (p,) in opn if p == "L1")
         out["l2"] = sum(1 for (p,) in opn if p == "L2")
     return out
