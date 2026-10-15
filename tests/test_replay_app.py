@@ -64,4 +64,3 @@ def test_play_pause_seek_step_and_module_switch():
     assert not app.session_state["replay_playing"]
     assert [metric.value for metric in app.metric] == ["200", "20.0%", "12.5%", "0.154"]
     assert not app.exception
-
