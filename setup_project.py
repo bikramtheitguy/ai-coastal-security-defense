@@ -1,23 +1,16 @@
-import os
+"""Prepare project directories without replacing any existing files."""
 
-folders = ["data", "notebooks", "scripts", "models", "dashboard"]
+from pathlib import Path
 
-base_path = "."
+FOLDERS = ("data", "notebooks", "scripts", "models", "dashboard")
 
-for folder in folders:
-    os.makedirs(os.path.join(base_path, folder), exist_ok=True)
 
-with open(os.path.join(base_path, "README.md"), "w") as f:
-    f.write("# AI-Driven Coastal Security\n\nProject initialized.\n")
+def prepare_directories(base: Path) -> None:
+    for folder in FOLDERS:
+        (base / folder).mkdir(parents=True, exist_ok=True)
 
-with open(os.path.join(base_path, "requirements.txt"), "w") as f:
-    f.write("""pandas==2.2.1
-numpy==1.26.4
-scikit-learn==1.4.2
-matplotlib==3.8.4
-seaborn==0.13.2
-jupyter==1.0.0
-notebook==7.1.3
-""")
 
-print("✅ Folder structure and base files created!")
+if __name__ == "__main__":
+    prepare_directories(Path(__file__).resolve().parent)
+    print("Project directories ready. Existing files were preserved.")
+    print("See docs/INSTALLATION.md to create an isolated demo environment.")
