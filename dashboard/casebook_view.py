@@ -116,9 +116,9 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
                 if flag["vessel_id"] == candidate:
                     st.write(f"{flag['rule']} · {flag['evidence_id']}")
                     st.caption(flag["explanation"])
-            with st.form(f"casebook_open_{candidate}", clear_on_submit=True):
+            with st.form(f"casebook_open_{candidate}"):
                 label, reason, acknowledged = _inputs(f"open_{candidate}")
-                if st.form_submit_button("Open investigation", type="primary"):
+                if st.form_submit_button(f"Open investigation for {candidate}", type="primary"):
                     _apply(
                         capture_case,
                         book,
@@ -217,7 +217,6 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
                 else:
                     with st.form(
                         f"casebook_capture_form_{selected}_{len(case['events'])}",
-                        clear_on_submit=True,
                     ):
                         label, reason, acknowledged = _inputs(
                             f"capture_{selected}_{len(case['events'])}"
@@ -239,7 +238,7 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
                 f"Decision refers to the latest capture at minute {evidence_minute(evidence)} "
                 f"— {evidence['snapshot_sha256']}"
             )
-            with st.form(f"casebook_review_{selected}_{len(case['events'])}", clear_on_submit=True):
+            with st.form(f"casebook_review_{selected}_{len(case['events'])}"):
                 status = st.selectbox(
                     "Next case status",
                     TRANSITIONS[case_status(case)],

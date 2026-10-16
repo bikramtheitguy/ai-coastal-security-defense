@@ -19,14 +19,19 @@ def submit(app, name):
 def test_investigation_keeps_evidence_and_cases_across_filters_and_views():
     app = watch()
     app.selectbox(key="casebook_candidate").select("SIM-004").run()
-    submit(app, "Open investigation")
+    app.text_input(key="open_SIM-004_reviewer").set_value("DEMO analyst")
+    app.text_area(key="open_SIM-004_reason").set_value("Keep this draft after validation errors.")
+    submit(app, "Open investigation for SIM-004")
     assert app.error and app.session_state["coastal_casebook"]["cases"] == []
+    assert (
+        app.text_area(key="open_SIM-004_reason").value == "Keep this draft after validation errors."
+    )
     app.text_input(key="open_SIM-004_reviewer").set_value("DEMO analyst")
     app.text_area(key="open_SIM-004_reason").set_value(
         "Inspecting a stale report in the synthetic exercise."
     )
     app.checkbox(key="open_SIM-004_ack").check()
-    submit(app, "Open investigation")
+    submit(app, "Open investigation for SIM-004")
     assert len(app.session_state["coastal_casebook"]["cases"]) == 1
     app.text_input(key="review_CASE-SIM-004_1_reviewer").set_value("DEMO analyst")
     app.text_area(key="review_CASE-SIM-004_1_reason").set_value(

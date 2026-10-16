@@ -27,14 +27,12 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     open_watch(page)
     workspace(page)
     select(page, "Flagged vessel", "SIM-004")
-    # The old vessel's form remains briefly visible during the server rerun.
-    opening = page.locator(".st-key-casebook_open_SIM-004")
-    expect(opening).to_be_visible()
-    opening.get_by_role("button", name="Open investigation", exact=True).click()
+    # Wait for the vessel-specific server-rendered action, not only the input value.
+    page.get_by_role("button", name="Open investigation for SIM-004", exact=True).click()
     expect(
         page.get_by_text("Acknowledge the evidence before recording this action.", exact=True)
     ).to_be_visible()
-    fill_form(page, "Open investigation", "Inspecting the synthetic reporting gap.")
+    fill_form(page, "Open investigation for SIM-004", "Inspecting the synthetic reporting gap.")
     workspace(page)
     expect(page.get_by_role("combobox", name="Saved case", exact=True)).to_have_value(
         "CASE-SIM-004"
