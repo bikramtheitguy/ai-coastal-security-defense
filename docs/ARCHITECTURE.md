@@ -18,6 +18,10 @@ The fifth view evaluates independently seeded synthetic voyages, compares detect
 - `coastal_security/watch.py`: deterministic traffic, receipt causality, quarantine, freshness, scoped snapshots and evidence exports.
 - `coastal_security/geography.py` and `india.py`: pinned-source integrity, bounded geometry processing, coast/state selection and display-only polygon orientation.
 - `dashboard/watch_view.py`: India map, layers, cohort controls, vessel inspector and intake/source panels.
+- `coastal_security/history.py`: receipt-causal freshness intervals, windowed vessel
+  evidence, gap-safe sampled distances and a separate versioned dossier export.
+- `dashboard/history_view.py`: lazy Vessel history tab, shared vessel selection,
+  explicit IST/UTC labels and numeric time axes independent of browser timezone.
 - `scripts/build_india_reference.py`, `build_coastal_watch.py` and `data/coastal_watch/`: reproducible public-geography derivation, synthetic generation and third-party notices.
 - `data/`, `models/`, `notebooks/`: historical research inputs and artifacts; training is outside the supported runtime.
 - No model deserialization, database, API, ingestion worker, identity service or external data feed is used.
@@ -44,6 +48,15 @@ CSVs, without inventing geographic joins or model probabilities.
 `coastal_security/casebook.py` owns transitions, bounds, evidence captures, export and import validation. `dashboard/casebook_view.py` owns forms and session state inside the existing Watch view. Case data never enters shared caches or server files. Import validates schema and limits, replays commands, and independently reconstructs every snapshot from the known exercise. No uploaded code, pickle or URLs are executed or fetched. Reviewer labels and notes remain unauthenticated data.
 
 Casebook scope is all saved vessels and clocks, independent of the map filters. Initial cases require a current flag; subsequent captures may show recovery. Every decision references the latest frozen capture. Changing the clock cannot rewrite saved evidence. Captures preserve status; the UI highlights evidence awaiting a fresh review. Download/restore is an explicit recovery workflow, not an authenticated persistent service. See the [increment plan](INVESTIGATIONS_PLAN.md).
+
+## Vessel history boundary
+
+The history dossier consumes validated watch snapshots; it is not an alternate
+ingestion path. Its calculations never write to the watch snapshot or casebook.
+Only the selected history tab renders its charts. Rewinding reconstructs the
+known receipt history, while late reports cannot rewrite past freshness. The
+new export format leaves existing watch, replay and casebook contracts intact.
+See [history semantics and acceptance](VESSEL_HISTORY.md).
 
 ## Current offline vessel benchmark
 

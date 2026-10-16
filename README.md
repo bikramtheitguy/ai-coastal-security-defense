@@ -14,6 +14,14 @@ The original 2D map and all six modules remain available. Drone and cyber resear
 interactive review panels; the original charts remain in expandable research sections.
 See the [globe workspace and Odisha walkthrough](docs/GLOBE_WORKSPACE.md).
 
+The **Vessel history** tab adds a dossier for each vessel in the selected Indian
+cohort: reporting freshness as it was known at the time, observation-to-receipt
+lags, segmented speed history and a reproducible JSON download. Start with
+Odisha's SIM-004 at minutes 60 and 95, then SIM-006 at minute 45. See the
+[plan, definitions and before/after comparison](docs/VESSEL_HISTORY.md).
+This branch's additions require merge and hosted verification before they can
+be claimed on the public demo.
+
 ## Related command-centre dashboard
 
 **[Explore the coastal command-centre concept built with Lovable](https://icccodishacshq.lovable.app/)**

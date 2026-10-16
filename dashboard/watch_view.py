@@ -10,6 +10,7 @@ from coastal_security.india import COASTAL_STATES, display_feature, scope_geomet
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
 from dashboard.casebook_view import render_investigations
 from dashboard.globe_view import render_globe
+from dashboard.history_view import focus_history, render_history
 
 
 def focus_investigation(vessel_id: str) -> None:
@@ -312,11 +313,19 @@ def render_watch() -> None:
         strict=True,
     ):
         column.metric(title, value)
-    watch, intake, investigations, sources = st.tabs(
-        ["Watch picture", "Intake quality", "Investigations", "Sources & export"],
+    watch, history_tab, intake, investigations, sources = st.tabs(
+        ["Watch picture", "Vessel history", "Intake quality", "Investigations", "Sources & export"],
         key="watch_tabs",
         on_change="rerun",
     )
+    history_options = sorted(
+        {p["vessel_id"] for p in state["positions"]} | set(state["unknown_vessels"])
+    )
+    if history_options and st.session_state.get("history_vessel") not in history_options:
+        preferred = st.session_state.get("watch_vessel")
+        st.session_state.history_vessel = (
+            preferred if preferred in history_options else history_options[0]
+        )
     with watch:
         layers = st.columns(4)
         coastline = layers[0].checkbox("Public coastline", True, key="watch_coastline")
@@ -343,6 +352,12 @@ def render_watch() -> None:
                 )
                 st.write(f"{position['speed_knots']:.1f} kn reported speed")
                 st.caption(f"{position['latitude']:.4f}° N · {position['longitude']:.4f}° E")
+                st.button(
+                    "Open vessel history",
+                    on_click=focus_history,
+                    args=(selected,),
+                    key="watch_history_handoff",
+                )
                 can_review = any(f["vessel_id"] == selected for f in state["flags"]) or any(
                     c["vessel_id"] == selected
                     for c in st.session_state.get("coastal_casebook", {}).get("cases", [])
@@ -363,7 +378,11 @@ def render_watch() -> None:
                 render_globe(
                     coast,
                     state,
-                    selected,
+                    (
+                        st.session_state.get("history_vessel", selected)
+                        if history_tab.open
+                        else selected
+                    ),
                     states,
                     districts,
                     extent,
@@ -463,6 +482,9 @@ def render_watch() -> None:
             st.dataframe(pd.DataFrame(state["flags"]), hide_index=True, width="stretch")
         else:
             st.info("No current rule flags in this cohort.")
+    with history_tab:
+        if history_tab.open:
+            render_history(state, exercise, registry)
     with intake:
         counts = state["counts"]
         st.subheader("Received, accepted, explained")

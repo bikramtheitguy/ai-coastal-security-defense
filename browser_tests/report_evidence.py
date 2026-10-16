@@ -7,6 +7,10 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 directory = root / "artifacts/browser"
 for name in (
+    "history-1365.jpg",
+    "history-390.jpg",
+    "history-delay-1365.jpg",
+    "history-delay-390.jpg",
     *(
         f"visual-first-{page}-{width}.jpg"
         for page in ("drone", "cyber", "replay", "evaluation", "watch")

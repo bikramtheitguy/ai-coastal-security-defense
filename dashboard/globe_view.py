@@ -232,6 +232,7 @@ def _pick(key: str, allowed: set[str]) -> None:
     selected = selected_vessel(st.session_state.get(key), allowed)
     if selected is not None:
         st.session_state.watch_vessel = selected
+        st.session_state.history_vessel = selected
 
 
 def _preset(name: str) -> None:

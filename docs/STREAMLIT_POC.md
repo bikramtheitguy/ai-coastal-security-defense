@@ -2,14 +2,27 @@
 
 This POC combines India-focused geographic watch, reproducible vessel replay, human evidence review and an independent trajectory evaluation lab in Python/Streamlit. Geography comes from dated public sources; traffic and operational scenarios are invented. It is a software demonstration, not an operational coastal-security system.
 
-## Current proposal: globe and interactive research review
+## Current proposal: vessel history and reporting continuity
+
+Add a Vessel history workspace inside Coastal Watch, using the existing Indian
+synthetic exercise and public geography. It explains gaps, recovery, delayed
+receipts and windowed sampled-link distance without inventing travel through
+missing observations. The [implementation plan and comparison](VESSEL_HISTORY.md)
+define the metric contract, Odisha walkthrough and validation requirements.
+This increment is proposed on a separate branch; hosted deployment requires
+merge and separate live verification.
+
+## Merged baseline: globe and graphics-first layouts
 
 India Coastal Watch becomes the default workspace, with a rotatable globe, India/Odisha
 camera presets, selectable synthetic vessels, receipt-aware history and an investigation
 handoff. The existing 2D map and all six modules remain available. Drone and cyber
 experiments gain interactive review panels while preserving their metrics, source files
 and original charts. See the [globe comparison, architecture and walkthrough](GLOBE_WORKSPACE.md).
-This increment requires separate merge and hosted verification before deployment is claimed.
+PR19 merged at `4c4de199d53450e7c454ef720a0699cef3e7967f` on 16 October 2026.
+Its five graphics-first pages and existing exports were verified on the hosted
+app at desktop and narrow widths after an authorized restart. That hosted check
+does not establish deployment of the new vessel-history proposal.
 
 ## Investigation and handover baseline: PR #16
 
