@@ -46,7 +46,7 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     slider = page.get_by_role("slider", name="Exercise minute Exercise minute", exact=True)
     for value in range(65, 100, 5):
         slider.press("ArrowRight")
-        expect(slider).to_have_attribute("aria-valuenow", str(value))
+        expect(slider).to_have_value(str(value))
         expect(
             page.get_by_text(f"Exercise clock · 01 Apr 2026, 07:{value - 60:02} UTC", exact=False)
         ).to_be_visible()

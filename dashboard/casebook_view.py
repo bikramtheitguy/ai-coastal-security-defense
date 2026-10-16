@@ -314,7 +314,8 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
             )
             if uploaded is not None:
                 try:
-                    restored = restore_casebook(uploaded.getvalue(), exercise, registry)
+                    with st.spinner("Checking recorded evidence against the synthetic exercise…"):
+                        restored = restore_casebook(uploaded.getvalue(), exercise, registry)
                 except ValueError as exc:
                     st.error(str(exc))
                 else:

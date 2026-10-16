@@ -198,3 +198,12 @@ def test_imported_notes_are_plain_data_not_authenticated(source):
     restored = restore_casebook(reseal(payload), *source)
     assert "<script>" in handover_text(restored["cases"][0])
     assert "not authenticated" in handover_text(restored["cases"][0])
+
+
+def test_multi_case_restore_preserves_case_boundaries(source):
+    book = capture(new_casebook(source[1]), source)
+    book = review(book)
+    book = capture(book, source, vessel="SIM-002")
+    restored = restore_casebook(export_casebook(book), *source)
+    assert restored == book
+    assert [case_status(c) for c in restored["cases"]] == ["In review", "New"]

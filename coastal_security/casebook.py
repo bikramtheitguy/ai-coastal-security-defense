@@ -244,7 +244,12 @@ def restore_casebook(raw: bytes, exercise: dict, registry: dict) -> dict:
         cases = payload["cases"]
         if not isinstance(cases, list) or len(cases) > MAX_CASES:
             raise ValueError("Case count exceeds the supported demo limit.")
+        if len({case["vessel_id"] for case in cases}) != len(cases):
+            raise ValueError("Casebook structure or event history is inconsistent.")
         for case in cases:
+            # Replay one bounded case at a time. Copying all previously rebuilt
+            # cases for every event makes large restores unnecessarily quadratic.
+            single = new_casebook(registry)
             events = case["events"]
             if not isinstance(events, list) or not 1 <= len(events) <= MAX_EVENTS:
                 raise ValueError("Invalid case event count.")
@@ -256,22 +261,20 @@ def restore_casebook(raw: bytes, exercise: dict, registry: dict) -> dict:
                     "recorded_at": event["recorded_at_utc"],
                 }
                 if event["kind"] == "Capture":
-                    rebuilt = capture_case(
-                        rebuilt,
+                    single = capture_case(
+                        single,
                         exercise,
                         registry,
                         evidence_minute(event["evidence"]),
                         case["vessel_id"],
                         **common,
                     )
-                    produced = next(
-                        c for c in rebuilt["cases"] if c["vessel_id"] == case["vessel_id"]
-                    )
+                    produced = single["cases"][0]
                     if json_bytes(produced["events"][-1]) != json_bytes(event):
                         raise ValueError("Captured evidence does not match the bundled exercise.")
                 elif event["kind"] == "Review":
-                    rebuilt = review_case(
-                        rebuilt,
+                    single = review_case(
+                        single,
                         case["case_id"],
                         event["status"],
                         event["evidence_sha256"],
@@ -279,6 +282,7 @@ def restore_casebook(raw: bytes, exercise: dict, registry: dict) -> dict:
                     )
                 else:
                     raise ValueError("Unsupported case event.")
+            rebuilt["cases"].extend(single["cases"])
         if json_bytes(rebuilt) != json_bytes(payload):
             raise ValueError("Casebook structure or event history is inconsistent.")
         return rebuilt
