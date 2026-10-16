@@ -95,7 +95,7 @@ def page(browser, app_url, request, context_options):
         timezone_id="Asia/Kolkata",
         **context_options,
     )
-    failures, external, console_errors = [], [], []
+    failures, external, console_errors, media_events = [], [], [], []
 
     def local_only(route):
         url = route.request.url
@@ -113,6 +113,22 @@ def page(browser, app_url, request, context_options):
         "console",
         lambda message: console_errors.append(message.text) if message.type == "error" else None,
     )
+    page.on(
+        "response",
+        lambda response: (
+            media_events.append({"path": urlsplit(response.url).path, "status": response.status})
+            if "/media/" in response.url
+            else None
+        ),
+    )
+    page.on(
+        "requestfailed",
+        lambda request: (
+            media_events.append({"path": urlsplit(request.url).path, "failure": request.failure})
+            if "/media/" in request.url
+            else None
+        ),
+    )
     context.tracing.start(screenshots=True, snapshots=True, sources=True)
     page.goto(app_url)
     try:
@@ -122,6 +138,7 @@ def page(browser, app_url, request, context_options):
         page.screenshot(path=str(EVIDENCE / f"{name}.jpg"), type="jpeg", quality=75)
         (EVIDENCE / f"{name}.txt").write_text(page.locator("body").inner_text(), encoding="utf-8")
         print("BROWSER_CONSOLE_ERRORS=" + json.dumps({name: console_errors}))
+        print("BROWSER_MEDIA_EVENTS=" + json.dumps({name: media_events[-30:]}))
         context.tracing.stop(path=str(EVIDENCE / f"{name}-trace.zip"))
         context.close()
     assert not failures, failures

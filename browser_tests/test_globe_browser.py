@@ -83,10 +83,14 @@ def test_globe_odisha_picking_clock_and_investigation_handoff(page):
     expect(page.get_by_text("CASE-SIM-004 · New", exact=True)).to_be_visible()
     screenshot(page, "globe-review-handoff.jpg")
     slider = page.get_by_role("slider", name="Exercise minute Exercise minute", exact=True)
-    for _ in range(7):
+    for value in range(65, 100, 5):
         slider.press("ArrowRight")
+        expect(slider).to_have_value(str(value))
+        expect(
+            page.get_by_text(f"Exercise clock · 01 Apr 2026, 07:{value - 60:02} UTC", exact=False)
+        ).to_be_visible()
         wait_for_idle(page)
-    expect(slider).to_have_attribute("aria-valuenow", "95")
+    expect(slider).to_have_value("95")
     page.get_by_role("tab", name="Watch picture", exact=True).click()
     expect(page.get_by_text("5 min since observation", exact=True)).to_be_visible()
     chart = globe(page)

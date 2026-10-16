@@ -299,6 +299,8 @@ def render_replay() -> None:
                 export_review(state.replay_reviews, scenario_manifest(rows)),
                 "synthetic-review-history.json",
                 "application/json",
+                # Export the already-rendered snapshot without racing a fragment rerun.
+                on_click="ignore",
             )
         with st.expander("Scenario provenance and downloads"):
             st.write(
