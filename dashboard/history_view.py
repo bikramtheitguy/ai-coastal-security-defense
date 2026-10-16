@@ -57,7 +57,7 @@ def history_charts(history: dict, zone: str) -> tuple[dict, dict, dict]:
                 "type": "nominal",
                 "title": None,
                 "scale": {"domain": list(COLOURS), "range": list(COLOURS.values())},
-                "legend": {"orient": "bottom"},
+                "legend": None,
             },
             "tooltip": [
                 {"field": "status", "title": "Known freshness"},
@@ -204,6 +204,7 @@ def render_history(state: dict, exercise: dict, registry: dict) -> None:
             st.vega_lite_chart(
                 spec=continuity, height=90, width="stretch", key="history_continuity"
             )
+            st.caption("Mint = Fresh · Amber = Stale · Slate = Awaiting first report")
         else:
             st.info("The exercise has just started; no elapsed interval to plot.")
         st.caption(
