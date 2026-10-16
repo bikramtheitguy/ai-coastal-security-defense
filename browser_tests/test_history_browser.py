@@ -15,7 +15,10 @@ def seek(page, minute):
     slider.press("Home")
     for _ in range(minute // 5):
         slider.press("ArrowRight")
-    expect(slider).to_have_attribute("aria-valuenow", str(minute))
+    # Streamlit renders a native range input: its value is the slider state,
+    # while aria-valuetext supplies the accessible text (no aria-valuenow).
+    expect(slider).to_have_value(str(minute))
+    expect(slider).to_have_attribute("aria-valuetext", str(minute))
 
 
 def download_history(page, target):
