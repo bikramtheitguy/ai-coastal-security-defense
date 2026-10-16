@@ -153,7 +153,9 @@ def test_review_validation_disposition_download_and_reset(page, width):
     replay(page)
     page.set_viewport_size({"width": width, "height": 900 if width == 1365 else 844})
     if width == 390:
-        page.get_by_role("button", name="Collapse sidebar", exact=True).click()
+        collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
+        if collapse.is_visible():
+            collapse.click()
         expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
     submit = page.get_by_role("button", name="Record demo review")
     submit.click()
