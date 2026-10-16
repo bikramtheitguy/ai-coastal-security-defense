@@ -27,7 +27,10 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     open_watch(page)
     workspace(page)
     select(page, "Flagged vessel", "SIM-004")
-    page.get_by_role("button", name="Open investigation", exact=True).click()
+    # The old vessel's form remains briefly visible during the server rerun.
+    opening = page.locator(".st-key-casebook_open_SIM-004")
+    expect(opening).to_be_visible()
+    opening.get_by_role("button", name="Open investigation", exact=True).click()
     expect(
         page.get_by_text("Acknowledge the evidence before recording this action.", exact=True)
     ).to_be_visible()
@@ -46,6 +49,9 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     for value in range(65, 100, 5):
         slider.press("ArrowRight")
         expect(slider).to_have_attribute("aria-valuenow", str(value))
+        expect(
+            page.get_by_text(f"Exercise clock · 01 Apr 2026, 07:{value - 60:02} UTC", exact=False)
+        ).to_be_visible()
     workspace(page)
     page.get_by_role("tab", name="Captured evidence", exact=True).click()
     page.get_by_text("Append evidence at current watch clock", exact=True).click()
@@ -67,6 +73,7 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
         page.get_by_text("Stale report: Last observation is 35 minutes old", exact=False)
     ).to_be_visible()
     select(page, "Inspect capture", "Minute 95")
+    expect(page.get_by_text("No current rule flags at this capture.", exact=False)).to_be_visible()
     chart = page.get_by_role("tabpanel", name="Captured evidence", exact=True).get_by_test_id(
         "stVegaLiteChart"
     )
