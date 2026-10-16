@@ -8,6 +8,7 @@ import streamlit as st
 from coastal_security.geography import EXTENT, load_bundle
 from coastal_security.india import COASTAL_STATES, display_feature, scope_geometry
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
+from dashboard.briefing_view import render_briefing
 from dashboard.casebook_view import render_investigations
 from dashboard.globe_view import render_globe
 from dashboard.history_view import focus_history, render_history
@@ -313,8 +314,15 @@ def render_watch() -> None:
         strict=True,
     ):
         column.metric(title, value)
-    watch, history_tab, intake, investigations, sources = st.tabs(
-        ["Watch picture", "Vessel history", "Intake quality", "Investigations", "Sources & export"],
+    watch, history_tab, briefing_tab, intake, investigations, sources = st.tabs(
+        [
+            "Watch picture",
+            "Vessel history",
+            "Watch briefing",
+            "Intake quality",
+            "Investigations",
+            "Sources & export",
+        ],
         key="watch_tabs",
         on_change="rerun",
     )
@@ -485,6 +493,9 @@ def render_watch() -> None:
     with history_tab:
         if history_tab.open:
             render_history(state, exercise, registry)
+    with briefing_tab:
+        if briefing_tab.open:
+            render_briefing(state, exercise, registry, focus_investigation)
     with intake:
         counts = state["counts"]
         st.subheader("Received, accepted, explained")

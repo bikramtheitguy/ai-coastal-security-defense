@@ -22,6 +22,12 @@ The fifth view evaluates independently seeded synthetic voyages, compares detect
   evidence, gap-safe sampled distances and a separate versioned dossier export.
 - `dashboard/history_view.py`: lazy Vessel history tab, shared vessel selection,
   explicit IST/UTC labels and numeric time axes independent of browser timezone.
+- `coastal_security/briefing.py`: same-cohort baseline/current comparison,
+  receipt-causal fleet continuity, deduplicated delivery exceptions and deterministic
+  JSON/text handover. Reuses validated snapshots and vessel-history calculations.
+- `dashboard/briefing_view.py`: lazy Watch briefing tab, bounded 12-vessel chart
+  pages, explicit review groups and navigation to the existing manual workflows.
+  Display pagination never changes export scope. No new persistence or model.
 - `scripts/build_india_reference.py`, `build_coastal_watch.py` and `data/coastal_watch/`: reproducible public-geography derivation, synthetic generation and third-party notices.
 - `data/`, `models/`, `notebooks/`: historical research inputs and artifacts; training is outside the supported runtime.
 - No model deserialization, database, API, ingestion worker, identity service or external data feed is used.

@@ -19,8 +19,14 @@ cohort: reporting freshness as it was known at the time, observation-to-receipt
 lags, segmented speed history and a reproducible JSON download. Start with
 Odisha's SIM-004 at minutes 60 and 95, then SIM-006 at minute 45. See the
 [plan, definitions and before/after comparison](docs/VESSEL_HISTORY.md).
-This branch's additions require merge and hosted verification before they can
-be claimed on the public demo.
+PR20 was merged and its hosted Odisha workflow verified on 16 October 2026.
+
+The proposed **Watch briefing** tab adds a fleet handover: receipt-causal
+continuity lanes, baseline/current comparison, grouped review evidence and
+JSON/text briefing downloads. It follows the existing coast/state/class filters,
+retains earlier outages after recovery and links to history and investigations.
+See the [plan, metric contract and before/after comparison](docs/WATCH_BRIEFING.md).
+This new increment requires merge and separate hosted verification.
 
 ## Related command-centre dashboard
 

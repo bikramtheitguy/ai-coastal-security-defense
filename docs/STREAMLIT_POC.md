@@ -2,15 +2,26 @@
 
 This POC combines India-focused geographic watch, reproducible vessel replay, human evidence review and an independent trajectory evaluation lab in Python/Streamlit. Geography comes from dated public sources; traffic and operational scenarios are invented. It is a software demonstration, not an operational coastal-security system.
 
-## Current proposal: vessel history and reporting continuity
+## Current proposal: fleet watch briefing
+
+Add a Watch briefing tab for cohort handover: receipt-causal fleet continuity,
+baseline/current changes, unique intake exceptions, review navigation and
+reproducible JSON/text. The [plan and comparison](WATCH_BRIEFING.md) defines the
+metric contract and Odisha acceptance scenarios. All existing capabilities and
+export schemas remain intact. This increment requires separate merge and hosted
+verification; relocation remains on hold.
+
+## Merged baseline: vessel history and reporting continuity
 
 Add a Vessel history workspace inside Coastal Watch, using the existing Indian
 synthetic exercise and public geography. It explains gaps, recovery, delayed
 receipts and windowed sampled-link distance without inventing travel through
 missing observations. The [implementation plan and comparison](VESSEL_HISTORY.md)
 define the metric contract, Odisha walkthrough and validation requirements.
-This increment is proposed on a separate branch; hosted deployment requires
-merge and separate live verification.
+PR20 merged at `0b9e4c94eb4379f757f0faceaca21a48b8d44117` on 16 October 2026.
+All 30 post-merge browser tests passed. The hosted Odisha history, investigation
+handoff, desktop/mobile-sized layouts and 15 export downloads were verified after
+an app restart. Those checks do not establish deployment of this briefing proposal.
 
 ## Merged baseline: globe and graphics-first layouts
 
@@ -22,7 +33,7 @@ and original charts. See the [globe comparison, architecture and walkthrough](GL
 PR19 merged at `4c4de199d53450e7c454ef720a0699cef3e7967f` on 16 October 2026.
 Its five graphics-first pages and existing exports were verified on the hosted
 app at desktop and narrow widths after an authorized restart. That hosted check
-does not establish deployment of the new vessel-history proposal.
+does not establish deployment of later proposals.
 
 ## Investigation and handover baseline: PR #16
 
