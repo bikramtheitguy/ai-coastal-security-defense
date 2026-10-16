@@ -98,10 +98,11 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
 def test_spatial_evaluation_narrow_layout(page):
     module(page, "Vessel Evaluation")
     expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
     capture(page, "evaluation-mobile.jpg")
     chart = page.get_by_test_id("stVegaLiteChart")
@@ -151,11 +152,11 @@ def test_replay_render_seek_autoplay_pause_and_end(page):
 @pytest.mark.parametrize("width", [1365, 390], ids=["desktop", "mobile"])
 def test_review_validation_disposition_download_and_reset(page, width):
     replay(page)
-    page.set_viewport_size({"width": width, "height": 900 if width == 1365 else 844})
     if width == 390:
         collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
         if collapse.is_visible():
             collapse.click()
+        page.set_viewport_size({"width": 390, "height": 844})
         expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
     submit = page.get_by_role("button", name="Record demo review")
     submit.click()
@@ -184,7 +185,7 @@ def test_review_validation_disposition_download_and_reset(page, width):
     expect(status).to_be_visible()
     wait_for_idle(page)
     status.scroll_into_view_if_needed()
-    capture(page, f"review-{width}.jpg")
+    capture(page, "review-desktop.jpg" if width == 1365 else "review-mobile.jpg")
     open_expander(page, "Session review history and export")
     with page.expect_download() as pending:
         page.get_by_role("button", name="Download demo review JSON").click()

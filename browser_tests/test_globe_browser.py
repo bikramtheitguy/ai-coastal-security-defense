@@ -117,10 +117,11 @@ def test_globe_narrow_and_research_views(page):
     page.get_by_role("button", name="Odisha", exact=True).click()
     wait_for_idle(page)
     hide_exercise_area(page)
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     expect(page.get_by_test_id("stSidebar")).to_have_attribute("data-collapsed", "true")
     page.wait_for_function(
         "document.querySelector('[data-testid=\"stSidebar\"]').getBoundingClientRect().right <= 1"
@@ -169,10 +170,11 @@ def test_interactive_research_outcomes_and_preserved_charts(page, tmp_path):
         page.get_by_text(re.compile("^Original research chart ·")).click()
         expect(page.get_by_test_id("stImage").locator("img")).to_be_visible()
         expect(page.get_by_test_id("stException")).to_have_count(0)
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     expect(page.get_by_test_id("stSidebar")).to_have_attribute("data-collapsed", "true")
     page.wait_for_function(
         "document.querySelector('[data-testid=\"stSidebar\"]').getBoundingClientRect().right <= 1"

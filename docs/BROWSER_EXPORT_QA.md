@@ -38,6 +38,16 @@ inject downloads, retry failed tests, or replace events with direct HTTP calls.
 
 Source: [Streamlit 1.66.0 expander implementation](https://github.com/streamlit/streamlit/tree/1.66.0/frontend/lib/src/components/elements/Expander).
 
+## Related responsive test setup
+
+Full-suite verification also exposed a sidebar race in the existing research
+panel test (run **38865584144**). After resizing, the Collapse sidebar button
+could be visible at the check but disappear before the click because Streamlit
+automatically collapses the sidebar at that breakpoint. Narrow-layout tests now
+collapse it at the stable desktop width before resizing. All existing sidebar,
+chart, viewport, and content assertions remain. Desktop evidence filenames are
+preserved and additional mobile export-flow screenshots are saved separately.
+
 ## Verification contract
 
 Both formerly failing flows run at desktop (1365 px) and mobile (390 px) widths.
