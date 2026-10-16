@@ -31,4 +31,17 @@ Cases are per vessel for the whole bundled exercise, not detected incident episo
 
 Reviewer labels, notes and recording timestamps are self-asserted. A valid imported casebook is not authenticated evidence. Source snapshots are reconstructed from the pinned fictional exercise; geographic rights and source notices remain in the embedded registry. Hashes are reproducibility fingerprints, not signatures.
 
-See [design and acceptance plan](INVESTIGATIONS_PLAN.md) and [validation](INVESTIGATIONS_VALIDATION.md). Screenshots will be added after real-browser verification of the proposed code.
+## Side-by-side visual comparison
+
+| Previous: geographic watch workspace | Added: investigation workspace |
+| --- | --- |
+| ![PR15 Odisha reference map and synthetic vessels](screenshots/watch-odisha-map.jpg) | ![PR16 synthetic investigation queue](screenshots/investigation-desktop.jpg) |
+| The map and watch evidence remain available. | A case retains evidence and review history across clock changes. |
+
+![Comparing the stale and recovered observations, with receipt timing](screenshots/investigation-timeline.jpg)
+
+![Restored case at 390-pixel mobile width](screenshots/investigation-mobile.jpg)
+
+The previous map screenshot retains its PR15 validation context. The added screenshots are from the passing PR16 Chromium preview at `6ae9caf`; they do not show a live deployment. All traffic and reviewer labels are fictional. The restored mobile screenshot deliberately retains the later evidence while the watch clock has reset, with an explicit notice.
+
+See [design and acceptance plan](INVESTIGATIONS_PLAN.md) and [validation](INVESTIGATIONS_VALIDATION.md).

@@ -28,18 +28,18 @@ The Lovable application is hosted and maintained separately. Its **only relation
 | Cybersecurity | Offline Random Forest on dummy packet records | No live monitoring; saved predictions miss all four positive cases |
 | Scenario replay | Four fictional tracks, 91 observations, replay controls, freshness, explained rules and human review exercise | Synthetic rules only; session history is not authenticated, persistent or tamper-proof |
 | Vessel Evaluation | Independent seeded trajectories, calibration/test separation, one-to-one event matching, false alerts per vessel-hour, comparison and evidence export | Same-family synthetic holdout; no real-world detection or national-scale claim |
-| Coastal Watch | Indian coastal geography, 44 fictional vessels, state/coast filters, district map focus, receipt validation, freshness and evidence export | Mixed historical boundary vintages; no live feed or jurisdiction claim |
+| Coastal Watch | Indian coastal geography, 44 fictional vessels, state/coast filters, district map focus, receipt validation, freshness, frozen investigation evidence, human review and validated casebook recovery | Mixed historical boundary vintages; no live feed, jurisdiction claim or authenticated durable case service |
 | Dashboard | Six views, including replay, evaluation and India Coastal Watch, with a spatial UI theme | Research and workflow demonstration, not an operational system |
 
 LOF, Logistic Regression, SVM, live AIS, autonomous surveillance, and AI-assisted incident analysis are **not implemented in the supported runtime**. Replay uses invented coordinates on local charts, without a navigation basemap. The separate [ICCC platform proposal in PR #10](https://github.com/bikramtheitguy/ai-coastal-security-defense/pull/10) is unmerged work and is not part of this demo.
 
 Read the **[updated Streamlit POC](docs/STREAMLIT_POC.md)**, **[previous/current comparison](docs/STREAMLIT_POC_COMPARISON.md)** and [validation record](docs/STREAMLIT_VALIDATION.md).
 
-The **[India Coastal Watch comparison](docs/COASTAL_WATCH_COMPARISON.md)** covers the latest additive increment, its screenshots, source terms and validation. The [platform concept map](docs/PLATFORM_CONCEPTS.md) distinguishes implemented ideas from future work.
+The **[India Coastal Watch comparison](docs/COASTAL_WATCH_COMPARISON.md)** covers the geographic baseline, its screenshots, source terms and validation. The **[investigation comparison](docs/INVESTIGATIONS_COMPARISON.md)** covers the new case workflow. The [platform concept map](docs/PLATFORM_CONCEPTS.md) distinguishes implemented ideas from future work.
 
 ![Spatial evaluation lab with independently generated test voyages](docs/screenshots/evaluation-desktop.jpg)
 
-Current evaluation/theme proposal, captured in real Chromium at `1715687`. The [evaluation validation record](docs/TRAJECTORY_VALIDATION.md) documents passed checks and remaining limitations. This screenshot is from the test environment; it does not imply this proposal has been deployed. The earlier replay screenshot below is retained for comparison.
+Earlier evaluation/theme baseline, captured in real Chromium at `1715687`. The [evaluation validation record](docs/TRAJECTORY_VALIDATION.md) documents passed checks and remaining limitations. This screenshot retains its original test-environment context. The earlier replay screenshot below is retained for comparison.
 
 ![Synthetic vessel replay with playback controls, freshness counts and explained flags](docs/screenshots/replay-desktop.jpg)
 
@@ -50,6 +50,10 @@ Screenshot from the repository's Chromium test environment, using invented data.
 The **Investigations** tab turns a current flag into a vessel case, freezes evidence at successive exercise times, records human review decisions, and exports a casebook plus a readable handover. A downloaded casebook can be restored after validation against the bundled synthetic fixture. Records remain private to each Streamlit session; download before refreshing. This is not authenticated or shared durable incident storage.
 
 Follow the [investigation walkthrough and before/after comparison](docs/INVESTIGATIONS_COMPARISON.md), [architecture plan](docs/INVESTIGATIONS_PLAN.md), and [validation record](docs/INVESTIGATIONS_VALIDATION.md). Existing watch maps, rules and all six modules are preserved.
+
+![Frozen Odisha exercise evidence and observation-to-receipt timing](docs/screenshots/investigation-timeline.jpg)
+
+Chromium preview at `6ae9caf`: the Odisha exercise vessel's earlier stale report and later recovery remain separate captures. This proposed increment is not yet deployed. India is the primary scope, with Odisha/Bay of Bengal as the reference scenario and the existing coastal states, union territories and island views retained.
 
 ## Run the demo
 

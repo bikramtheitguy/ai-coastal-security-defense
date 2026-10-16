@@ -6,7 +6,15 @@ Build an additive **Investigations** tab inside India Coastal Watch. The audienc
 
 Baseline: merged PR #15, commit `e4a383bf79858a38ea4574699fa31a46f57b6532`. Build on a separate branch and submit a reviewable PR; deployment remains a separate approved step. Lovable is an external hyperlink only.
 
-## Implemented contract to build and verify
+## India-first scope
+
+India is the primary product scope. Odisha and the adjoining Bay of Bengal are the reference scenario for development and acceptance, with extension across Indian coastal states, union territories and islands. This increment preserves the existing geographic selection and startup defaults; it does not silently change the supported baseline. The SIM-004 reporting-gap investigation uses the existing Odisha exercise.
+
+Future map-workspace work should make Odisha the initial area of interest and retain explicit nationwide and island selection. Use Indian administrative context with source vintage, UTC/IST timestamps, kilometres and nautical miles where relevant. Broader global context is secondary, not a requirement for the next Indian demonstration. Never infer authoritative jurisdictions, operational inventories or sensor coverage from synthetic fixtures.
+
+The expanded maritime-platform brief is a roadmap input. Its map, source adapters, aviation, sensor correlation, persistent authenticated cases, AI and forecasting requirements are not claims about this increment. Research, access verification and separate acceptance checks remain necessary for each phase.
+
+## Implementation contract
 
 1. Open a case from a current flag. Keep one case per vessel per exercise; changing report IDs must not silently create duplicate cases. A case is a demonstration review folder, not a confirmed incident or an episode detector.
 2. Freeze vessel evidence using receipts available at the selected exercise time. Later captures append to the case. Never rewrite earlier evidence when the map clock changes. Refuse backward or duplicate captures.
@@ -29,10 +37,11 @@ Validate with domain tests, Streamlit AppTest and Chromium desktop/narrow-layout
 
 ## Next increments after this
 
-1. Authenticated durable case service: server-side authorization, database migrations, optimistic concurrency, retention and backup/restore tests.
-2. Approved historical AIS replay with source coverage and licensing, followed by independent real-data detection evaluation.
-3. Calibrated trajectory events with benign counterexamples and event-level false-alert measurement.
-4. Evidence-citing AI assistance only after measuring this deterministic handover baseline.
+1. India map workspace: default Odisha/Bay of Bengal area, vessel search and selection, saved non-sensitive areas, map-visible evidence and synchronised playback. Review reference-platform evidence and interaction requirements before choosing a map component; preserve the current offline reference view.
+2. Indian observation and source contracts: explicit observed/received/processed times, provider rights and geographic coverage, bounded adapters and degraded states. Add an approved historical AIS source only after access and reuse verification; otherwise keep a clearly labelled fixture. Evaluate trajectory events using benign counterexamples and event-level false-alert measurement.
+3. Authenticated durable case service: server-side authorization, database migrations, optimistic concurrency, retention and backup/restore tests. Plan migration from the current versioned portable casebook without silently rewriting its history or implying authentication of old labels.
+
+Subsequent phases can add synthetic civilian aviation, environmental context, sensor-association contracts, evidence-citing AI and evaluated forecasts. Each needs its own provenance, uncertainty and acceptance criteria. The current deterministic handover supplies a baseline for later AI evaluation.
 
 ## Runtime references
 
