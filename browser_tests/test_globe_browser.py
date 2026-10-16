@@ -43,7 +43,7 @@ def test_globe_odisha_picking_clock_and_investigation_handoff(page):
     select(page, "State / Union Territory", "Odisha")
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["8", "1", "3", "4"])
     page.get_by_role("button", name="Odisha", exact=True).click()
-    page.get_by_text("Exercise area", exact=True).click()
+    page.get_by_role("checkbox", name="Exercise area", exact=True).uncheck()
     wait_for_idle(page)
     chart = globe(page)
     diagnostic = pixels(chart, "globe-odisha-canvas.png")
@@ -102,7 +102,10 @@ def test_globe_narrow_and_research_views(page):
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
-    expect(page.get_by_test_id("stSidebar")).to_have_attribute("aria-expanded", "false")
+    expect(page.get_by_test_id("stSidebar")).to_have_attribute("data-collapsed", "true")
+    page.wait_for_function(
+        "document.querySelector('[data-testid=\"stSidebar\"]').getBoundingClientRect().right <= 1"
+    )
     globe(page)
     screenshot(page, "globe-mobile.jpg")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
@@ -142,7 +145,10 @@ def test_interactive_research_outcomes_and_preserved_charts(page, tmp_path):
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
-    expect(page.get_by_test_id("stSidebar")).to_have_attribute("aria-expanded", "false")
+    expect(page.get_by_test_id("stSidebar")).to_have_attribute("data-collapsed", "true")
+    page.wait_for_function(
+        "document.querySelector('[data-testid=\"stSidebar\"]').getBoundingClientRect().right <= 1"
+    )
     page.get_by_test_id("stVegaLiteChart").scroll_into_view_if_needed()
     screenshot(page, "cyber-review-mobile.jpg")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")

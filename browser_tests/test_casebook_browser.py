@@ -8,7 +8,9 @@ from ui_sync import wait_for_idle
 
 
 def workspace(page):
-    page.get_by_role("tab", name="Investigations", exact=True).click()
+    tab = page.get_by_role("tab", name="Investigations", exact=True)
+    if tab.get_attribute("aria-selected") != "true":
+        tab.click()
     expect(page.get_by_role("heading", name="Investigation workspace", exact=True)).to_be_visible()
     wait_for_idle(page)
 
@@ -141,6 +143,12 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     ).to_be_visible()
     wait_for_idle(page)
     page.get_by_role("button", name="Restore validated casebook", exact=True).click()
+    expect(
+        page.get_by_text(
+            "Casebook restored. Authorship of imported notes is not verified.", exact=True
+        )
+    ).to_be_visible()
+    wait_for_idle(page)
     workspace(page)
     expect(page.get_by_text("CASE-SIM-004 · Closed — benign", exact=True)).to_be_visible()
     wait_for_idle(page)

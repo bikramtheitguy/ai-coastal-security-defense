@@ -179,6 +179,7 @@ def globe_deck(
                 get_size="size",
                 size_units=String("pixels"),
                 billboard=True,
+                parameters={"cull": False, "cullMode": "none"},
                 pickable=True,
                 auto_highlight=True,
                 highlight_color=[228, 244, 255, 180],
@@ -195,6 +196,7 @@ def globe_deck(
                 outline_width=3,
                 outline_color=[10, 23, 39],
                 font_settings={"sdf": True},
+                parameters={"cull": False, "cullMode": "none"},
                 pickable=False,
             ),
             pdk.Layer(
@@ -208,6 +210,7 @@ def globe_deck(
                 get_text="label",
                 get_size=13,
                 get_color=[158, 191, 209],
+                parameters={"cull": False, "cullMode": "none"},
                 pickable=False,
             ),
         ]

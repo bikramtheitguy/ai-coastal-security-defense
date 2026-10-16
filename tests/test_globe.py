@@ -110,6 +110,7 @@ def test_globe_serialization_has_no_remote_assets_and_tracks_are_bounded():
     vessels = next(layer for layer in spec["layers"] if layer["id"] == VESSEL_LAYER)
     assert vessels["iconAtlas"].startswith("data:image/svg+xml;base64,")
     assert vessels["sizeUnits"] == "pixels"
+    assert vessels["parameters"]["cullMode"] == "none"
     for layer in spec["layers"]:
         for field in ("widthUnits", "radiusUnits"):
             if field in layer:
