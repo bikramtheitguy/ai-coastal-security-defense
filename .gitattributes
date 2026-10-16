@@ -4,6 +4,7 @@
 *.toml text eol=lf
 *.yml text eol=lf
 *.json text eol=lf
+*.geojson text eol=lf
 *.csv text eol=lf
 requirements*.txt text eol=lf
 *.png binary

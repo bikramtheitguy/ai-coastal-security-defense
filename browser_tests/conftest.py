@@ -89,7 +89,7 @@ def page(browser, app_url, request):
         reduced_motion="reduce",
         timezone_id="Asia/Kolkata",
     )
-    failures, external = [], []
+    failures, external, console_errors = [], [], []
 
     def local_only(route):
         url = route.request.url
@@ -103,6 +103,10 @@ def page(browser, app_url, request):
     page = context.new_page()
     page.set_default_timeout(15_000)
     page.on("pageerror", lambda error: failures.append(str(error)))
+    page.on(
+        "console",
+        lambda message: console_errors.append(message.text) if message.type == "error" else None,
+    )
     context.tracing.start(screenshots=True, snapshots=True, sources=True)
     page.goto(app_url)
     try:
@@ -111,7 +115,9 @@ def page(browser, app_url, request):
         name = request.node.name.replace("[", "-").replace("]", "")
         page.screenshot(path=str(EVIDENCE / f"{name}.jpg"), type="jpeg", quality=75)
         (EVIDENCE / f"{name}.txt").write_text(page.locator("body").inner_text(), encoding="utf-8")
+        print("BROWSER_CONSOLE_ERRORS=" + json.dumps({name: console_errors}))
         context.tracing.stop(path=str(EVIDENCE / f"{name}-trace.zip"))
         context.close()
     assert not failures, failures
+    assert not console_errors, console_errors
     assert not external, f"Unexpected external requests: {external}"

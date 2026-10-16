@@ -6,27 +6,30 @@ The Streamlit application uses a spatial-inspired interface: layered navy surfac
 
 The new evaluation page orders the workflow as scope → outcomes → method comparison → evidence → protocol and export. Meaning is conveyed through text, labels and counts as well as colour. No glowing severity indicators, confidence gauges or “live” badges imply evidence the system does not have. Existing experiment plots are preserved as historical images.
 
+India Coastal Watch extends that theme with public geographic context, layer controls, source/receipt quality and last-known positions. National-view vessel labels are suppressed to reduce overlap; state cohorts of 12 or fewer show identifiers, with hover details and the inspector available at every scope. The [watch comparison](COASTAL_WATCH_COMPARISON.md) records the current increment.
+
 ## Data boundary
 
 Public GitHub demonstrations use verified public sources or clearly labelled fictional synthetic data. Client-provided references remain outside the public repository until dataset-specific rights and approval are established. Synthetic data must never be described as unavailable real intelligence, recovered observations or verified operational records. There are no Lovable integrations: the coastal website remains an external showcase hyperlink only. No bkdigital.tech assets or settings are involved.
 
-## Verified candidate sources, not yet integrated
+## Public-source decisions
 
 | Source | Suitable use | Important limitation |
 | --- | --- | --- |
-| [Natural Earth terms](https://www.naturalearthdata.com/about/terms-of-use/) and [data creation](https://www.naturalearthdata.com/about/data-creation/) | Public-domain small-scale geographic context | Generalised at 1:10 million and smaller scales; not navigation, precise shore distance or port geometry. Review boundary portrayal for intended use |
+| [Natural Earth terms](https://www.naturalearthdata.com/about/terms-of-use/) and [data creation](https://www.naturalearthdata.com/about/data-creation/) | Integrated: pinned 1:50 million public-domain coastline | Generalised context; not navigation, precise shore distance or port geometry |
+| [geoBoundaries references and notices](../data/coastal_watch/NOTICE.md) | Integrated: 13 coastal states/UTs and 229 historical district references | Separate licences, mixed vintages and spatial parent associations; not current official jurisdiction |
 | [NOAA AccessAIS](https://www.coast.noaa.gov/digitalcoast/tools/ais.html) | Historical traffic fixtures and external behaviour evaluation within stated U.S. coastal coverage | Not an Indian live surveillance feed or incident-label source; review the selected dataset's metadata and terms before ingestion |
 | Seeded project generators | Missing vessel scenarios, outages and human review exercises | Fictional, labelled, versioned and reproducible; no real-world performance claim |
 
-Source descriptions were checked against their providers on 15 October 2026. Neither public dataset is downloaded or wired into this increment.
+The original source review was on 15 October 2026; Coastal Watch's pinned geography was reviewed on 16 October. NOAA AIS remains a candidate and is not integrated. Source-check dates do not establish observation freshness.
 
-## Next geospatial increment
+## Geospatial progress and next steps
 
-1. Add a data registry with origin, licence URL, version, checksum, observation/ingestion time, units, coordinate reference system, coverage and synthetic status.
-2. Ingest a bounded approved geographic fixture; validate coordinate order/ranges, geometry and duplicate identifiers. Prefer original GIS geometries to tracing PDF images.
-3. Add a geographic context view with selectable layers, source/freshness legend, synchronized replay and an explicit empty/stale state. Keep unknown observations distinct from zero activity.
-4. Add fictional harbour/landing-centre records where public reuse cannot be verified, with conspicuous synthetic identifiers. Do not copy client coordinates or operational features.
-5. Validate map alignment, distance calculations, performance, keyboard navigation, colour contrast and narrow-screen behaviour before release.
+1. Implemented: pinned registry with origin, licence, version, hashes, units, coordinate reference system and synthetic status; separate observed/received timestamps in the traffic contract.
+2. Implemented: bounded public geography, geometry checks and byte-integrity validation. Display copies adapt polygon orientation without rewriting the source bundle.
+3. Implemented: selectable layers, freshness legend, exercise clock, explicit unknown/stale states and evidence export. Counts follow coast/state cohorts; district selection changes viewport only.
+4. Proposed: fictional harbour/landing-centre records with conspicuous synthetic identifiers. Do not copy client coordinates or operational features.
+5. Continuing release gates: map alignment, narrow layouts and browser errors. Before real-data use, add independent geographic validation, accessibility review, measured performance and geodesic event evaluation.
 
 ## Credible operational-workflow roadmap
 

@@ -1,0 +1,71 @@
+{
+  "assets": {
+    "coastline.geojson": {
+      "bytes": 78377,
+      "dataset": "ne_50m_coastline",
+      "dataset_version": "4.1.0",
+      "license": "Public domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "limitations": "Generalised historical coastline; not navigation, precise coastal distance or legal boundaries. Source checking date is not survey date.",
+      "observation_time": null,
+      "provider": "Natural Earth",
+      "revision": "ca96624a56bd078437bca8184e78163e5039ad19",
+      "scale": "1:50 million",
+      "sha256": "3f9ced965d972229ae102a672fe9ecc42f8b54521cc08e7d8502c89427b1f923",
+      "source_checked_on": "2026-10-15",
+      "source_type": "public",
+      "source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_50m_coastline.geojson",
+      "transformation": "Clip line segments to registered extent using Liang-Barsky; retain disconnected parts; round to six decimals. No inferred land polygon or operational boundaries.",
+      "upstream_sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+      "version_url": "https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/50m_physical/ne_50m_coastline.VERSION.txt"
+    },
+    "exercise.json": {
+      "bytes": 370296,
+      "generator": "coastal_security/watch.py",
+      "license": "MIT",
+      "license_url": "https://github.com/bikramtheitguy/ai-coastal-security-defense/blob/main/LICENSE",
+      "limitations": "Invented vessels, receipt times, outages and exercise area. No real AIS, clients, ports, security facilities or operational incidents.",
+      "provider": "Project generator",
+      "seed": 20261016,
+      "sha256": "c24cc8fd9b2834ef3e685354f5717ef10b844e4ce702bac479c94ba1afe71994",
+      "source_type": "synthetic",
+      "version": "coastal-watch-v1"
+    },
+    "india-reference.json": {
+      "bytes": 4519237,
+      "license": "State polygons CC BY 2.5 IN; district database ODbL 1.0",
+      "notices": {
+        "districts": "Contains information from geoBoundaries / Pathways Data Pvt. Ltd. / lgdirectory.gov.in, made available under ODbL 1.0 https://opendatacommons.org/licenses/odbl/1-0/. This derived district database and association fields are offered under ODbL 1.0.",
+        "states": "DataMeet India community / Election Commission of India via geoBoundaries; CC BY 2.5 IN https://creativecommons.org/licenses/by/2.5/in/",
+        "transformation": "Coastal states selected by source ISO. Districts associated using an interior point and exact polygon containment; unmatched units retained in exclusion ledger. Coordinates and polygon topology are unmodified. District list includes inland districts within coastal states.",
+        "vintage": "ADM1 metadata reports 2011 but includes later administrative units; temporal currency is unverified. ADM2 metadata represents 2021 and advertises 736 units, while the pinned simplified file contains 735. No current official jurisdiction claim."
+      },
+      "provider": "geoBoundaries",
+      "revision": "9469f09592ced973a3448cf66b6100b741b64c0d",
+      "sha256": "686ba2e4efc13b5bc97c491eb8269cd12a1249e8c6e2c0826b750b563fd92716",
+      "source_type": "public",
+      "source_urls": [
+        "https://github.com/wmgeolab/geoBoundaries/blob/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/IND/ADM1/geoBoundaries-IND-ADM1_simplified.geojson",
+        "https://github.com/wmgeolab/geoBoundaries/blob/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/IND/ADM2/geoBoundaries-IND-ADM2_simplified.geojson"
+      ],
+      "upstream_sha256": {
+        "1": "4c63fe43294a391e8f2de4e9f86f3edb60f8688275b9fee90c61fb2aa0c26061",
+        "2": "d68db39cd3e2d0892af268e2b0454166368ce3b5b8a78fcda63069ec92a641db"
+      }
+    }
+  },
+  "coordinate_order": "longitude, latitude",
+  "crs": "OGC:CRS84",
+  "extent": [
+    67.0,
+    5.5,
+    96.0,
+    28.5
+  ],
+  "schema_version": 1,
+  "units": {
+    "age": "minutes",
+    "coordinates": "decimal degrees",
+    "speed": "knots"
+  }
+}

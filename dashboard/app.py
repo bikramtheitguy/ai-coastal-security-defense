@@ -11,6 +11,7 @@ from evaluation_view import render_evaluation  # noqa: E402
 from replay_view import render_replay  # noqa: E402
 from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions  # noqa: E402
 from spatial_style import apply_spatial_style  # noqa: E402
+from watch_view import render_watch  # noqa: E402
 
 st.set_page_config(page_title="Coastal Analytics | Research Demo", layout="wide")
 apply_spatial_style()
@@ -22,6 +23,7 @@ mode = st.sidebar.selectbox(
         "Cyber Intrusions",
         "Scenario Replay",
         "Vessel Evaluation",
+        "Coastal Watch",
     ],
 )
 st.sidebar.caption("Artifact baseline: 203d5fe · May 2025 experiments")
@@ -31,6 +33,9 @@ st.sidebar.markdown(
 st.sidebar.markdown("[External coastal dashboard showcase](https://icccodishacshq.lovable.app/)")
 st.sidebar.caption("Separate website; hyperlink only. No shared backend, data or deployment.")
 
+if mode == "Coastal Watch":
+    render_watch()
+    st.stop()
 if mode == "Vessel Evaluation":
     render_evaluation()
     st.stop()
