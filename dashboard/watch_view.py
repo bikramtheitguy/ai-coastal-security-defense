@@ -228,11 +228,12 @@ def render_watch() -> None:
     st.session_state.replay_playing = False
     st.caption("COASTAL ANALYTICS / GEOGRAPHIC WATCH")
     st.title("India Coastal Watch")
+    st.info("PUBLIC GEOGRAPHY + SYNTHETIC TRAFFIC · Exercise mode · Human review required")
+    visual = st.container(key="primary_visual")
     st.write(
         "Understand the last-known picture. Inspect freshness, intake "
         "quality and supporting evidence."
     )
-    st.info("PUBLIC GEOGRAPHY + SYNTHETIC TRAFFIC · Exercise mode · Human review required")
     try:
         coast, exercise, admin, registry = load_bundle()
         geography = st.columns(2)
@@ -325,9 +326,8 @@ def render_watch() -> None:
         display = st.radio(
             "Map display", ["Interactive globe", "2D map"], horizontal=True, key="watch_display"
         )
-        canvas, inspector = st.columns([3, 1])
         selected = None
-        with inspector:
+        with st.container(border=True):
             st.subheader("Vessel inspector")
             options = [p["vessel_id"] for p in state["positions"]]
             if options:
@@ -358,7 +358,7 @@ def render_watch() -> None:
                     st.caption("Review is available for a current flag or an existing case.")
             else:
                 st.info("No accepted position at this clock.")
-        with canvas:
+        with visual:
             if display == "Interactive globe":
                 render_globe(
                     coast,

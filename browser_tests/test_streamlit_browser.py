@@ -146,6 +146,8 @@ def test_replay_render_seek_autoplay_pause_and_end(page):
     expect(page.get_by_role("button", name="Play", exact=True)).to_be_visible()
     expect(clock).to_have_text("Replay clock · 01:55 UTC")
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["4", "0", "4"])
+    # The external visual slot replaces its content on fragment ticks.
+    expect(charts).to_have_count(2)
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 

@@ -51,8 +51,12 @@ def _reset() -> None:
 
 def render_replay() -> None:
     st.title("Synthetic vessel scenario replay")
-    st.caption("Four fictional vessels · 1 Jan 2026 UTC · Rule-based flags · Session-only review")
     st.info("SYNTHETIC DATA · Flags need human review · Not for operational decisions")
+    # Fragment ticks replace this single slot, rather than appending charts to
+    # a container outside the fragment. Playback controls keep their app reruns.
+    with st.container(key="primary_visual"):
+        visual = st.empty()
+    st.caption("Four fictional vessels · 1 Jan 2026 UTC · Rule-based flags · Session-only review")
     for key, value in {
         "replay_minute": 60,
         "replay_playing": False,
@@ -100,10 +104,112 @@ def render_replay() -> None:
         )
         flags = tuple(flag for flag in detect_flags(rows, cursor) if flag.vessel_id in vessels)
         latest = [row for row in latest_positions(rows, cursor) if row["vessel_id"] in vessels]
-        st.subheader(f"Replay clock · {cursor.strftime('%H:%M UTC')}")
-        st.caption(
-            "All counts and plots cover selected vessels from 00:00 through this replay clock."
-        )
+        tracks = pd.DataFrame([asdict(row) for row in visible])
+        with visual.container():
+            st.subheader(f"Replay clock · {cursor.strftime('%H:%M UTC')}")
+            st.caption(
+                "All counts and plots cover selected vessels from 00:00 through this replay clock."
+            )
+            if visible:
+                st.subheader("Fictional positions and reported speed")
+                vessel_color = {
+                    "field": "vessel_id",
+                    "type": "nominal",
+                    "title": "Vessel",
+                    "legend": {"orient": "bottom", "columns": 2},
+                }
+                # Local charts avoid transmitting positions to a basemap or external tile service.
+                st.vega_lite_chart(
+                    tracks,
+                    {
+                        "mark": {"type": "point", "filled": True, "size": 55},
+                        "params": [
+                            {"name": "position_zoom", "select": "interval", "bind": "scales"}
+                        ],
+                        "encoding": {
+                            "x": {
+                                "field": "longitude",
+                                "type": "quantitative",
+                                "title": "Longitude (degrees)",
+                                "scale": {"zero": False, "padding": 10},
+                            },
+                            "y": {
+                                "field": "latitude",
+                                "type": "quantitative",
+                                "title": "Latitude (degrees)",
+                                "scale": {"zero": False, "padding": 10},
+                            },
+                            "color": vessel_color,
+                            "tooltip": [
+                                {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                                {
+                                    "field": "observation_id",
+                                    "type": "nominal",
+                                    "title": "Observation",
+                                },
+                                {"field": "longitude", "type": "quantitative", "format": ".4f"},
+                                {"field": "latitude", "type": "quantitative", "format": ".4f"},
+                                {
+                                    "field": "speed_knots",
+                                    "type": "quantitative",
+                                    "title": "Speed (kn)",
+                                },
+                            ],
+                        },
+                    },
+                    height=310,
+                    width="stretch",
+                )
+                st.caption(
+                    "Observed positions in decimal degrees; no basemap. "
+                    "Axes fit the visible observations and can change with replay time/filter. "
+                    "Points are not connected across gaps. "
+                    "This geographic scatter is not a navigation chart."
+                )
+                st.vega_lite_chart(
+                    tracks,
+                    {
+                        "mark": {"type": "line", "point": True},
+                        "params": [{"name": "speed_zoom", "select": "interval", "bind": "scales"}],
+                        "encoding": {
+                            "x": {
+                                "field": "observed_at",
+                                "type": "temporal",
+                                "title": "Observation time (UTC)",
+                                "scale": {"type": "utc"},
+                                "axis": {"format": "%H:%M"},
+                            },
+                            "y": {
+                                "field": "speed_knots",
+                                "type": "quantitative",
+                                "title": "Speed (kn)",
+                                "scale": {"zero": True},
+                            },
+                            "color": vessel_color,
+                            "tooltip": [
+                                {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
+                                {
+                                    "field": "observation_id",
+                                    "type": "nominal",
+                                    "title": "Observation",
+                                },
+                                {
+                                    "field": "speed_knots",
+                                    "type": "quantitative",
+                                    "title": "Speed (kn)",
+                                },
+                            ],
+                        },
+                    },
+                    height=320,
+                    width="stretch",
+                )
+                st.caption(
+                    "Reported speed in knots. Lines do not establish continuity "
+                    "through missing reports."
+                )
+            else:
+                st.info("Select at least one vessel to display tracks and flags.")
         metrics = st.columns(3)
         metrics[0].metric("Vessels with reports", len(latest))
         metrics[1].metric(
@@ -111,88 +217,8 @@ def render_replay() -> None:
         )
         metrics[2].metric("Rule flags to inspect", len(flags))
         if not visible:
-            st.info("Select at least one vessel to display tracks and flags.")
             return
 
-        tracks = pd.DataFrame([asdict(row) for row in visible])
-        st.subheader("Fictional positions and reported speed")
-        vessel_color = {
-            "field": "vessel_id",
-            "type": "nominal",
-            "title": "Vessel",
-            "legend": {"orient": "bottom", "columns": 2},
-        }
-        # Local charts avoid transmitting positions to a basemap or external tile service.
-        st.vega_lite_chart(
-            tracks,
-            {
-                "mark": {"type": "point", "filled": True, "size": 55},
-                "params": [{"name": "position_zoom", "select": "interval", "bind": "scales"}],
-                "encoding": {
-                    "x": {
-                        "field": "longitude",
-                        "type": "quantitative",
-                        "title": "Longitude (degrees)",
-                        "scale": {"zero": False, "padding": 10},
-                    },
-                    "y": {
-                        "field": "latitude",
-                        "type": "quantitative",
-                        "title": "Latitude (degrees)",
-                        "scale": {"zero": False, "padding": 10},
-                    },
-                    "color": vessel_color,
-                    "tooltip": [
-                        {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
-                        {"field": "observation_id", "type": "nominal", "title": "Observation"},
-                        {"field": "longitude", "type": "quantitative", "format": ".4f"},
-                        {"field": "latitude", "type": "quantitative", "format": ".4f"},
-                        {"field": "speed_knots", "type": "quantitative", "title": "Speed (kn)"},
-                    ],
-                },
-            },
-            height=310,
-            width="stretch",
-        )
-        st.caption(
-            "Observed positions in decimal degrees; no basemap. "
-            "Axes fit the visible observations and can change with replay time/filter. "
-            "Points are not connected across gaps. "
-            "This geographic scatter is not a navigation chart."
-        )
-        st.vega_lite_chart(
-            tracks,
-            {
-                "mark": {"type": "line", "point": True},
-                "params": [{"name": "speed_zoom", "select": "interval", "bind": "scales"}],
-                "encoding": {
-                    "x": {
-                        "field": "observed_at",
-                        "type": "temporal",
-                        "title": "Observation time (UTC)",
-                        "scale": {"type": "utc"},
-                        "axis": {"format": "%H:%M"},
-                    },
-                    "y": {
-                        "field": "speed_knots",
-                        "type": "quantitative",
-                        "title": "Speed (kn)",
-                        "scale": {"zero": True},
-                    },
-                    "color": vessel_color,
-                    "tooltip": [
-                        {"field": "vessel_id", "type": "nominal", "title": "Vessel"},
-                        {"field": "observation_id", "type": "nominal", "title": "Observation"},
-                        {"field": "speed_knots", "type": "quantitative", "title": "Speed (kn)"},
-                    ],
-                },
-            },
-            height=320,
-            width="stretch",
-        )
-        st.caption(
-            "Reported speed in knots. Lines do not establish continuity through missing reports."
-        )
         st.dataframe(
             pd.DataFrame(latest)[
                 [

@@ -161,7 +161,7 @@ def _select(kind: str, ids: set[int]) -> None:
             st.session_state[f"{kind}_row"] = identity
 
 
-def render_review(frame: pd.DataFrame, kind: str) -> None:
+def render_review(frame: pd.DataFrame, kind: str, visual) -> None:
     rows = review_rows(frame)
     st.subheader("Observation review board" if kind == "drone" else "Detection review matrix")
     st.caption(
@@ -170,7 +170,7 @@ def render_review(frame: pd.DataFrame, kind: str) -> None:
         else "Select a cell to inspect saved predictions, including misses and false alerts."
     )
     focus = st.selectbox("Review outcome", ["All outcomes"] + OUTCOMES, key=f"{kind}_outcome")
-    st.vega_lite_chart(
+    visual.vega_lite_chart(
         spec=review_spec(rows, kind, focus),
         width="stretch",
         key=f"{kind}_review_chart",

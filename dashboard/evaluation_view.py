@@ -35,8 +35,9 @@ def render_evaluation():
     st.session_state.replay_playing = False
     st.caption("COASTAL ANALYTICS / EVALUATION LAB")
     st.title("Vessel trajectory evaluation")
-    st.write("Measure missed events and review workload before trusting an alert rule.")
     st.info("SYNTHETIC BENCHMARK · Held-out vessels and dates · No operational performance claim")
+    visual = st.container(key="primary_visual")
+    st.write("Measure missed events and review workload before trusting an alert rule.")
     data = report()
     with st.container(border=True):
         st.subheader("Evaluation scope")
@@ -72,8 +73,7 @@ def render_evaluation():
         f"Detected {selected['tp']} · Missed {selected['fn']} · False alerts {selected['fp']} "
         f"(including {selected['duplicates']} duplicate alerts) · F1 {rate(selected['f1'])}"
     )
-    tabs = st.tabs(["Compare methods", "Inspect evidence", "Protocol & provenance"])
-    with tabs[0]:
+    with visual:
         st.subheader("Detection and review burden")
         st.write(
             "Compare counts on exactly the same test cohort. Duplicate flags count as "
@@ -118,6 +118,8 @@ def render_evaluation():
             },
             width="stretch",
         )
+    tabs = st.tabs(["Compare methods", "Inspect evidence", "Protocol & provenance"])
+    with tabs[0]:
         table = [
             {
                 "Method": r["method"],
