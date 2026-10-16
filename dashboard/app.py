@@ -47,7 +47,17 @@ if mode == "Scenario Replay":
     st.stop()
 st.session_state.replay_playing = False
 st.title("Coastal Analytics Research Demo")
+st.header(
+    {
+        "Drone Threats": "Drone observation classification",
+        "Vessel Anomalies": "Vessel anomaly experiment",
+        "Cyber Intrusions": "Cybersecurity classification experiment",
+    }[mode]
+)
 st.info("SYNTHETIC DATA · Research and workflow demonstrations · Not for operational decisions")
+# Reserve the visual's actual document position, then populate it after loading
+# verified predictions. Controls and evidence remain below it in DOM/tab order.
+visual = st.container(key="primary_visual")
 st.caption(
     "Explore three preserved experiments or replay a fictional vessel scenario. "
     "No live feeds, operational actions or model inference are connected."
@@ -106,17 +116,15 @@ def open_globe() -> None:
 
 try:
     if mode == "Drone Threats":
-        st.header("Drone observation classification")
         st.write(
             "A Random Forest used supplied object categories and confidence scores. "
             "This experiment contains no image or video detector."
         )
         frame = predictions("drone_threat_predictions_phase1.csv")
-        render_review(frame, "drone")
+        render_review(frame, "drone", visual)
         with st.expander("Original research chart · feature importance"):
             chart("feature_importance_phase1.png", "Saved tabular-model feature importance")
     elif mode == "Vessel Anomalies":
-        st.header("Vessel anomaly experiment")
         st.button("Open interactive India globe", on_click=open_globe)
         st.write("A saved geographic scatterplot from an Isolation Forest using vessel speed.")
         st.warning(
@@ -129,13 +137,12 @@ try:
                 "vessel_anomalies_phase1.png", "Saved anomaly predictions · not a navigation chart"
             )
     else:
-        st.header("Cybersecurity classification experiment")
         st.write(
             "A Random Forest used packet size, port and two constant IP-octet features. "
             "No live network traffic or security logs are collected."
         )
         frame = predictions("cyber_intrusion_predictions_phase1.csv")
-        render_review(frame, "cyber")
+        render_review(frame, "cyber", visual)
         with st.expander("Original research chart · confusion matrix"):
             chart(
                 "cyber_confusion_matrix_phase1.png", "Saved confusion matrix · positive class = 1"

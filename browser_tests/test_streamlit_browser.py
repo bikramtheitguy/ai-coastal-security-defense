@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
-from ui_sync import open_expander, wait_for_idle
+from ui_sync import open_expander, select_tab, wait_for_idle
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts/browser"
 
@@ -73,14 +73,17 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
     expect(page.get_by_test_id("stMetricValue")).to_have_count(3)
     chart = page.get_by_test_id("stVegaLiteChart")
     expect(chart.locator("canvas, svg").first).to_be_visible()
+    wait_for_idle(page)
     capture(page, "evaluation-desktop.jpg")
-    page.get_by_role("combobox", name="Scenario family").click()
+    family = page.get_by_role("combobox", name="Scenario family")
+    family.evaluate("element => element.scrollIntoView({block: 'center', behavior: 'instant'})")
+    family.click()
     print("EVALUATION_OPTIONS_JSON=" + json.dumps(page.get_by_role("option").all_text_contents()))
     page.get_by_role("option", name="Steady transit", exact=True).click()
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["Undefined", "Undefined", "0.000"])
-    page.get_by_role("tab", name="Inspect evidence").click()
+    select_tab(page, "Inspect evidence")
     expect(page.get_by_text("No alerts in this selection.", exact=True)).to_be_visible()
-    page.get_by_role("tab", name="Protocol & provenance").click()
+    select_tab(page, "Protocol & provenance")
     expect(page.get_by_role("heading", name="Frozen selection protocol")).to_be_visible()
     with page.expect_download() as result:
         page.get_by_role("button", name="Download complete synthetic benchmark (JSON)").click()
@@ -89,7 +92,7 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
     report = json.loads(target.read_bytes())
     assert report["synthetic"] is True and len(report["evaluations"]) == 84
     assert report["calibration_seed"] != report["test_seed"]
-    page.get_by_role("tab", name="Compare methods").click()
+    select_tab(page, "Compare methods")
     chart.scroll_into_view_if_needed()
     capture(page, "evaluation-comparison.jpg")
     expect(page.get_by_test_id("stException")).to_have_count(0)
@@ -146,6 +149,8 @@ def test_replay_render_seek_autoplay_pause_and_end(page):
     expect(page.get_by_role("button", name="Play", exact=True)).to_be_visible()
     expect(clock).to_have_text("Replay clock · 01:55 UTC")
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["4", "0", "4"])
+    # The external visual slot replaces its content on fragment ticks.
+    expect(charts).to_have_count(2)
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 

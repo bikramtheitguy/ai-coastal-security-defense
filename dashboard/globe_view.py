@@ -242,11 +242,6 @@ def _preset(name: str) -> None:
 def render_globe(
     coast, state, selected, states, districts, extent, coastline, trails, zone, show_districts
 ) -> None:
-    controls = st.columns(4)
-    for col, label in zip(controls, ["Globe", "India", "Odisha", "Filtered area"], strict=True):
-        col.button(
-            label, key=f"globe_focus_{label}", on_click=_preset, args=(label,), width="stretch"
-        )
     try:
         land, _ = load_land()
         scope = (state["coast"], state["exercise_state"], tuple(extent))
@@ -280,6 +275,11 @@ def render_globe(
         )
     except (ValueError, KeyError, TypeError) as exc:
         st.warning(str(exc))
+    controls = st.columns(4)
+    for col, label in zip(controls, ["Globe", "India", "Odisha", "Filtered area"], strict=True):
+        col.button(
+            label, key=f"globe_focus_{label}", on_click=_preset, args=(label,), width="stretch"
+        )
     st.caption(
         "Drag to rotate · scroll/pinch to zoom · click a vessel to inspect · "
         "use the chart's fullscreen control to expand. Mint: fresh; amber: stale. "
