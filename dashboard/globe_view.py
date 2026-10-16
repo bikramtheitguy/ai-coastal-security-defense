@@ -162,6 +162,8 @@ def globe_deck(
                 "IconLayer",
                 id=VESSEL_LAYER,
                 data=marks,
+                # Bare strings become @@= expressions in pydeck. A data URI is
+                # an image literal; parsing `data:` as JavaScript crashes the chart.
                 icon_atlas=String(ICON),
                 icon_mapping={
                     "vessel": {
@@ -173,7 +175,7 @@ def globe_deck(
                         "mask": True,
                     }
                 },
-                get_icon='"vessel"',
+                get_icon=String("vessel"),
                 get_position="position",
                 get_color="colour",
                 get_size="size",

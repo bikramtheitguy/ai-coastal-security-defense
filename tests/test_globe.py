@@ -15,7 +15,7 @@ from coastal_security.globe import (
 )
 from coastal_security.india import scope_geometry
 from coastal_security.watch import parse_time, snapshot
-from dashboard.globe_view import globe_deck
+from dashboard.globe_view import ICON, globe_deck
 
 
 def odisha(minute):
@@ -94,14 +94,18 @@ def test_globe_context_integrity_and_missing_asset(tmp_path):
         load_land(tmp_path)
 
 
-def test_globe_serialization_has_no_remote_assets_and_tracks_are_bounded():
+@pytest.mark.parametrize("preset", ["Globe", "India", "Odisha", "Filtered area"])
+@pytest.mark.parametrize("minute", [60, 95])
+def test_globe_serialization_has_no_remote_assets_and_tracks_are_bounded(preset, minute):
     coast, exercise, admin, _ = load_bundle()
-    state = snapshot(exercise, 95, state_iso="IN-OR")
+    state = snapshot(exercise, minute, state_iso="IN-OR")
     states, districts, extent = scope_geometry(
         admin, "IN-OR", "All reference districts", "All coasts"
     )
     land, _ = load_land()
-    deck = globe_deck(land, coast, state, "SIM-004", states, districts, extent, "Odisha")
+    deck = globe_deck(
+        land, coast, state, "SIM-004", states, districts, extent, preset, show_districts=True
+    )
     spec = json.loads(deck.to_json())
     assert spec["views"][0]["@@type"] == "GlobeView"
     assert "mapProvider" not in spec and "mapStyle" not in spec
@@ -109,9 +113,27 @@ def test_globe_serialization_has_no_remote_assets_and_tracks_are_bounded():
     assert [layer["id"] for layer in spec["layers"] if layer.get("pickable")] == [VESSEL_LAYER]
     vessels = next(layer for layer in spec["layers"] if layer["id"] == VESSEL_LAYER)
     assert vessels["iconAtlas"].startswith("data:image/svg+xml;base64,")
+    assert vessels["iconAtlas"] == ICON  # Never @@=data:... (invalid JS at character 4).
+    assert vessels["getIcon"] == "vessel"
+    assert vessels["getPosition"] == "@@=position"
+    assert vessels["getColor"] == "@@=colour"
+    assert vessels["getSize"] == "@@=size"
     assert vessels["sizeUnits"] == "pixels"
     assert vessels["parameters"]["cullMode"] == "none"
     for layer in spec["layers"]:
+        # Only actual per-row accessors may enter the frontend expression parser.
+        for field, value in layer.items():
+            if isinstance(value, str) and value.startswith("@@="):
+                assert field.startswith("get"), (layer["id"], field, value)
+                assert value[3:] in {
+                    "polygon",
+                    "path",
+                    "position",
+                    "colour",
+                    "size",
+                    "vessel_id",
+                    "label",
+                }
         for field in ("widthUnits", "radiusUnits"):
             if field in layer:
                 assert layer[field] == "pixels"

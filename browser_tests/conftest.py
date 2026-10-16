@@ -83,11 +83,17 @@ def browser():
 
 
 @pytest.fixture
-def page(browser, app_url, request):
+def context_options(request):
+    return getattr(request, "param", {})
+
+
+@pytest.fixture
+def page(browser, app_url, request, context_options):
     context = browser.new_context(
         viewport={"width": 1365, "height": 900},
         reduced_motion="reduce",
         timezone_id="Asia/Kolkata",
+        **context_options,
     )
     failures, external, console_errors = [], [], []
 

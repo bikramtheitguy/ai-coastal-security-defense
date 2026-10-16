@@ -85,6 +85,25 @@ Chromium QA must verify rendered land, vessel picking, review handoff, replay,
 rotation/zoom and narrow layouts. Screenshots are collected as CI evidence.
 Do not treat a non-empty WebGL canvas or passing Python tests alone as visual verification.
 
+### Deck.gl expression regression
+
+Chromium run `38853758843` at `a163d24` failed during JSON conversion, before the
+vessel layer could render. In `dashboard/globe_view.py`, `icon_atlas=ICON` passed a
+bare `data:image/svg+xml;base64,...` string to pydeck. pydeck 0.9.3 treats unquoted
+strings as expressions and emitted `iconAtlas: "@@=data:image/svg+xml;base64,..."`.
+The Deck.gl JSON converter removed `@@=` and parsed `data:` as JavaScript, producing
+`Unexpected ":" at character 4`. The same implicit conversion affected the
+`width_units`, `radius_units` and `size_units` constants (`@@=pixels`).
+
+The fix uses `pydeck.types.String` for the atlas, icon name and pixel units. Data
+accessors such as `get_position="position"` intentionally remain expressions.
+This follows [pydeck's literal-string contract](https://deckgl.readthedocs.io/en/latest/layer.html#passing-string-constants).
+Serialization tests cover all four camera presets at both stale and fresh Odisha
+timestamps, including optional district layers, and reject expressions in constant
+properties. Browser QA continues to fail on every console error, page error and
+external request; none is filtered or suppressed. Picking is tested against the
+rendered vessel glyph on desktop and through a touch-enabled narrow viewport.
+
 ## Boundaries and follow-up
 
 This change improves presentation and exploration, not model validity or data coverage.
