@@ -28,6 +28,14 @@ Replay uses local charts without external map tiles. Domain logic is separate fr
 
 Coastal Watch's receipt validator is an offline exercise processor, not a live ingestion service. It retains observation time separately from receipt time, explains rejected records, and refuses mismatched fixture bytes. Display copies adapt polygon winding for D3 without rewriting source geometry. Historical district associations are context, not official current jurisdiction. Snapshot SHA-256 values verify content identity, not authorship or tamper-proof audit. See the [watch metric contract](COASTAL_WATCH_PLAN.md) and [platform concept sequence](PLATFORM_CONCEPTS.md).
 
+## Coastal Watch investigation boundary
+
+`current flag -> frozen vessel snapshot -> append-only case events -> human decision -> portable JSON / plain-text handover -> validated restore`
+
+`coastal_security/casebook.py` owns transitions, bounds, evidence captures, export and import validation. `dashboard/casebook_view.py` owns forms and session state inside the existing Watch view. Case data never enters shared caches or server files. Import validates schema and limits, replays commands, and independently reconstructs every snapshot from the known exercise. No uploaded code, pickle or URLs are executed or fetched. Reviewer labels and notes remain unauthenticated data.
+
+Casebook scope is all saved vessels and clocks, independent of the map filters. Initial cases require a current flag; subsequent captures may show recovery. Every decision references the latest frozen capture. Changing the clock cannot rewrite saved evidence. Captures preserve status; the UI highlights evidence awaiting a fresh review. Download/restore is an explicit recovery workflow, not an authenticated persistent service. See the [increment plan](INVESTIGATIONS_PLAN.md).
+
 ## Current offline vessel benchmark
 
 `coastal_security/vessel/data.py` generates and validates fictional snapshots and creates chronological, vessel-disjoint partitions. `model.py` fits the feature pipeline only on training data, chooses the model/threshold on validation data, and evaluates the frozen selection on test data. `run.py` writes a new experiment bundle with IDs, scores, metrics, pipeline, model card and provenance hashes. `__main__.py` supplies the CLI.

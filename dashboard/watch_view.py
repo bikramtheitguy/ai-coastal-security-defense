@@ -8,6 +8,7 @@ import streamlit as st
 from coastal_security.geography import EXTENT, load_bundle
 from coastal_security.india import COASTAL_STATES, display_feature, scope_geometry
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
+from dashboard.casebook_view import render_investigations
 
 
 def map_spec(
@@ -298,7 +299,9 @@ def render_watch() -> None:
         strict=True,
     ):
         column.metric(title, value)
-    watch, intake, sources = st.tabs(["Watch picture", "Intake quality", "Sources & export"])
+    watch, intake, investigations, sources = st.tabs(
+        ["Watch picture", "Intake quality", "Investigations", "Sources & export"]
+    )
     with watch:
         layers = st.columns(4)
         coastline = layers[0].checkbox("Public coastline", True, key="watch_coastline")
@@ -434,6 +437,8 @@ def render_watch() -> None:
             "envelopes without a usable receipt time fail the batch rather "
             "than being assigned an invented time."
         )
+    with investigations:
+        render_investigations(state, exercise, registry)
     with sources:
         st.subheader("Traceable sources")
         st.write(
