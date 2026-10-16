@@ -18,6 +18,15 @@ def download(page, label, target):
     return target.read_bytes()
 
 
+def show_all_vessels(page):
+    # Streamlit's styled radio covers its proxy input. Use the visible label,
+    # just as a pointer user does, then independently assert native checked state.
+    wait_for_idle(page)
+    page.get_by_text("All vessels", exact=True).click()
+    expect(page.get_by_role("radio", name="All vessels", exact=True)).to_be_checked()
+    wait_for_idle(page)
+
+
 @pytest.mark.parametrize("width", [1365, 390], ids=["desktop", "mobile"])
 def test_odisha_briefing_history_review_and_exports(page, tmp_path, width):
     open_watch(page)
@@ -83,6 +92,11 @@ def test_odisha_briefing_history_review_and_exports(page, tmp_path, width):
     select_tab(page, "Watch briefing")
     select(page, "Briefing window", "Full exercise so far")
     seek(page, 95)
+    expect(page.get_by_test_id("stMetricValue")).to_have_text(["8", "0", "1", "4"])
+    wait_for_idle(page)
+    # Keyboard seek passes through minute zero. SIM-004 is routine there and
+    # leaves the attention filter, so explicitly inspect it again after recovery.
+    select(page, "Briefing vessel", "SIM-004")
     expect(
         panel.get_by_text(
             "51 stale minutes · 0 minutes awaiting first report in this window", exact=True
@@ -103,7 +117,7 @@ def test_odisha_briefing_history_review_and_exports(page, tmp_path, width):
             exact=True,
         )
     ).to_be_visible()
-    page.get_by_role("radio", name="All vessels", exact=True).check()
+    show_all_vessels(page)
     expect(panel.get_by_test_id("stVegaLiteChart").locator("canvas,svg").first).to_be_visible()
     island = json.loads(download(page, "Download watch briefing (JSON)", tmp_path / "island.json"))
     assert len(island["vessels"]) == 3
@@ -115,7 +129,7 @@ def test_odisha_briefing_history_review_and_exports(page, tmp_path, width):
 def test_briefing_national_pagination_zero_clock_and_existing_exports(page, tmp_path):
     open_watch(page)
     select_tab(page, "Watch briefing")
-    page.get_by_role("radio", name="All vessels", exact=True).check()
+    show_all_vessels(page)
     select(page, "Briefing page", "4")
     panel = page.get_by_role("tabpanel", name="Watch briefing", exact=True)
     expect(

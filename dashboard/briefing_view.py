@@ -47,7 +47,8 @@ def briefing_chart(briefing: dict, rows: list[dict], zone: str) -> dict:
                 "type": "nominal",
                 "title": None,
                 "sort": [r["vessel_id"] for r in rows],
-                "axis": {"labelLimit": 80},
+                "axis": {"labelLimit": 80, "labelOverlap": False, "labelPadding": 8},
+                "scale": {"paddingInner": 0.3},
             },
             "color": {
                 "field": "status",
@@ -117,7 +118,7 @@ def render_briefing(state: dict, exercise: dict, registry: dict, review_callback
         else:
             st.vega_lite_chart(
                 spec=briefing_chart(briefing, rows, zone),
-                height=max(140, len(rows) * 28),
+                height=max(180, len(rows) * 32 + 80),
                 width="stretch",
                 key="briefing_continuity",
             )

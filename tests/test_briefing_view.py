@@ -12,6 +12,8 @@ def test_chart_uses_causal_intervals_numeric_time_and_explicit_legend_contract()
     assert spec["encoding"]["x"]["scale"]["domain"] == [0, 95]
     assert "IST" in spec["encoding"]["x"]["title"]
     assert spec["encoding"]["color"]["legend"] is None
+    assert spec["encoding"]["y"]["axis"]["labelOverlap"] is False
+    assert spec["encoding"]["y"]["scale"]["paddingInner"] == 0.3
     outage = [
         r for r in spec["data"]["values"] if r["vessel_id"] == "SIM-004" and r["status"] == "Stale"
     ]
