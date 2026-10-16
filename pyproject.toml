@@ -3,7 +3,7 @@ name = "ai-coastal-security-demo"
 version = "0.1.0"
 description = "Synthetic-data research demonstrator displaying saved coastal analytics results"
 requires-python = ">=3.13,<3.14"
-dependencies = ["pandas==3.0.6", "pillow==12.3.0", "streamlit==1.66.0"]
+dependencies = ["pandas==3.0.6", "pillow==12.3.0", "pydeck==0.9.3", "streamlit==1.66.0"]
 
 [dependency-groups]
 dev = ["pytest==9.1.1", "ruff==0.17.0", "pip-audit==2.10.1"]

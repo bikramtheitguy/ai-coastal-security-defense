@@ -9,6 +9,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from evaluation_view import render_evaluation  # noqa: E402
 from replay_view import render_replay  # noqa: E402
+from research_view import render_review  # noqa: E402
 from results import AssetError, binary_metrics, checked_asset, read_image, read_predictions  # noqa: E402
 from spatial_style import apply_spatial_style  # noqa: E402
 from watch_view import render_watch  # noqa: E402
@@ -25,6 +26,8 @@ mode = st.sidebar.selectbox(
         "Vessel Evaluation",
         "Coastal Watch",
     ],
+    index=5,
+    key="module",
 )
 st.sidebar.caption("Artifact baseline: 203d5fe · May 2025 experiments")
 st.sidebar.markdown(
@@ -61,7 +64,7 @@ def chart(filename: str, caption: str) -> None:
     st.caption(f"Chart SHA-256: {digest[:12]}")
 
 
-def predictions(filename: str) -> None:
+def predictions(filename: str):
     path, digest = checked_asset(filename)
     frame = read_predictions(path)
     metrics = binary_metrics(frame)
@@ -94,6 +97,11 @@ def predictions(filename: str) -> None:
     with st.expander("Inspect all saved predictions"):
         st.dataframe(frame, hide_index=True, width="stretch")
         st.caption(f"Prediction SHA-256: {digest}")
+    return frame
+
+
+def open_globe() -> None:
+    st.session_state.module = "Coastal Watch"
 
 
 try:
@@ -103,25 +111,35 @@ try:
             "A Random Forest used supplied object categories and confidence scores. "
             "This experiment contains no image or video detector."
         )
-        predictions("drone_threat_predictions_phase1.csv")
-        chart("feature_importance_phase1.png", "Saved tabular-model feature importance")
+        frame = predictions("drone_threat_predictions_phase1.csv")
+        render_review(frame, "drone")
+        with st.expander("Original research chart · feature importance"):
+            chart("feature_importance_phase1.png", "Saved tabular-model feature importance")
     elif mode == "Vessel Anomalies":
         st.header("Vessel anomaly experiment")
+        st.button("Open interactive India globe", on_click=open_globe)
         st.write("A saved geographic scatterplot from an Isolation Forest using vessel speed.")
         st.warning(
             "Vessel evaluation is not validated: the tuning scorer uses incompatible labels "
             "and evaluation reuses fitting data. Each vessel has one observation and no "
             "timestamp, so this is not a trajectory or live-tracking view."
         )
-        chart("vessel_anomalies_phase1.png", "Saved anomaly predictions · not a navigation chart")
+        with st.expander("Original research chart · vessel scatterplot"):
+            chart(
+                "vessel_anomalies_phase1.png", "Saved anomaly predictions · not a navigation chart"
+            )
     else:
         st.header("Cybersecurity classification experiment")
         st.write(
             "A Random Forest used packet size, port and two constant IP-octet features. "
             "No live network traffic or security logs are collected."
         )
-        predictions("cyber_intrusion_predictions_phase1.csv")
-        chart("cyber_confusion_matrix_phase1.png", "Saved confusion matrix · positive class = 1")
+        frame = predictions("cyber_intrusion_predictions_phase1.csv")
+        render_review(frame, "cyber")
+        with st.expander("Original research chart · confusion matrix"):
+            chart(
+                "cyber_confusion_matrix_phase1.png", "Saved confusion matrix · positive class = 1"
+            )
 except AssetError as exc:
     st.error(str(exc))
     st.stop()

@@ -9,6 +9,18 @@ from coastal_security.geography import EXTENT, load_bundle
 from coastal_security.india import COASTAL_STATES, display_feature, scope_geometry
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
 from dashboard.casebook_view import render_investigations
+from dashboard.globe_view import render_globe
+
+
+def focus_investigation(vessel_id: str) -> None:
+    """Navigate to review; never open or modify a case without its existing form."""
+    st.session_state.watch_tabs = "Investigations"
+    cases = st.session_state.get("coastal_casebook", {}).get("cases", [])
+    saved = next((case for case in cases if case["vessel_id"] == vessel_id), None)
+    if saved:
+        st.session_state.casebook_selected = saved["case_id"]
+    else:
+        st.session_state.casebook_candidate = vessel_id
 
 
 def map_spec(
@@ -300,7 +312,9 @@ def render_watch() -> None:
     ):
         column.metric(title, value)
     watch, intake, investigations, sources = st.tabs(
-        ["Watch picture", "Intake quality", "Investigations", "Sources & export"]
+        ["Watch picture", "Intake quality", "Investigations", "Sources & export"],
+        key="watch_tabs",
+        on_change="rerun",
     )
     with watch:
         layers = st.columns(4)
@@ -308,22 +322,79 @@ def render_watch() -> None:
         trails = layers[1].checkbox("Observation history", True, key="watch_trails")
         zone = layers[2].checkbox("Exercise area", True, key="watch_zone")
         show_districts = layers[3].checkbox("Reference districts", False, key="watch_districts")
-        st.vega_lite_chart(
-            spec=map_spec(
-                coast, state, trails, zone, coastline, states, districts, extent, show_districts
-            ),
-            height=440,
-            width="stretch",
-            key="watch_map",
+        display = st.radio(
+            "Map display", ["Interactive globe", "2D map"], horizontal=True, key="watch_display"
         )
-        st.caption(
-            "Mercator view · WGS84 longitude/latitude · Made with Natural "
-            "Earth (1:50 million). Generalised context, not navigation or "
-            "legal boundaries. Dots are received observations; gaps are not "
-            "interpolated. Amber markers are stale last-known positions. "
-            "Dashed area is fictional. Hover markers for identity; vessel "
-            "labels appear in cohorts of 12 or fewer."
-        )
+        canvas, inspector = st.columns([3, 1])
+        selected = None
+        with inspector:
+            st.subheader("Vessel inspector")
+            options = [p["vessel_id"] for p in state["positions"]]
+            if options:
+                if st.session_state.get("watch_vessel") not in options:
+                    st.session_state.watch_vessel = options[0]
+                selected = st.selectbox("Inspect vessel", options, key="watch_vessel")
+                position = next(p for p in state["positions"] if p["vessel_id"] == selected)
+                st.markdown(f"### {selected}")
+                st.write(f"{position['vessel_class']} · {position['freshness']}")
+                st.write(f"**{position['age_minutes']:.0f} min** since observation")
+                st.caption(
+                    f"Observed: {position['observed_at']}\n\nReceived: {position['received_at']}"
+                )
+                st.write(f"{position['speed_knots']:.1f} kn reported speed")
+                st.caption(f"{position['latitude']:.4f}° N · {position['longitude']:.4f}° E")
+                can_review = any(f["vessel_id"] == selected for f in state["flags"]) or any(
+                    c["vessel_id"] == selected
+                    for c in st.session_state.get("coastal_casebook", {}).get("cases", [])
+                )
+                st.button(
+                    "Review this vessel",
+                    disabled=not can_review,
+                    on_click=focus_investigation,
+                    args=(selected,),
+                    key="globe_review",
+                )
+                if not can_review:
+                    st.caption("Review is available for a current flag or an existing case.")
+            else:
+                st.info("No accepted position at this clock.")
+        with canvas:
+            if display == "Interactive globe":
+                render_globe(
+                    coast,
+                    state,
+                    selected,
+                    states,
+                    districts,
+                    extent,
+                    coastline,
+                    trails,
+                    zone,
+                    show_districts,
+                )
+            else:
+                st.vega_lite_chart(
+                    spec=map_spec(
+                        coast,
+                        state,
+                        trails,
+                        zone,
+                        coastline,
+                        states,
+                        districts,
+                        extent,
+                        show_districts,
+                    ),
+                    height=440,
+                    width="stretch",
+                    key="watch_map",
+                )
+                st.caption(
+                    "Mercator view · WGS84 longitude/latitude · Natural Earth 1:50 million. "
+                    "Generalised context, not navigation or legal boundaries. Dots are "
+                    "received observations; gaps are not interpolated. Amber: stale "
+                    "last-known positions. Dashed area is fictional."
+                )
         st.caption(
             "State outlines: DataMeet / Election Commission of India via "
             "geoBoundaries, CC BY 2.5 IN. "
@@ -341,10 +412,7 @@ def render_watch() -> None:
                 "No accepted positions for this cohort at this exercise time. Try a later clock."
             )
         else:
-            st.subheader("Vessel inspector")
-            selected = st.selectbox(
-                "Inspect vessel", [p["vessel_id"] for p in state["positions"]], key="watch_vessel"
-            )
+            st.subheader("Selected vessel evidence")
             position = next(p for p in state["positions"] if p["vessel_id"] == selected)
             st.write(
                 f"**{selected} · {position['vessel_class']} · {position['freshness']}** "

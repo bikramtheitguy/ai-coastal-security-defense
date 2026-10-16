@@ -8,6 +8,12 @@ A Python and Streamlit research demonstrator for **India-focused coastal analyti
 
 The hosted demo may sleep. This repository does not establish which revision is currently deployed.
 
+The default workspace is **India Coastal Watch**, with an interactive globe, India/Odisha camera
+presets, selectable synthetic vessels, an evidence inspector and investigation handoff.
+The original 2D map and all six modules remain available. Drone and cyber research now have
+interactive review panels; the original charts remain in expandable research sections.
+See the [globe workspace and Odisha walkthrough](docs/GLOBE_WORKSPACE.md).
+
 ## Related command-centre dashboard
 
 **[Explore the coastal command-centre concept built with Lovable](https://icccodishacshq.lovable.app/)**

@@ -23,6 +23,7 @@ def open_watch(page):
 
 
 def rendered_map(page):
+    page.get_by_text("2D map", exact=True).click()
     chart = page.get_by_test_id("stVegaLiteChart")
     chart.scroll_into_view_if_needed()
     expect(chart.locator("svg.marks")).to_be_visible()
