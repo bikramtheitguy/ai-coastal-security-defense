@@ -1,8 +1,10 @@
 import hashlib
 import json
+import re
 
 from playwright.sync_api import expect
 from test_watch_browser import EVIDENCE, open_watch, select
+from ui_sync import wait_for_idle
 
 
 def workspace(page):
@@ -10,7 +12,7 @@ def workspace(page):
     expect(page.get_by_role("heading", name="Investigation workspace", exact=True)).to_be_visible()
 
 
-def fill_form(page, button, reason):
+def fill_form(page, button, reason, actions):
     form = page.get_by_test_id("stForm").filter(
         has=page.get_by_role("button", name=button, exact=True)
     )
@@ -18,9 +20,10 @@ def fill_form(page, button, reason):
     form.get_by_role("textbox", name="Rationale (fictional exercise only)", exact=True).fill(reason)
     form.get_by_text("I reviewed the referenced evidence", exact=True).click()
     form.get_by_role("button", name=button, exact=True).click()
-    expect(
-        page.get_by_text("Casebook updated. Download it to keep a recovery copy.", exact=True)
-    ).to_be_visible()
+    # A generic success notice may belong to the preceding action. Wait for
+    # the exact new event count before touching controls in the next rerun.
+    expect(page.get_by_text(re.compile(rf"^Recorded actions: {actions} ·"))).to_be_visible()
+    wait_for_idle(page)
 
 
 def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_url):
@@ -28,11 +31,14 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     workspace(page)
     select(page, "Flagged vessel", "SIM-004")
     # Wait for the vessel-specific server-rendered action, not only the input value.
+    expect(page.get_by_role("button", name="Open investigation for SIM-004")).to_be_visible()
+    wait_for_idle(page)
     page.get_by_role("button", name="Open investigation for SIM-004", exact=True).click()
     expect(
         page.get_by_text("Acknowledge the evidence before recording this action.", exact=True)
     ).to_be_visible()
-    fill_form(page, "Open investigation for SIM-004", "Inspecting the synthetic reporting gap.")
+    wait_for_idle(page)
+    fill_form(page, "Open investigation for SIM-004", "Inspecting the synthetic reporting gap.", 1)
     workspace(page)
     expect(page.get_by_role("combobox", name="Saved case", exact=True)).to_have_value(
         "CASE-SIM-004"
@@ -42,7 +48,8 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     ).scroll_into_view_if_needed()
     page.screenshot(path=str(EVIDENCE / "investigation-desktop.jpg"), type="jpeg", quality=80)
     page.get_by_role("tab", name="Review & handover", exact=True).click()
-    fill_form(page, "Record case decision", "Reviewing the last observation and receipt lag.")
+    fill_form(page, "Record case decision", "Reviewing the last observation and receipt lag.", 2)
+    expect(page.get_by_text("CASE-SIM-004 · In review", exact=True)).to_be_visible()
     slider = page.get_by_role("slider", name="Exercise minute Exercise minute", exact=True)
     for value in range(65, 100, 5):
         slider.press("ArrowRight")
@@ -50,6 +57,7 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
         expect(
             page.get_by_text(f"Exercise clock · 01 Apr 2026, 07:{value - 60:02} UTC", exact=False)
         ).to_be_visible()
+        wait_for_idle(page)
     workspace(page)
     page.get_by_role("tab", name="Captured evidence", exact=True).click()
     page.get_by_text("Append evidence at current watch clock", exact=True).click()
@@ -57,6 +65,7 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
         page,
         "Append evidence capture",
         "Received valid observations after the fictional reporting gap.",
+        3,
     )
     workspace(page)
     expect(
@@ -66,12 +75,14 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
             exact=True,
         )
     ).to_be_visible()
+    wait_for_idle(page)
     select(page, "Inspect capture", "Minute 60")
     expect(
         page.get_by_text("Stale report: Last observation is 35 minutes old", exact=False)
     ).to_be_visible()
     select(page, "Inspect capture", "Minute 95")
     expect(page.get_by_text("No current rule flags at this capture.", exact=False)).to_be_visible()
+    wait_for_idle(page)
     chart = page.get_by_role("tabpanel", name="Captured evidence", exact=True).get_by_test_id(
         "stVegaLiteChart"
     )
@@ -79,11 +90,14 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     expect(chart.locator("canvas, svg").first).to_be_visible()
     page.screenshot(path=str(EVIDENCE / "investigation-timeline.jpg"), type="jpeg", quality=80)
     page.get_by_role("tab", name="Review & handover", exact=True).click()
+    select(page, "Next case status", "Closed — benign")
     fill_form(
         page,
         "Record case decision",
         "Recovery observed in the exercise; closing this demonstration review.",
+        4,
     )
+    expect(page.get_by_text("CASE-SIM-004 · Closed — benign", exact=True)).to_be_visible()
     workspace(page)
     page.get_by_role("tab", name="Review & handover", exact=True).click()
     with page.expect_download() as handover:
@@ -124,9 +138,11 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     expect(
         page.get_by_text("Validated 1 cases against the bundled synthetic fixture.", exact=True)
     ).to_be_visible()
+    wait_for_idle(page)
     page.get_by_role("button", name="Restore validated casebook", exact=True).click()
     workspace(page)
     expect(page.get_by_text("CASE-SIM-004 · Closed — benign", exact=True)).to_be_visible()
+    wait_for_idle(page)
     page.set_viewport_size({"width": 390, "height": 844})
     collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
     if collapse.is_visible():

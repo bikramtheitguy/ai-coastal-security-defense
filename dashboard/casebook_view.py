@@ -161,6 +161,9 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
         case = next(c for c in book["cases"] if c["case_id"] == selected)
         evidence = latest_evidence(case)
         st.write(f"**{selected} · {case_status(case)}**")
+        st.caption(
+            f"Recorded actions: {len(case['events'])} · Evidence captures: {len(captures(case))}"
+        )
         ist = parse_time(evidence["as_of_utc"]).astimezone(timezone(timedelta(hours=5, minutes=30)))
         st.caption(
             f"Latest captured exercise time: {ist:%d %b %Y, %H:%M} IST · "

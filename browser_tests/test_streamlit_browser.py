@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
+from ui_sync import wait_for_idle
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts/browser"
 
@@ -19,6 +20,7 @@ def replay(page):
     module(page, "Scenario Replay")
     expect(page.get_by_role("heading", name="Synthetic vessel scenario replay")).to_be_visible()
     expect(page.get_by_role("heading", name="Replay clock · 01:00 UTC")).to_be_visible()
+    wait_for_idle(page)
 
 
 def capture(page, name):
@@ -47,6 +49,7 @@ def seek(page, minute):
 def test_preserved_research_views(page, name, heading):
     module(page, name)
     expect(page.get_by_role("heading", name=heading, exact=True)).to_be_visible()
+    wait_for_idle(page)
     image = page.get_by_test_id("stImage").locator("img")
     expect(image).to_have_count(1)
     expect(image).to_be_visible()
@@ -160,6 +163,7 @@ def test_review_validation_disposition_download_and_reset(page):
     expect(page.get_by_role("checkbox")).to_be_checked()
     submit.click()
     expect(page.get_by_text(re.compile(r"^Review status: In review\."))).to_be_visible()
+    wait_for_idle(page)
     page.get_by_role("combobox", name="Next demo status").click()
     page.get_by_role("option", name="Dismissed", exact=True).click()
     page.get_by_role("textbox", name="Review rationale (synthetic exercise only)").fill(
@@ -170,6 +174,7 @@ def test_review_validation_disposition_download_and_reset(page):
     submit.click()
     status = page.get_by_text(re.compile(r"^Review status: Dismissed\."))
     expect(status).to_be_visible()
+    wait_for_idle(page)
     status.scroll_into_view_if_needed()
     capture(page, "review-desktop.jpg")
     page.get_by_text("Session review history and export", exact=True).click()
