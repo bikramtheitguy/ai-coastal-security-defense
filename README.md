@@ -2,7 +2,7 @@
 
 A Python and Streamlit research demonstrator for **India-focused coastal analytics**: public coastal geography, synthetic vessel monitoring, evidence review and reproducible evaluation in a spatial UI. Vessel, drone and cybersecurity research experiments remain available.
 
-**Status: experimental. Not validated for operational decisions or production use.** Three views display saved CSVs and PNGs. Scenario Replay explains fictional tracks and supports session-only reviews. Vessel Evaluation measures synthetic detection quality. India Coastal Watch adds dated public geography, received observations, freshness and data-quality evidence. No live feeds, model inference or operational actions are connected.
+**Status: experimental. Not validated for operational decisions or production use.** Three views display saved CSVs and PNGs. Scenario Replay explains fictional tracks and supports session-only reviews. Vessel Evaluation measures synthetic detection quality. India Coastal Watch adds dated public geography, received observations, freshness, data-quality evidence and a session-local investigation casebook with validated recovery. No live feeds, model inference or operational actions are connected.
 
 [Streamlit research demo](https://ai-coastal-security-defense.streamlit.app/) · [Command-centre concept (Lovable)](https://icccodishacshq.lovable.app/) · [Installation](docs/INSTALLATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Limitations](docs/LIMITATIONS.md) · [Security](SECURITY.md)
 
@@ -44,6 +44,12 @@ Current evaluation/theme proposal, captured in real Chromium at `1715687`. The [
 ![Synthetic vessel replay with playback controls, freshness counts and explained flags](docs/screenshots/replay-desktop.jpg)
 
 Screenshot from the repository's Chromium test environment, using invented data. See the [desktop, narrow-screen and chart comparisons](docs/STREAMLIT_POC_COMPARISON.md#visual-comparison-within-the-replay-increment). This is not evidence of a hosted deployment.
+
+## Coastal Watch investigations
+
+The **Investigations** tab turns a current flag into a vessel case, freezes evidence at successive exercise times, records human review decisions, and exports a casebook plus a readable handover. A downloaded casebook can be restored after validation against the bundled synthetic fixture. Records remain private to each Streamlit session; download before refreshing. This is not authenticated or shared durable incident storage.
+
+Follow the [investigation walkthrough and before/after comparison](docs/INVESTIGATIONS_COMPARISON.md), [architecture plan](docs/INVESTIGATIONS_PLAN.md), and [validation record](docs/INVESTIGATIONS_VALIDATION.md). Existing watch maps, rules and all six modules are preserved.
 
 ## Run the demo
 
