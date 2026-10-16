@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "dataset": "Natural Earth ne_110m_land",
+  "source_type": "public",
+  "license": "Public domain",
+  "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_110m_land.geojson",
+  "source_revision": "ca96624a56bd078437bca8184e78163e5039ad19",
+  "source_checked_on": "2026-10-16",
+  "coordinate_order": "longitude, latitude",
+  "scale": "1:110 million",
+  "transformation": "Unmodified geographic coordinates; UTF-8 source file stored locally. No political boundaries.",
+  "limitations": "Generalised land context; not navigation, a current coastline survey, or legal jurisdiction.",
+  "bytes": 138160,
+  "sha256": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9"
+}

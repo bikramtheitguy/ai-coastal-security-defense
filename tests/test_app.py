@@ -33,6 +33,7 @@ def test_all_modules_from_another_working_directory(tmp_path, monkeypatch, mode,
 
 def test_asset_failure_is_friendly_and_does_not_show_metrics(monkeypatch):
     app = AppTest.from_file(str(APP), default_timeout=20).run()
+    app.sidebar.selectbox[0].select("Drone Threats").run()
     results = sys.modules["results"]
 
     def unavailable(*args, **kwargs):
