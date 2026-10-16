@@ -107,6 +107,13 @@ def test_globe_serialization_has_no_remote_assets_and_tracks_are_bounded():
     assert "mapProvider" not in spec and "mapStyle" not in spec
     assert len({layer["id"] for layer in spec["layers"]}) == len(spec["layers"])
     assert [layer["id"] for layer in spec["layers"] if layer.get("pickable")] == [VESSEL_LAYER]
+    vessels = next(layer for layer in spec["layers"] if layer["id"] == VESSEL_LAYER)
+    assert vessels["iconAtlas"].startswith("data:image/svg+xml;base64,")
+    assert vessels["sizeUnits"] == "pixels"
+    for layer in spec["layers"]:
+        for field in ("widthUnits", "radiusUnits"):
+            if field in layer:
+                assert layer[field] == "pixels"
     rendered = deck.to_json()
     assert "https://" not in rendered and "http://" not in rendered
     assert len(rendered) < 3_000_000

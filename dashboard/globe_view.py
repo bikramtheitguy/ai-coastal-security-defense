@@ -5,6 +5,7 @@ from functools import partial
 
 import pydeck as pdk
 import streamlit as st
+from pydeck.types import String
 
 from coastal_security.globe import (
     VESSEL_LAYER,
@@ -72,7 +73,7 @@ def globe_deck(
             get_path="path",
             get_color=[113, 156, 183, 55],
             get_width=1,
-            width_units="pixels",
+            width_units=String("pixels"),
             pickable=False,
         ),
         pdk.Layer(
@@ -122,7 +123,7 @@ def globe_deck(
                 data=[{"path": [[w, s], [e, s], [e, n], [w, n], [w, s]]}],
                 get_path="path",
                 get_color=[232, 185, 98],
-                width_units="pixels",
+                width_units=String("pixels"),
                 get_width=2,
                 pickable=False,
             )
@@ -135,7 +136,7 @@ def globe_deck(
                 data=track_segments(state, selected),
                 get_path="path",
                 get_color=[166, 214, 243],
-                width_units="pixels",
+                width_units=String("pixels"),
                 get_width=2,
                 pickable=False,
             )
@@ -150,7 +151,7 @@ def globe_deck(
                 data=selected_marks,
                 get_position="position",
                 get_radius=22,
-                radius_units="pixels",
+                radius_units=String("pixels"),
                 filled=False,
                 stroked=True,
                 get_line_color=[220, 239, 255],
@@ -161,7 +162,7 @@ def globe_deck(
                 "IconLayer",
                 id=VESSEL_LAYER,
                 data=marks,
-                icon_atlas=ICON,
+                icon_atlas=String(ICON),
                 icon_mapping={
                     "vessel": {
                         "x": 0,
@@ -176,7 +177,7 @@ def globe_deck(
                 get_position="position",
                 get_color="colour",
                 get_size="size",
-                size_units="pixels",
+                size_units=String("pixels"),
                 billboard=True,
                 pickable=True,
                 auto_highlight=True,

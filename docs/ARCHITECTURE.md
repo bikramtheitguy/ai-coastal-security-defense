@@ -30,6 +30,15 @@ Coastal Watch's receipt validator is an offline exercise processor, not a live i
 
 ## Coastal Watch investigation boundary
 
+The [globe workspace](GLOBE_WORKSPACE.md) adds a presentation boundary:
+`snapshot -> bounded globe payload -> native Streamlit/pydeck -> validated selected ID -> inspector`.
+`coastal_security/globe.py` owns source integrity, observed-track segmentation and identity
+validation; `dashboard/globe_view.py` owns rendering and camera controls. Browser-supplied
+positions or model scores never become case evidence. The independent `data/globe` manifest
+preserves the existing casebook source hashes. The original 2D renderer remains available.
+`dashboard/research_view.py` derives interactive outcomes directly from preserved prediction
+CSVs, without inventing geographic joins or model probabilities.
+
 `current flag -> frozen vessel snapshot -> append-only case events -> human decision -> portable JSON / plain-text handover -> validated restore`
 
 `coastal_security/casebook.py` owns transitions, bounds, evidence captures, export and import validation. `dashboard/casebook_view.py` owns forms and session state inside the existing Watch view. Case data never enters shared caches or server files. Import validates schema and limits, replays commands, and independently reconstructs every snapshot from the known exercise. No uploaded code, pickle or URLs are executed or fetched. Reviewer labels and notes remain unauthenticated data.

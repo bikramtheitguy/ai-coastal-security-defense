@@ -70,7 +70,7 @@ def test_globe_odisha_picking_clock_and_investigation_handoff(page):
     page.get_by_role("button", name="Open investigation for SIM-004").click()
     expect(page.get_by_text("CASE-SIM-004 · New", exact=True)).to_be_visible()
     screenshot(page, "globe-review-handoff.jpg")
-    slider = page.get_by_role("slider", name="Exercise minute", exact=True)
+    slider = page.get_by_role("slider", name="Exercise minute Exercise minute", exact=True)
     for _ in range(7):
         slider.press("ArrowRight")
         wait_for_idle(page)
@@ -102,6 +102,7 @@ def test_globe_narrow_and_research_views(page):
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    expect(page.get_by_test_id("stSidebar")).to_have_attribute("aria-expanded", "false")
     globe(page)
     screenshot(page, "globe-mobile.jpg")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
@@ -141,6 +142,7 @@ def test_interactive_research_outcomes_and_preserved_charts(page, tmp_path):
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    expect(page.get_by_test_id("stSidebar")).to_have_attribute("aria-expanded", "false")
     page.get_by_test_id("stVegaLiteChart").scroll_into_view_if_needed()
     screenshot(page, "cyber-review-mobile.jpg")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")

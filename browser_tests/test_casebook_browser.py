@@ -10,6 +10,7 @@ from ui_sync import wait_for_idle
 def workspace(page):
     page.get_by_role("tab", name="Investigations", exact=True).click()
     expect(page.get_by_role("heading", name="Investigation workspace", exact=True)).to_be_visible()
+    wait_for_idle(page)
 
 
 def fill_form(page, button, reason, actions):

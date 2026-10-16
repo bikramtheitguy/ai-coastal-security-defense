@@ -2,9 +2,18 @@
 
 This POC combines India-focused geographic watch, reproducible vessel replay, human evidence review and an independent trajectory evaluation lab in Python/Streamlit. Geography comes from dated public sources; traffic and operational scenarios are invented. It is a software demonstration, not an operational coastal-security system.
 
-## Current proposal: investigation and handover
+## Current proposal: globe and interactive research review
 
-Coastal Watch now includes a session-local casebook with frozen evidence captures, human review transitions, observation-to-receipt timing, a deterministic handover brief, and validated JSON recovery. The proposal preserves all six modules and data fixtures. See the [plan](INVESTIGATIONS_PLAN.md), [side-by-side capability comparison and demo](INVESTIGATIONS_COMPARISON.md), and [validation record](INVESTIGATIONS_VALIDATION.md). This new increment is not deployed until separately merged and verified.
+India Coastal Watch becomes the default workspace, with a rotatable globe, India/Odisha
+camera presets, selectable synthetic vessels, receipt-aware history and an investigation
+handoff. The existing 2D map and all six modules remain available. Drone and cyber
+experiments gain interactive review panels while preserving their metrics, source files
+and original charts. See the [globe comparison, architecture and walkthrough](GLOBE_WORKSPACE.md).
+This increment requires separate merge and hosted verification before deployment is claimed.
+
+## Investigation and handover baseline: PR #16
+
+Coastal Watch includes a session-local casebook with frozen evidence captures, human review transitions, observation-to-receipt timing, a deterministic handover brief, and validated JSON recovery. PR #16 was merged at `131fcaa052525b1935e1aa49512206366a7b3e32`; its Odisha workflow and validated download/restore were verified on the hosted app on 16 October 2026. See the [plan](INVESTIGATIONS_PLAN.md), [side-by-side capability comparison and demo](INVESTIGATIONS_COMPARISON.md), and [validation record](INVESTIGATIONS_VALIDATION.md).
 
 ## Geographic watch baseline: PR #15
 

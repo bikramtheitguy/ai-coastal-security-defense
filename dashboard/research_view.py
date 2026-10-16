@@ -115,7 +115,18 @@ def review_spec(rows: pd.DataFrame, kind: str, focus: str) -> dict:
                         "stroke": "#0b1424",
                         "strokeWidth": 5,
                     },
-                    "encoding": {"color": colour, "opacity": {"value": 0.38}},
+                    "encoding": {
+                        "color": colour,
+                        "opacity": {
+                            "condition": {
+                                "test": "true"
+                                if focus == "All outcomes"
+                                else f"datum.outcome === '{focus}'",
+                                "value": 0.65,
+                            },
+                            "value": 0.24,
+                        },
+                    },
                 },
                 {
                     "mark": {"type": "text", "fontSize": 34, "color": "#eff6ff", "dy": -9},
