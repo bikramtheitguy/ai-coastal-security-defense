@@ -152,10 +152,11 @@ def test_casebook_review_recovery_export_restore_and_mobile(page, tmp_path, app_
     workspace(page)
     expect(page.get_by_text("CASE-SIM-004 · Closed — benign", exact=True)).to_be_visible()
     wait_for_idle(page)
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     page.get_by_role("combobox", name="Saved case", exact=True).scroll_into_view_if_needed()
     page.screenshot(path=str(EVIDENCE / "investigation-mobile.jpg"), type="jpeg", quality=80)
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")

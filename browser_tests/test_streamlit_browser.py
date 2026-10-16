@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
-from ui_sync import wait_for_idle
+from ui_sync import open_expander, wait_for_idle
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts/browser"
 
@@ -98,10 +98,11 @@ def test_evaluation_filters_evidence_and_download(page, tmp_path):
 def test_spatial_evaluation_narrow_layout(page):
     module(page, "Vessel Evaluation")
     expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     expect(page.get_by_role("heading", name="Vessel trajectory evaluation")).to_be_visible()
     capture(page, "evaluation-mobile.jpg")
     chart = page.get_by_test_id("stVegaLiteChart")
@@ -148,8 +149,15 @@ def test_replay_render_seek_autoplay_pause_and_end(page):
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 
-def test_review_validation_disposition_download_and_reset(page):
+@pytest.mark.parametrize("width", [1365, 390], ids=["desktop", "mobile"])
+def test_review_validation_disposition_download_and_reset(page, width):
     replay(page)
+    if width == 390:
+        collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
+        if collapse.is_visible():
+            collapse.click()
+        page.set_viewport_size({"width": 390, "height": 844})
+        expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
     submit = page.get_by_role("button", name="Record demo review")
     submit.click()
     expect(
@@ -177,8 +185,8 @@ def test_review_validation_disposition_download_and_reset(page):
     expect(status).to_be_visible()
     wait_for_idle(page)
     status.scroll_into_view_if_needed()
-    capture(page, "review-desktop.jpg")
-    page.get_by_text("Session review history and export", exact=True).click()
+    capture(page, "review-desktop.jpg" if width == 1365 else "review-mobile.jpg")
+    open_expander(page, "Session review history and export")
     with page.expect_download() as pending:
         page.get_by_role("button", name="Download demo review JSON").click()
     data = json.loads(Path(pending.value.path()).read_text())
@@ -187,10 +195,11 @@ def test_review_validation_disposition_download_and_reset(page):
     assert data["scenario"]["rows"] == 91
     page.get_by_role("button", name="Reset replay and demo reviews").click()
     expect(page.get_by_role("heading", name="Replay clock · 00:00 UTC")).to_be_visible()
-    page.get_by_text("Session review history and export", exact=True).click()
+    open_expander(page, "Session review history and export")
     expect(
         page.get_by_text("No demo reviews recorded in this session.", exact=True)
     ).to_be_visible()
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 
@@ -210,7 +219,7 @@ def test_narrow_layout_and_synthetic_downloads(page):
         box = chart.bounding_box()
         assert box and box["width"] <= 390
     capture(page, "replay-mobile-chart.jpg")
-    page.get_by_text("Scenario provenance and downloads", exact=True).click()
+    open_expander(page, "Scenario provenance and downloads")
     with page.expect_download() as pending:
         page.get_by_role("button", name="Download full synthetic observations").click()
     csv = Path(pending.value.path()).read_text()

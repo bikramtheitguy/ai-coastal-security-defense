@@ -2,7 +2,9 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
 from playwright.sync_api import expect
+from ui_sync import select_tab, wait_for_idle
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts/browser"
 
@@ -20,6 +22,7 @@ def open_watch(page):
     select(page, "Select Module", "Coastal Watch")
     expect(page.get_by_role("heading", name="India Coastal Watch", exact=True)).to_be_visible()
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["44", "1", "3", "4"])
+    wait_for_idle(page)
 
 
 def rendered_map(page):
@@ -53,22 +56,31 @@ def rendered_map(page):
     return chart
 
 
-def test_india_watch_scope_layers_and_evidence(page, tmp_path):
+@pytest.mark.parametrize("width", [1365, 390], ids=["desktop", "mobile"])
+def test_india_watch_scope_layers_and_evidence(page, tmp_path, width):
     open_watch(page)
     page.screenshot(path=str(EVIDENCE / "watch-india-desktop.jpg"), type="jpeg", quality=80)
     rendered_map(page)
     page.screenshot(path=str(EVIDENCE / "watch-india-map.jpg"), type="jpeg", quality=80)
     select(page, "State / Union Territory", "Odisha")
     expect(page.get_by_test_id("stMetricValue")).to_have_text(["8", "1", "3", "4"])
+    wait_for_idle(page)
+    if width == 390:
+        collapse = page.get_by_role("button", name="Collapse sidebar", exact=True)
+        if collapse.is_visible():
+            collapse.click()
+        page.set_viewport_size({"width": 390, "height": 844})
+        expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
     page.get_by_text("Reference districts", exact=True).click()
     expect(page.get_by_role("checkbox", name="Reference districts", exact=True)).to_be_checked()
     rendered_map(page)
-    page.screenshot(path=str(EVIDENCE / "watch-odisha-map.jpg"), type="jpeg", quality=80)
+    image_name = "watch-odisha-map.jpg" if width == 1365 else "watch-odisha-map-mobile.jpg"
+    page.screenshot(path=str(EVIDENCE / image_name), type="jpeg", quality=80)
     page.get_by_text("Observation history", exact=True).click()
     expect(page.get_by_role("checkbox", name="Observation history", exact=True)).not_to_be_checked()
-    page.get_by_role("tab", name="Intake quality", exact=True).click()
+    select_tab(page, "Intake quality")
     expect(page.get_by_text("86 received = 82 accepted + 4 rejected.", exact=True)).to_be_visible()
-    page.get_by_role("tab", name="Sources & export", exact=True).click()
+    select_tab(page, "Sources & export")
     with page.expect_download() as result:
         page.get_by_role("button", name="Download watch snapshot (JSON)", exact=True).click()
     target = tmp_path / "watch.json"
@@ -82,6 +94,7 @@ def test_india_watch_scope_layers_and_evidence(page, tmp_path):
     assert hashlib.sha256(actual).hexdigest() == expected_hash
     assert payload["exercise_state"] == "IN-OR"
     assert payload["source"] == "synthetic" and payload["catalogue_count"] == 8
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     expect(page.get_by_test_id("stException")).to_have_count(0)
 
 
@@ -99,10 +112,11 @@ def test_island_scope_and_narrow_watch(page):
     ).to_be_visible()
     rendered_map(page)
     page.screenshot(path=str(EVIDENCE / "watch-island-desktop-map.jpg"), type="jpeg", quality=80)
-    page.set_viewport_size({"width": 390, "height": 844})
+    wait_for_idle(page)
     collapse = page.get_by_role("button", name="Collapse sidebar")
     if collapse.is_visible():
         collapse.click()
+    page.set_viewport_size({"width": 390, "height": 844})
     expect(page.get_by_role("button", name="Expand sidebar", exact=True)).to_be_visible()
     page.wait_for_function(
         """() => {
