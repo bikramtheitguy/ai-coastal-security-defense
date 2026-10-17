@@ -1,0 +1,31 @@
+{
+  "files": {
+    "drone_observations.csv": {
+      "rows": 36,
+      "sha256": "c15247cd07ddc0ae04a89bb88ada204afce1d96245c77182742c272ada22d9bd"
+    },
+    "security_events.csv": {
+      "rows": 48,
+      "sha256": "a849be68698dff811064d253800d5747bf6a376800f2a6eb50e2b316c5929ca7"
+    },
+    "vessel_observations.csv": {
+      "rows": 60,
+      "sha256": "c693bc27e873630a604c67da507efd186e06b60c1736df332eb3a49b5272a087"
+    }
+  },
+  "fixed_start_utc": "2026-01-01T00:00:00+00:00",
+  "generator": "seed/workflow_fixtures.py",
+  "intended_use": "POC ingestion, review and data-quality examples; not model performance evidence",
+  "is_synthetic": true,
+  "license": "MIT (repository-generated fixtures)",
+  "limitations": [
+    "Coordinates are invented offshore examples, not approved boundaries or navigation data",
+    "Drone rows contain invented labels and confidence, no images or detector outputs",
+    "Expected review labels come from explicit fixture rules; not independent ground truth",
+    "IP addresses use documentation ranges; no network packets were captured",
+    "Not automatically ingested by the POC; its existing database seeder remains separate"
+  ],
+  "seed": 20261015,
+  "source": "wholly generated; no external records",
+  "version": "1.0"
+}

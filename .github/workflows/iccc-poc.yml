@@ -1,0 +1,129 @@
+name: ICCC POC
+
+on:
+  pull_request:
+    paths:
+      - 'ICCC_Coastal_Security/**'
+      - '.github/workflows/iccc-poc.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ICCC_Coastal_Security/**'
+      - '.github/workflows/iccc-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iccc-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ICCC_Coastal_Security
+
+jobs:
+  backend:
+    name: ICCC backend / ${{ matrix.database }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: synthetic-ci-only
+          POSTGRES_DB: iccc_test_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d iccc_test_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: ${{ matrix.database == 'postgres' && 'postgresql+psycopg://test:synthetic-ci-only@127.0.0.1:5432/iccc_test_ci' || '' }}
+      ICCC_ALLOW_TEST_DB_RESET: '1'
+      SECRET_KEY: synthetic-ci-key-never-for-deployment
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: ICCC_Coastal_Security
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: false
+      - run: uv venv --python 3.11
+      - run: uv pip install --python .venv/bin/python --require-hashes -r backend/requirements-dev.txt
+      - name: Verify Python lock inputs
+        if: matrix.database == 'sqlite'
+        run: |
+          uv pip compile backend/requirements.in --python-version 3.11 --universal --generate-hashes --no-header --quiet --output-file backend/requirements.txt
+          uv pip compile backend/requirements-dev.in --constraint backend/requirements.txt --python-version 3.11 --universal --generate-hashes --no-header --quiet --output-file backend/requirements-dev.txt
+          git diff --exit-code -- backend/requirements.txt backend/requirements-dev.txt
+      - run: .venv/bin/python -m pytest tests/backend -q
+
+  browser:
+    name: ICCC frontend and browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      SECRET_KEY: synthetic-ci-key-never-for-deployment
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: ICCC_Coastal_Security
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: uv venv --python 3.11
+      - run: uv pip install --python .venv/bin/python --require-hashes -r backend/requirements-dev.txt
+      - run: echo "PYTHON=$PWD/.venv/bin/python" >> "$GITHUB_ENV"
+      - run: npm ci --no-audit --no-fund
+        working-directory: ICCC_Coastal_Security/frontend
+      - run: npm run typecheck
+        working-directory: ICCC_Coastal_Security/frontend
+      - run: npm run build
+        working-directory: ICCC_Coastal_Security/frontend
+      - run: npm ci --no-audit --no-fund
+        working-directory: ICCC_Coastal_Security/tests/e2e
+      - run: npx playwright install --with-deps chromium
+        working-directory: ICCC_Coastal_Security/tests/e2e
+      - run: npm test
+        working-directory: ICCC_Coastal_Security/tests/e2e
+
+  dependency-audit:
+    name: ICCC dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: ICCC_Coastal_Security
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: '0.13.1'
+          python-version: '3.11'
+          enable-cache: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Audit backend requirements
+        run: uvx --from pip-audit==2.10.1 pip-audit --require-hashes --disable-pip --no-deps -r backend/requirements.txt
+      - name: Audit frontend runtime
+        if: ${{ !cancelled() }}
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: ICCC_Coastal_Security/frontend

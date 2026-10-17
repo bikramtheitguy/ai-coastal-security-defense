@@ -1,0 +1,7 @@
+**/node_modules
+frontend/.next
+frontend/out
+data
+tests
+**/__pycache__
+.env

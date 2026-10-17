@@ -1,0 +1,51 @@
+# ICCC Coastal Security & MDA Platform — Proof of Concept. ALL DATA IS SIMULATED / POC DATA.
+# Usage:  cp .env.example .env   (edit secrets)   &&   docker compose up --build
+# Then open http://localhost:8000
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_DB: iccc
+      POSTGRES_USER: iccc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iccc -d iccc"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.11-slim}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://iccc:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/iccc
+      APP_MODE: ${APP_MODE:?Set APP_MODE explicitly in .env}
+      SECRET_KEY: ${SECRET_KEY:?Generate SECRET_KEY in .env}
+      SEED_ON_START: ${SEED_ON_START:-false}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-Demo@2026}
+      SIM_ENABLED: ${SIM_ENABLED:-false}
+      SIM_TIME_FACTOR: ${SIM_TIME_FACTOR:-20}
+      SESSION_IDLE_MINUTES: ${SESSION_IDLE_MINUTES:-30}
+      MAP_TILE_URL: ${MAP_TILE_URL:-https://tile.openstreetmap.org/{z}/{x}/{y}.png}
+      SEAMARK_TILE_URL: ${SEAMARK_TILE_URL:-https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png}
+      DATA_DIR: /app/data
+    volumes:
+      - app_data:/app/data            # evidence files, backups
+    ports:
+      - "${APP_BIND_HOST:-127.0.0.1}:${APP_PORT:-8000}:8000"
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  app_data:

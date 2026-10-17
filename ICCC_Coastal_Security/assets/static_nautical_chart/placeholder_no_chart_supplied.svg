@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#eef2f5"/>
+  <g stroke="#c5d0da" stroke-width="1">
+    <path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200M0 700H1200"/>
+    <path d="M100 0V800M200 0V800M300 0V800M400 0V800M500 0V800M600 0V800M700 0V800M800 0V800M900 0V800M1000 0V800M1100 0V800"/>
+  </g>
+  <rect x="200" y="260" width="800" height="280" fill="#ffffff" stroke="#8a2f28" stroke-width="3"/>
+  <text x="600" y="330" font-family="sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#8a2f28">NO STATIC CHART SUPPLIED — PLACEHOLDER</text>
+  <text x="600" y="380" font-family="sans-serif" font-size="20" text-anchor="middle" fill="#333">LOCAL STATIC NAUTICAL REFERENCE — NOT FOR NAVIGATION</text>
+  <text x="600" y="430" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#555">Add an authorised chart image to assets/static_nautical_chart/ (see README.md)</text>
+  <text x="600" y="470" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#555">This view is intentionally not georeferenced.</text>
+</svg>

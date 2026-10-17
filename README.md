@@ -38,6 +38,18 @@ The public landing and reporting pages can be viewed without an account; staff v
 
 The Lovable application is hosted and maintained separately. Its **only relationship to this project is the external showcase hyperlink**. This repository does not develop, connect, synchronise, deploy or share data/backends with that website. See the [project boundary](docs/ARCHITECTURE.md#related-lovable-prototype).
 
+The dashboard is a **read-only reference** for this repository's development. The [concept mapping](docs/LOVABLE_CONCEPT_MAPPING.md) connects its workflows and data structures to repository work without changing the website or copying operational records.
+
+### Synthetic incident exchange
+
+A new [incident data contract](docs/INCIDENT_EXCHANGE.md) validates invented state/district/station membership, timestamps and coordinate quality. Forwarding proposals preserve the original destination and require human review; nothing is written or dispatched.
+
+```bash
+uv run --locked python -m coastal_security.incidents --input data/synthetic_incident_exchange.json
+```
+
+On this proposal branch, the [ICCC POC charter](ICCC_Coastal_Security/docs/POC_CHARTER.md), [review findings](ICCC_Coastal_Security/docs/REVIEW_FINDINGS.md) and [development backlog](ICCC_Coastal_Security/docs/ROADMAP.md) define the next acceptance gates. The POC remains under review.
+
 ## What exists
 
 | Module | Implemented | Limitations |

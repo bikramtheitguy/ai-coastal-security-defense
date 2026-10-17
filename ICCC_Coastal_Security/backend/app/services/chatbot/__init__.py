@@ -1,0 +1,1 @@
+"""AI Maritime Public Assistant."""
