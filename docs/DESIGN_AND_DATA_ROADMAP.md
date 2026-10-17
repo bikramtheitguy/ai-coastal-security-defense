@@ -29,7 +29,7 @@ The original source review was on 15 October 2026; Coastal Watch's pinned geogra
 2. Implemented: bounded public geography, geometry checks and byte-integrity validation. Display copies adapt polygon orientation without rewriting the source bundle.
 3. Implemented: selectable layers, freshness legend, exercise clock, explicit unknown/stale states and evidence export. Counts follow coast/state cohorts; district selection changes viewport only.
 4. Implemented: 26 fictional harbour/landing-centre records with conspicuous `SIM-HBR`/`SIM-LDC` identities, placed on public reference-boundary vertices and carrying no operational attributes. See [fictional sites](FICTIONAL_SITES.md). No client coordinates or facility data are used.
-5. Continuing release gates: map alignment, narrow layouts and browser errors. Before real-data use, add independent geographic validation, accessibility review, measured performance and geodesic event evaluation.
+5. Continuing release gates: map alignment, narrow layouts and browser errors. Implemented: an automated [accessibility gate](ACCESSIBILITY.md) (WCAG 2.2 AA rules, contrast, reflow, keyboard); a manual assistive-technology audit remains. Before real-data use, add independent geographic validation, measured performance and geodesic event evaluation.
 
 ## Credible operational-workflow roadmap
 

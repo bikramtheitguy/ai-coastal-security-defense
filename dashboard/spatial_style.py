@@ -26,8 +26,20 @@ def apply_spatial_style():
     }
     [data-testid="stMetricValue"] { font-variant-numeric: tabular-nums; }
     [data-testid="stVerticalBlockBorderWrapper"] { border-radius: 16px; }
+    /* WCAG 1.4.3: Streamlit fades captions to 60% opacity (4.0:1 on panels)
+       and puts white text on the light primary blue (1.8:1). Navy on that
+       blue is 10.4:1; full-opacity captions are at least 6.8:1. */
+    [data-testid="stCaptionContainer"] { opacity: 1 !important; }
     [data-testid="stCaptionContainer"],
     [data-testid="stCaptionContainer"] p { color: #b8c8dc !important; }
+    [data-testid^="stBaseButton-primary"],
+    [data-testid^="stBaseButton-primary"] p,
+    [data-testid="stMultiSelectTagsContainer"] [data-tag],
+    [data-testid="stMultiSelectTagsContainer"] [data-tag] * { color: #0b1424 !important; }
+    /* st.json numbers use an inline #cc6633 (3.8:1 on panels); this hue is 5.2:1+. */
+    [data-testid="stJson"] .variable-value > [style*="rgb(204, 102, 51)"] {
+      color: #f0995f !important;
+    }
     [data-testid="stAlert"] p { color: #eef4fc; }
     button, input, textarea { font-variant-numeric: tabular-nums; }
     @media (max-width: 640px) {

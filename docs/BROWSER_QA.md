@@ -4,7 +4,7 @@
 
 ## Isolated, reproducible tooling
 
-The Streamlit runtime remains defined by `pyproject.toml` and `uv.lock`. Browser tooling uses a separate `.browser-venv`. `browser_tests/requirements.in` pins Playwright 1.64.0 and pytest 9.1.1; `requirements.txt` in that directory is their generated transitive hash lock. Python installs enforce hashes. Chromium is selected by the pinned Playwright distribution; its runtime version is recorded with the evidence. Browser binaries and Linux system packages are outside the application's runtime lock.
+The Streamlit runtime remains defined by `pyproject.toml` and `uv.lock`. Browser tooling uses a separate `.browser-venv`. `browser_tests/requirements.in` pins Playwright 1.64.0, pytest 9.1.1 and axe-playwright-python 0.1.8; `requirements.txt` in that directory is their generated transitive hash lock. Python installs enforce hashes. Chromium is selected by the pinned Playwright distribution; its runtime version is recorded with the evidence. Browser binaries and Linux system packages are outside the application's runtime lock.
 
 Linux, from the repository root:
 
@@ -36,6 +36,7 @@ Do not disable host protections when loopback access is denied. GitHub Actions p
 - Review: acknowledgement/rationale validation, status transitions, downloaded JSON and reset.
 - Narrow layout: controls, plots, page overflow and synthetic CSV/manifest downloads.
 - Isolation: unexpected external HTTP requests and browser JavaScript errors fail tests.
+- Accessibility: axe-core WCAG 2.2 AA rules, text contrast, 320 px reflow and keyboard module switching on every view; see [accessibility review](ACCESSIBILITY.md).
 
 Desktop size is 1365 × 900; narrow size is 390 × 844. Browser timezone is Asia/Kolkata so screenshot review can also check that the explicitly UTC speed axis remains UTC. Viewport emulation is not physical-phone validation. Firefox, Safari/WebKit, assistive technology, concurrent reviewers and operational workloads remain outside this check.
 
