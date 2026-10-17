@@ -92,7 +92,7 @@ Select **Scenario Replay** to explore the new POC. Start at minute 45 to see a s
 
 Select **Vessel Evaluation** to compare calibrated rules, fixed thresholds and a no-alert baseline across six scenario families. Inspect matching evidence and download the complete reproducible benchmark. See the [evaluation protocol](docs/TRAJECTORY_EVALUATION.md) and [spatial design and public-data roadmap](docs/DESIGN_AND_DATA_ROADMAP.md).
 
-Select **Coastal Watch** for an India-focused geographic exercise. Choose a coast and state/UT, inspect last-known vessel positions and source delays, and download the evidence available at the exercise clock. Public geography and synthetic traffic are clearly separated. See the [previous/current comparison and walkthrough](docs/COASTAL_WATCH_COMPARISON.md), [third-party data notices](data/coastal_watch/NOTICE.md), and [platform-inspired development sequence](docs/PLATFORM_CONCEPTS.md).
+Select **Coastal Watch** for an India-focused geographic exercise. Choose a coast and state/UT, inspect last-known vessel positions and source delays, and download the evidence available at the exercise clock. Public geography and synthetic traffic are clearly separated. Lavender diamonds mark [fictional harbour and landing-centre records](docs/FICTIONAL_SITES.md); they are invented exercise context, not real facilities. See the [previous/current comparison and walkthrough](docs/COASTAL_WATCH_COMPARISON.md), [third-party data notices](data/coastal_watch/NOTICE.md), and [platform-inspired development sequence](docs/PLATFORM_CONCEPTS.md).
 
 Do not activate the committed `venv/` directory. It is a historical Linux/Python environment retained with the original repository; supported installations use a fresh `.venv/`.
 

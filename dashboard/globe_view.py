@@ -43,6 +43,7 @@ def globe_deck(
     trails=True,
     zone=True,
     show_districts=False,
+    sites=None,
 ) -> pdk.Deck:
     layers = [
         pdk.Layer(
@@ -128,6 +129,53 @@ def globe_deck(
                 pickable=False,
             )
         )
+    if sites:
+        # Display only: picking stays limited to vessels, whose identity is validated.
+        layers.append(
+            pdk.Layer(
+                "ScatterplotLayer",
+                id="fictional-sites",
+                data=[site | {"position": [site["longitude"], site["latitude"]]} for site in sites],
+                get_position="position",
+                get_radius=6,
+                radius_units=String("pixels"),
+                get_fill_color=[199, 168, 242],
+                get_line_color=[11, 20, 36],
+                line_width_min_pixels=1,
+                stroked=True,
+                filled=True,
+                parameters={"cull": False, "cullMode": "none"},
+                pickable=False,
+            )
+        )
+        if len(sites) <= 12:
+            layers.append(
+                pdk.Layer(
+                    "TextLayer",
+                    id="fictional-site-identities",
+                    data=[
+                        site
+                        | {
+                            "position": [site["longitude"], site["latitude"]],
+                            "offset": [-10, -7 if site["site_type"] == "Fictional harbour" else 8],
+                        }
+                        for site in sites
+                    ],
+                    get_position="position",
+                    get_text="site_id",
+                    get_size=11,
+                    get_color=[217, 200, 245],
+                    # Sites lie on the shore; label landward, away from vessel labels,
+                    # and stagger the two record types.
+                    get_text_anchor=String("end"),
+                    get_pixel_offset="offset",
+                    outline_width=3,
+                    outline_color=[10, 23, 39],
+                    font_settings={"sdf": True},
+                    parameters={"cull": False, "cullMode": "none"},
+                    pickable=False,
+                )
+            )
     if trails:
         layers.append(
             pdk.Layer(
@@ -241,7 +289,17 @@ def _preset(name: str) -> None:
 
 
 def render_globe(
-    coast, state, selected, states, districts, extent, coastline, trails, zone, show_districts
+    coast,
+    state,
+    selected,
+    states,
+    districts,
+    extent,
+    coastline,
+    trails,
+    zone,
+    show_districts,
+    sites=None,
 ) -> None:
     try:
         land, _ = load_land()
@@ -266,6 +324,7 @@ def render_globe(
                 trails,
                 zone,
                 show_districts,
+                sites,
             ),
             key=key,
             height=550,
@@ -283,7 +342,8 @@ def render_globe(
         )
     st.caption(
         "Drag to rotate · scroll/pinch to zoom · click a vessel to inspect · "
-        "use the chart's fullscreen control to expand. Mint: fresh; amber: stale. "
+        "use the chart's fullscreen control to expand. Mint: fresh; amber: stale; "
+        "lavender: fictional sites. "
         "Vessel symbols identify records; orientation is not a reported heading."
     )
     st.caption(

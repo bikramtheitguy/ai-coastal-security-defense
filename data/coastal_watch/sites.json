@@ -1,0 +1,457 @@
+{
+  "limitations": "Invented sites on generalised public geometry. Not real ports, harbours, landing centres, facilities or jurisdictions; a site may fall near a real place by coincidence. Not for navigation or operational planning.",
+  "rules": {
+    "anchor": "Existing fictional exercise anchor for each coastal state/UT",
+    "candidates": "Vertices of that state/UT's geoBoundaries reference boundary",
+    "coastline_km": 8.0,
+    "distance": "Great-circle on a sphere of radius 6371.0088 km; spacing aid only",
+    "order": "Nearest eligible vertex to the anchor first; ties by polygon, ring, vertex",
+    "separation_km": 25.0
+  },
+  "sites": [
+    {
+      "anchor_km": 90.9,
+      "coast": "West coast",
+      "coastline_km": 2.1,
+      "exercise_state": "IN-GJ",
+      "latitude": 21.796674261762803,
+      "longitude": 69.39992463715808,
+      "reference_vertex": {
+        "polygon": 4,
+        "ring": 0,
+        "vertex": 4486
+      },
+      "site_id": "SIM-HBR-GJ-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Gujarat"
+    },
+    {
+      "anchor_km": 94.6,
+      "coast": "West coast",
+      "coastline_km": 1.2,
+      "exercise_state": "IN-GJ",
+      "latitude": 21.957585611796944,
+      "longitude": 69.21723933959628,
+      "reference_vertex": {
+        "polygon": 4,
+        "ring": 0,
+        "vertex": 4467
+      },
+      "site_id": "SIM-LDC-GJ-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Gujarat"
+    },
+    {
+      "anchor_km": 51.8,
+      "coast": "West coast",
+      "coastline_km": 4.8,
+      "exercise_state": "IN-MH",
+      "latitude": 18.219213804492494,
+      "longitude": 72.93201925058186,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 3778
+      },
+      "site_id": "SIM-HBR-MH-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Maharashtra"
+    },
+    {
+      "anchor_km": 54.7,
+      "coast": "West coast",
+      "coastline_km": 0.2,
+      "exercise_state": "IN-MH",
+      "latitude": 18.00707946584623,
+      "longitude": 73.01683498889254,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 3831
+      },
+      "site_id": "SIM-LDC-MH-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Maharashtra"
+    },
+    {
+      "anchor_km": 38.0,
+      "coast": "West coast",
+      "coastline_km": 1.0,
+      "exercise_state": "IN-GA",
+      "latitude": 15.394346581433759,
+      "longitude": 73.79147133231723,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 154
+      },
+      "site_id": "SIM-HBR-GA-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Goa"
+    },
+    {
+      "anchor_km": 46.0,
+      "coast": "West coast",
+      "coastline_km": 2.3,
+      "exercise_state": "IN-GA",
+      "latitude": 15.108099767471117,
+      "longitude": 73.91798211223227,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 197
+      },
+      "site_id": "SIM-LDC-GA-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Goa"
+    },
+    {
+      "anchor_km": 41.7,
+      "coast": "West coast",
+      "coastline_km": 0.0,
+      "exercise_state": "IN-KA",
+      "latitude": 13.552653181643185,
+      "longitude": 74.68146499285227,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 448
+      },
+      "site_id": "SIM-HBR-KA-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Karnataka"
+    },
+    {
+      "anchor_km": 47.3,
+      "coast": "West coast",
+      "coastline_km": 0.3,
+      "exercise_state": "IN-KA",
+      "latitude": 13.779858055901842,
+      "longitude": 74.62960175974852,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 438
+      },
+      "site_id": "SIM-LDC-KA-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Karnataka"
+    },
+    {
+      "anchor_km": 45.0,
+      "coast": "West coast",
+      "coastline_km": 0.9,
+      "exercise_state": "IN-KL",
+      "latitude": 10.593020932776206,
+      "longitude": 76.00017939366293,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 54
+      },
+      "site_id": "SIM-HBR-KL-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Kerala"
+    },
+    {
+      "anchor_km": 54.3,
+      "coast": "West coast",
+      "coastline_km": 0.3,
+      "exercise_state": "IN-KL",
+      "latitude": 10.898047746529155,
+      "longitude": 75.88756847610782,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 51
+      },
+      "site_id": "SIM-LDC-KL-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Kerala"
+    },
+    {
+      "anchor_km": 67.7,
+      "coast": "East coast",
+      "coastline_km": 1.7,
+      "exercise_state": "IN-TN",
+      "latitude": 12.385126713395255,
+      "longitude": 80.11699169611099,
+      "reference_vertex": {
+        "polygon": 40,
+        "ring": 0,
+        "vertex": 173
+      },
+      "site_id": "SIM-HBR-TN-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Tamil Nadu"
+    },
+    {
+      "anchor_km": 71.6,
+      "coast": "East coast",
+      "coastline_km": 1.0,
+      "exercise_state": "IN-TN",
+      "latitude": 12.201136231606789,
+      "longitude": 79.97433988925454,
+      "reference_vertex": {
+        "polygon": 40,
+        "ring": 0,
+        "vertex": 166
+      },
+      "site_id": "SIM-LDC-TN-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Tamil Nadu"
+    },
+    {
+      "anchor_km": 101.5,
+      "coast": "East coast",
+      "coastline_km": 0.1,
+      "exercise_state": "IN-AP",
+      "latitude": 17.472533112585197,
+      "longitude": 82.99195669387879,
+      "reference_vertex": {
+        "polygon": 9,
+        "ring": 0,
+        "vertex": 432
+      },
+      "site_id": "SIM-HBR-AP-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Andhra Pradesh"
+    },
+    {
+      "anchor_km": 103.7,
+      "coast": "East coast",
+      "coastline_km": 2.5,
+      "exercise_state": "IN-AP",
+      "latitude": 17.59100498987014,
+      "longitude": 83.21292661500142,
+      "reference_vertex": {
+        "polygon": 9,
+        "ring": 0,
+        "vertex": 455
+      },
+      "site_id": "SIM-LDC-AP-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Andhra Pradesh"
+    },
+    {
+      "anchor_km": 55.3,
+      "coast": "East coast",
+      "coastline_km": 5.9,
+      "exercise_state": "IN-OR",
+      "latitude": 19.954490896441868,
+      "longitude": 86.386191824739,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 1424
+      },
+      "site_id": "SIM-HBR-OR-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Odisha"
+    },
+    {
+      "anchor_km": 68.9,
+      "coast": "East coast",
+      "coastline_km": 0.0,
+      "exercise_state": "IN-OR",
+      "latitude": 19.850423376627145,
+      "longitude": 86.05774138412482,
+      "reference_vertex": {
+        "polygon": 0,
+        "ring": 0,
+        "vertex": 1417
+      },
+      "site_id": "SIM-LDC-OR-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Odisha"
+    },
+    {
+      "anchor_km": 73.2,
+      "coast": "East coast",
+      "coastline_km": 7.3,
+      "exercise_state": "IN-WB",
+      "latitude": 21.55792125912179,
+      "longitude": 88.48571925910385,
+      "reference_vertex": {
+        "polygon": 17,
+        "ring": 0,
+        "vertex": 8
+      },
+      "site_id": "SIM-HBR-WB-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "West Bengal"
+    },
+    {
+      "anchor_km": 78.1,
+      "coast": "East coast",
+      "coastline_km": 2.4,
+      "exercise_state": "IN-WB",
+      "latitude": 21.569091220743317,
+      "longitude": 88.72886017186873,
+      "reference_vertex": {
+        "polygon": 21,
+        "ring": 0,
+        "vertex": 21
+      },
+      "site_id": "SIM-LDC-WB-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "West Bengal"
+    },
+    {
+      "anchor_km": 44.8,
+      "coast": "West coast",
+      "coastline_km": 0.9,
+      "exercise_state": "IN-DH",
+      "latitude": 20.367663040128463,
+      "longitude": 72.82123644146087,
+      "reference_vertex": {
+        "polygon": 1,
+        "ring": 0,
+        "vertex": 9
+      },
+      "site_id": "SIM-HBR-DH-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Dadra and Nagar Haveli and Daman and Diu"
+    },
+    {
+      "anchor_km": 170.9,
+      "coast": "West coast",
+      "coastline_km": 2.3,
+      "exercise_state": "IN-DH",
+      "latitude": 20.713506863238955,
+      "longitude": 70.99690301922901,
+      "reference_vertex": {
+        "polygon": 2,
+        "ring": 0,
+        "vertex": 39
+      },
+      "site_id": "SIM-LDC-DH-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Dadra and Nagar Haveli and Daman and Diu"
+    },
+    {
+      "anchor_km": 41.9,
+      "coast": "East coast",
+      "coastline_km": 0.3,
+      "exercise_state": "IN-PY",
+      "latitude": 11.876523712898308,
+      "longitude": 79.82264042692621,
+      "reference_vertex": {
+        "polygon": 6,
+        "ring": 0,
+        "vertex": 2
+      },
+      "site_id": "SIM-HBR-PY-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Puducherry"
+    },
+    {
+      "anchor_km": 97.0,
+      "coast": "East coast",
+      "coastline_km": 1.0,
+      "exercise_state": "IN-PY",
+      "latitude": 11.002115741134297,
+      "longitude": 79.84019704604181,
+      "reference_vertex": {
+        "polygon": 14,
+        "ring": 0,
+        "vertex": 18
+      },
+      "site_id": "SIM-LDC-PY-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Puducherry"
+    },
+    {
+      "anchor_km": 81.5,
+      "coast": "Island territories",
+      "coastline_km": 7.9,
+      "exercise_state": "IN-LD",
+      "latitude": 11.136406714614768,
+      "longitude": 72.73372523627496,
+      "reference_vertex": {
+        "polygon": 18,
+        "ring": 0,
+        "vertex": 4
+      },
+      "site_id": "SIM-HBR-LD-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Lakshadweep"
+    },
+    {
+      "anchor_km": 320.1,
+      "coast": "Island territories",
+      "coastline_km": 0.9,
+      "exercise_state": "IN-LD",
+      "latitude": 8.32429621929929,
+      "longitude": 73.07842503706058,
+      "reference_vertex": {
+        "polygon": 1,
+        "ring": 0,
+        "vertex": 4
+      },
+      "site_id": "SIM-LDC-LD-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Lakshadweep"
+    },
+    {
+      "anchor_km": 29.6,
+      "coast": "Island territories",
+      "coastline_km": 0.1,
+      "exercise_state": "IN-AN",
+      "latitude": 11.570565198075238,
+      "longitude": 92.73777448705141,
+      "reference_vertex": {
+        "polygon": 80,
+        "ring": 0,
+        "vertex": 601
+      },
+      "site_id": "SIM-HBR-AN-01",
+      "site_type": "Fictional harbour",
+      "source": "synthetic",
+      "state_name": "Andaman and Nicobar Islands"
+    },
+    {
+      "anchor_km": 35.5,
+      "coast": "Island territories",
+      "coastline_km": 6.4,
+      "exercise_state": "IN-AN",
+      "latitude": 11.331485023661319,
+      "longitude": 92.72290670075266,
+      "reference_vertex": {
+        "polygon": 63,
+        "ring": 0,
+        "vertex": 3
+      },
+      "site_id": "SIM-LDC-AN-02",
+      "site_type": "Fictional landing centre",
+      "source": "synthetic",
+      "state_name": "Andaman and Nicobar Islands"
+    }
+  ],
+  "source": "synthetic",
+  "version": "coastal-sites-v1"
+}
