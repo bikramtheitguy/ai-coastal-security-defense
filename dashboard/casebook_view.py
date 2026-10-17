@@ -21,6 +21,7 @@ from coastal_security.casebook import (
     review_case,
 )
 from coastal_security.watch import parse_time
+from dashboard.downloads import download_button
 
 BOOK_KEY = "coastal_casebook"
 
@@ -285,13 +286,13 @@ def render_investigations(state: dict, exercise: dict, registry: dict) -> None:
             )
             with st.expander("Handover brief · deterministic, evidence-linked"):
                 st.text(handover_text(case))
-            st.download_button(
+            download_button(
                 "Download case handover (TXT)",
                 handover_text(case),
                 f"{selected}-synthetic-handover.txt",
                 "text/plain",
             )
-        st.download_button(
+        download_button(
             "Download casebook (JSON)",
             export_casebook(book),
             "india-watch-synthetic-casebook.json",

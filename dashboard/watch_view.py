@@ -10,6 +10,7 @@ from coastal_security.india import COASTAL_STATES, display_feature, scope_geomet
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
 from dashboard.briefing_view import render_briefing
 from dashboard.casebook_view import render_investigations
+from dashboard.downloads import download_button
 from dashboard.globe_view import render_globe
 from dashboard.history_view import focus_history, render_history
 
@@ -474,7 +475,7 @@ def render_watch() -> None:
                 hide_index=True,
                 width="stretch",
             )
-            st.download_button(
+            download_button(
                 "Download vessel evidence (JSON)",
                 evidence_export(state, registry, selected),
                 f"{selected}-synthetic-evidence.json",
@@ -571,7 +572,7 @@ def render_watch() -> None:
                 "Lakshadweep has no district association in this mixed-vintage "
                 "bundle. This is a data gap, not absence of a district."
             )
-        st.download_button(
+        download_button(
             "Download watch snapshot (JSON)",
             evidence_export(state, registry),
             "coastal-watch-synthetic-snapshot.json",
