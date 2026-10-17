@@ -85,3 +85,25 @@ computed during the script run: exported bytes and displayed hashes are
 unchanged. `tests/test_downloads.py` rejects direct `st.download_button` calls
 in views and asserts rendered buttons are deferred and ignore reruns. Browser
 tests still click the real buttons and validate saved files.
+
+## Idle waits after a globe rebuild
+
+Browser run **39006889984** (PR #23) failed in
+`test_globe_narrow_and_research_views`: after the Odisha camera click,
+`stApp[data-test-script-state]` stayed `running` past Playwright's 5 s default.
+The same test also failed 1 of 8 local runs of unmodified `main`, so the race
+predates the fictional-site layers.
+
+A state/UT scope change and every camera preset deliberately re-key the pydeck
+chart, so deck.gl rebuilds the globe. A traced local failure showed the scope
+rerun finishing in 1.5 s, then the camera rerun running from 4.0 s to 11.4 s
+while main-thread long tasks of 4.4 s and 1.8 s ran: under software WebGL the
+frontend cannot record that the script finished until the rebuild yields. The
+script itself takes about 0.2 s on `main` and on PR #23.
+
+`wait_for_idle` now allows 20 s for the run-state to settle. It still fails if
+a run never finishes; it does not add retries, skip tests or inject state. The
+narrow globe test also confirms the Odisha scope (metrics, then idle) before
+clicking the camera preset, so each rebuild has its own wait. Clean samples put
+PR #23's site layers within about 10% of `main`'s rebuild cost; the rebuild on
+camera changes is existing design and a candidate for the performance gate.
