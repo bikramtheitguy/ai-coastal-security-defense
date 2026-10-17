@@ -52,6 +52,20 @@
         "1": "4c63fe43294a391e8f2de4e9f86f3edb60f8688275b9fee90c61fb2aa0c26061",
         "2": "d68db39cd3e2d0892af268e2b0454166368ce3b5b8a78fcda63069ec92a641db"
       }
+    },
+    "sites.json": {
+      "bytes": 12317,
+      "derived_from": [
+        "india-reference.json",
+        "coastline.geojson"
+      ],
+      "generator": "coastal_security/sites.py",
+      "license": "Generator MIT; vertex coordinates from geoBoundaries state polygons, CC BY 2.5 IN",
+      "limitations": "Invented sites on generalised public geometry. Not real ports, harbours, landing centres, facilities or jurisdictions; a site may fall near a real place by coincidence. Not for navigation or operational planning.",
+      "provider": "Project generator",
+      "sha256": "822699482caa7377edb0bada0ae6405cdf9bf3f3cd3b0c1df111db9399f26452",
+      "source_type": "synthetic",
+      "version": "coastal-sites-v1"
     }
   },
   "coordinate_order": "longitude, latitude",

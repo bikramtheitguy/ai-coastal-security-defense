@@ -2,6 +2,12 @@ import re
 
 from playwright.sync_api import expect
 
+# Scope changes and camera presets deliberately re-key the globe, rebuilding
+# deck.gl. Under the software WebGL used in CI, a traced rebuild blocked the
+# main thread for 4.4 s + 1.8 s, delaying the run-state update past
+# Playwright's 5 s default (CI run 39006889984). This only bounds the wait.
+IDLE_TIMEOUT_MS = 20_000
+
 
 def wait_for_idle(page):
     """Call after asserting the requested server state, before the next action.
@@ -9,7 +15,9 @@ def wait_for_idle(page):
     A heading can arrive before Streamlit finishes replacing stale elements.
     This is the run-state attribute exposed by the pinned Streamlit frontend.
     """
-    expect(page.get_by_test_id("stApp")).to_have_attribute("data-test-script-state", "notRunning")
+    expect(page.get_by_test_id("stApp")).to_have_attribute(
+        "data-test-script-state", "notRunning", timeout=IDLE_TIMEOUT_MS
+    )
 
 
 def select_tab(page, name):

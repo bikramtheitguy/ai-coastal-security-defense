@@ -7,6 +7,7 @@ import streamlit as st
 
 from coastal_security.geography import EXTENT, load_bundle
 from coastal_security.india import COASTAL_STATES, display_feature, scope_geometry
+from coastal_security.sites import load_sites, sites_export, sites_in_scope
 from coastal_security.watch import END_MINUTE, ZONE, evidence_export, parse_time, snapshot
 from dashboard.briefing_view import render_briefing
 from dashboard.casebook_view import render_investigations
@@ -36,6 +37,7 @@ def map_spec(
     districts: list,
     extent: list,
     show_districts: bool,
+    sites: list | None = None,
 ) -> dict:
     layers = []
     # Fixed fit prevents the coast jumping as observations arrive or filters change.
@@ -137,6 +139,46 @@ def map_spec(
         "longitude": {"field": "longitude", "type": "quantitative"},
         "latitude": {"field": "latitude", "type": "quantitative"},
     }
+    if sites:
+        layers.append(
+            {
+                "data": {"values": sites},
+                "mark": {
+                    "type": "point",
+                    "shape": "diamond",
+                    "filled": True,
+                    "size": 110,
+                    "color": "#c7a8f2",
+                    "stroke": "#0b1424",
+                    "strokeWidth": 1,
+                },
+                "encoding": position
+                | {
+                    "tooltip": [
+                        {"field": "site_id", "title": "Fictional site", "type": "nominal"},
+                        {"field": "site_type", "title": "Record", "type": "nominal"},
+                        {"field": "state_name", "title": "Exercise state/UT", "type": "nominal"},
+                    ]
+                },
+            }
+        )
+        if len(sites) <= 12:
+            # Label landward of the shore, away from vessel labels; stagger the two types.
+            for site_type, dy in (("Fictional harbour", -6), ("Fictional landing centre", 7)):
+                layers.append(
+                    {
+                        "data": {"values": [s for s in sites if s["site_type"] == site_type]},
+                        "mark": {
+                            "type": "text",
+                            "align": "right",
+                            "dx": -9,
+                            "dy": dy,
+                            "fontSize": 9,
+                            "color": "#d9c8f5",
+                        },
+                        "encoding": position | {"text": {"field": "site_id"}},
+                    }
+                )
     if trails and state["observations"]:
         layers.append(
             {
@@ -239,6 +281,11 @@ def render_watch() -> None:
     )
     try:
         coast, exercise, admin, registry = load_bundle()
+        try:
+            site_records, site_error = load_sites(admin), None
+        except ValueError as exc:
+            # Optional context: hide the sites, keep the verified vessel picture.
+            site_records, site_error = None, str(exc)
         geography = st.columns(2)
         coast_scope = geography[0].selectbox(
             "Coast",
@@ -282,6 +329,7 @@ def render_watch() -> None:
             "Vessel class", ["All classes", "Cargo", "Fishing", "Service"], key="watch_class"
         )
         state = snapshot(exercise, minute, vessel_class, state_iso, coast_scope)
+        scoped_sites = sites_in_scope(site_records, state_iso, coast_scope) if site_records else []
     except (ValueError, KeyError, TypeError) as exc:
         st.error(f"Coastal Watch cannot render this fixture: {exc}")
         return
@@ -336,11 +384,13 @@ def render_watch() -> None:
             preferred if preferred in history_options else history_options[0]
         )
     with watch:
-        layers = st.columns(4)
+        layers = st.columns(5)
         coastline = layers[0].checkbox("Public coastline", True, key="watch_coastline")
         trails = layers[1].checkbox("Observation history", True, key="watch_trails")
         zone = layers[2].checkbox("Exercise area", True, key="watch_zone")
         show_districts = layers[3].checkbox("Reference districts", False, key="watch_districts")
+        show_sites = layers[4].checkbox("Fictional sites", True, key="watch_sites")
+        map_sites = scoped_sites if show_sites else None
         display = st.radio(
             "Map display", ["Interactive globe", "2D map"], horizontal=True, key="watch_display"
         )
@@ -399,6 +449,7 @@ def render_watch() -> None:
                     trails,
                     zone,
                     show_districts,
+                    map_sites,
                 )
             else:
                 st.vega_lite_chart(
@@ -412,6 +463,7 @@ def render_watch() -> None:
                         districts,
                         extent,
                         show_districts,
+                        map_sites,
                     ),
                     height=440,
                     width="stretch",
@@ -421,7 +473,7 @@ def render_watch() -> None:
                     "Mercator view · WGS84 longitude/latitude · Natural Earth 1:50 million. "
                     "Generalised context, not navigation or legal boundaries. Dots are "
                     "received observations; gaps are not interpolated. Amber: stale "
-                    "last-known positions. Dashed area is fictional."
+                    "last-known positions. Dashed area and lavender diamonds are fictional."
                 )
         st.caption(
             "State outlines: DataMeet / Election Commission of India via "
@@ -491,6 +543,45 @@ def render_watch() -> None:
             st.dataframe(pd.DataFrame(state["flags"]), hide_index=True, width="stretch")
         else:
             st.info("No current rule flags in this cohort.")
+        with st.expander("Fictional harbour and landing-centre records"):
+            st.caption(
+                "INVENTED EXERCISE CONTEXT. Not real ports, harbours, landing centres or "
+                "facilities; a site may fall near a real place by coincidence. Identities "
+                "and provenance only: no names, capacities or security attributes."
+            )
+            if site_error:
+                st.warning(site_error)
+            elif not scoped_sites:
+                st.info("No fictional site records in this scope.")
+            else:
+                st.dataframe(
+                    pd.DataFrame(scoped_sites)[
+                        [
+                            "site_id",
+                            "site_type",
+                            "state_name",
+                            "coast",
+                            "latitude",
+                            "longitude",
+                            "coastline_km",
+                        ]
+                    ],
+                    hide_index=True,
+                    width="stretch",
+                )
+                st.caption(
+                    "Placement: two vertices of each state/UT's public reference boundary "
+                    "nearest its fictional exercise anchor, within 8 km of the Natural Earth "
+                    "coastline and at least 25 km apart. Counts follow the state/coast scope; "
+                    "district focus changes the viewport only. No vessel is assigned to a site."
+                )
+                download_button(
+                    "Download fictional site records (JSON)",
+                    sites_export(site_records, registry, state_iso, coast_scope),
+                    "coastal-watch-fictional-sites.json",
+                    "application/json",
+                    key="watch_sites_download",
+                )
     with history_tab:
         if history_tab.open:
             render_history(state, exercise, registry)

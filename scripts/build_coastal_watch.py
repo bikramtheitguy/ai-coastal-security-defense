@@ -16,6 +16,8 @@ from coastal_security.geography import (  # noqa: E402
     json_bytes,
 )
 from coastal_security.india import ADMIN_HASHES, GEOB_REVISION  # noqa: E402
+from coastal_security.sites import LIMITATIONS, generate_sites  # noqa: E402
+from coastal_security.sites import VERSION as SITES_VERSION  # noqa: E402
 from coastal_security.watch import SEED, VERSION, generate_exercise  # noqa: E402
 
 
@@ -24,12 +26,14 @@ def build(source: Path, admin_source: Path, output: Path) -> None:
         raise ValueError(
             "Output already exists; choose a new directory and compare before replacing."
         )
-    coast = json_bytes(coastline_fixture(source.read_bytes()))
+    coastline = coastline_fixture(source.read_bytes())
+    coast = json_bytes(coastline)
     exercise = json_bytes(generate_exercise())
     admin = admin_source.read_bytes()
     reference = json.loads(admin)
     if reference["revision"] != GEOB_REVISION or len(reference["states"]) != 13:
         raise ValueError("Unexpected administrative reference bundle.")
+    sites = json_bytes(generate_sites(reference, coastline))
     registry = {
         "schema_version": 1,
         "crs": "OGC:CRS84",
@@ -94,6 +98,20 @@ def build(source: Path, admin_source: Path, output: Path) -> None:
                     "incidents."
                 ),
             },
+            "sites.json": {
+                "source_type": "synthetic",
+                "provider": "Project generator",
+                "version": SITES_VERSION,
+                "generator": "coastal_security/sites.py",
+                "license": (
+                    "Generator MIT; vertex coordinates from geoBoundaries state "
+                    "polygons, CC BY 2.5 IN"
+                ),
+                "derived_from": ["india-reference.json", "coastline.geojson"],
+                "sha256": digest(sites),
+                "bytes": len(sites),
+                "limitations": LIMITATIONS,
+            },
         },
     }
     output.mkdir(parents=True)
@@ -101,12 +119,14 @@ def build(source: Path, admin_source: Path, output: Path) -> None:
         ("coastline.geojson", coast),
         ("exercise.json", exercise),
         ("india-reference.json", admin),
+        ("sites.json", sites),
         ("registry.json", json_bytes(registry)),
     ):
         (output / name).write_bytes(payload)
     print(
-        f"Wrote public coastline ({len(coast)} bytes) "
-        f"and synthetic exercise ({len(exercise)} bytes)."
+        f"Wrote public coastline ({len(coast)} bytes), "
+        f"synthetic exercise ({len(exercise)} bytes) "
+        f"and fictional sites ({len(sites)} bytes)."
     )
 
 

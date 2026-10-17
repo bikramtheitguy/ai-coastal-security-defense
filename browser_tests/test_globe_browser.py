@@ -114,6 +114,10 @@ def test_globe_odisha_picking_clock_and_investigation_handoff(page):
 @pytest.mark.parametrize("context_options", [{"has_touch": True}], indirect=True)
 def test_globe_narrow_and_research_views(page):
     select(page, "State / Union Territory", "Odisha")
+    # Settle the scope rerun before the camera click, so each globe rebuild
+    # gets its own idle wait.
+    expect(page.get_by_test_id("stMetricValue")).to_have_text(["8", "1", "3", "4"])
+    wait_for_idle(page)
     page.get_by_role("button", name="Odisha", exact=True).click()
     wait_for_idle(page)
     hide_exercise_area(page)

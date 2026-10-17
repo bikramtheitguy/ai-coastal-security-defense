@@ -28,7 +28,7 @@ The original source review was on 15 October 2026; Coastal Watch's pinned geogra
 1. Implemented: pinned registry with origin, licence, version, hashes, units, coordinate reference system and synthetic status; separate observed/received timestamps in the traffic contract.
 2. Implemented: bounded public geography, geometry checks and byte-integrity validation. Display copies adapt polygon orientation without rewriting the source bundle.
 3. Implemented: selectable layers, freshness legend, exercise clock, explicit unknown/stale states and evidence export. Counts follow coast/state cohorts; district selection changes viewport only.
-4. Proposed: fictional harbour/landing-centre records with conspicuous synthetic identifiers. Do not copy client coordinates or operational features.
+4. Implemented: 26 fictional harbour/landing-centre records with conspicuous `SIM-HBR`/`SIM-LDC` identities, placed on public reference-boundary vertices and carrying no operational attributes. See [fictional sites](FICTIONAL_SITES.md). No client coordinates or facility data are used.
 5. Continuing release gates: map alignment, narrow layouts and browser errors. Before real-data use, add independent geographic validation, accessibility review, measured performance and geodesic event evaluation.
 
 ## Credible operational-workflow roadmap
