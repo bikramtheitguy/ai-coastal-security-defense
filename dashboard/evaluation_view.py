@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from coastal_security.trajectory import FAMILIES, RULES, benchmark
+from dashboard.downloads import download_button
 
 LABELS = {
     "all": "All scenarios",
@@ -182,7 +183,7 @@ def render_evaluation():
         st.write("Version: " + data["version"])
         st.write(f"Calibration seed: {data['calibration_seed']} · Test seed: {data['test_seed']}")
     payload = (json.dumps(data, indent=2, allow_nan=False) + "\n").encode()
-    st.download_button(
+    download_button(
         "Download complete synthetic benchmark (JSON)",
         payload,
         "synthetic-trajectory-benchmark.json",

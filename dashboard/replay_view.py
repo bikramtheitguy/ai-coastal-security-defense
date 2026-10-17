@@ -25,6 +25,7 @@ from coastal_security.replay import (
     status_for,
     visible_observations,
 )
+from dashboard.downloads import download_button
 
 
 def _pause() -> None:
@@ -320,13 +321,11 @@ def render_replay() -> None:
                 )
             else:
                 st.write("No demo reviews recorded in this session.")
-            st.download_button(
+            download_button(
                 "Download demo review JSON",
                 export_review(state.replay_reviews, scenario_manifest(rows)),
                 "synthetic-review-history.json",
                 "application/json",
-                # Export the already-rendered snapshot without racing a fragment rerun.
-                on_click="ignore",
             )
         with st.expander("Scenario provenance and downloads"):
             st.write(
@@ -338,13 +337,13 @@ def render_replay() -> None:
                 "The plots and rule engine do not."
             )
             st.json(scenario_manifest(rows))
-            st.download_button(
+            download_button(
                 "Download full synthetic observations",
                 observations_csv(rows),
                 "synthetic-vessel-replay.csv",
                 "text/csv",
             )
-            st.download_button(
+            download_button(
                 "Download provenance manifest",
                 json.dumps(scenario_manifest(rows), indent=2),
                 "synthetic-replay-manifest.json",

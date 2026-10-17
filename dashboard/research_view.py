@@ -5,6 +5,8 @@ from functools import partial
 import pandas as pd
 import streamlit as st
 
+from dashboard.downloads import download_button
+
 OUTCOMES = ["Detected positive", "False alert", "Missed positive", "Correct negative"]
 COLOURS = ["#70cfff", "#ffc46b", "#f78a91", "#345b70"]
 
@@ -197,7 +199,7 @@ def render_review(frame: pd.DataFrame, kind: str, visual) -> None:
             )
     else:
         st.info("No saved predictions in this outcome.")
-    st.download_button(
+    download_button(
         "Download selected prediction rows (CSV)",
         selected[["saved_row", "actual", "predicted", "outcome"]].to_csv(index=False),
         f"{kind}-saved-prediction-review.csv",

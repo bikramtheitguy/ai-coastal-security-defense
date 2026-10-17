@@ -7,6 +7,7 @@ import streamlit as st
 
 from coastal_security.briefing import briefing_export, briefing_text, watch_briefing
 from coastal_security.watch import START, parse_time
+from dashboard.downloads import download_button
 from dashboard.history_view import COLOURS, WINDOWS, focus_history, time_label
 
 PAGE_SIZE = 12
@@ -224,20 +225,18 @@ def render_briefing(state: dict, exercise: dict, registry: dict, review_callback
     text = briefing_text(briefing, registry, zone)
     with st.expander("Preview handover text"):
         st.code(text, language=None, wrap_lines=True)
-    st.download_button(
+    download_button(
         "Download watch briefing (JSON)",
         briefing_export(briefing, registry),
         "india-watch-synthetic-briefing.json",
         "application/json",
-        on_click="ignore",
         key="briefing_json",
     )
-    st.download_button(
+    download_button(
         "Download handover briefing (TXT)",
         text,
         "india-watch-synthetic-handover.txt",
         "text/plain",
-        on_click="ignore",
         key="briefing_text",
     )
     st.caption(

@@ -61,3 +61,27 @@ remain part of the same suite.
 
 Only browser test synchronization and coverage change. Application code,
 datasets, model outputs, dependencies, and runtime capabilities are unchanged.
+
+## Download source checks after a rerun
+
+After PR #21 merged, `test_odisha_briefing_history_review_and_exports[desktop]`
+intermittently failed at teardown: 5 of 10 local Chromium runs at `abc3e7c`.
+Every assertion and download passed. The console recorded
+`Client Error: Download Button source error - 404` for batches of `/media/`
+JSON/TXT URLs.
+
+In the pinned 1.66.0 frontend, every render of an eager download button sends
+a background `checkSourceUrlResponse` request for its URL. Changing a control
+reruns the script and registers new files; the server may release the previous
+URLs before those checks return. Clicks use the current URL, so downloads still
+worked, but any console error fails the browser suite and the race could block
+unrelated PRs.
+
+All views now render downloads through `dashboard/downloads.py`. It passes the
+already-computed content as a deferred callable, so a button has no URL to check
+until it is clicked, and sets `on_click="ignore"` so the click cannot rerun and
+revoke the deferred registration before the file is fetched. Content is still
+computed during the script run: exported bytes and displayed hashes are
+unchanged. `tests/test_downloads.py` rejects direct `st.download_button` calls
+in views and asserts rendered buttons are deferred and ignore reruns. Browser
+tests still click the real buttons and validate saved files.

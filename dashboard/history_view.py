@@ -8,6 +8,7 @@ import streamlit as st
 from coastal_security.history import history_export, vessel_history
 from coastal_security.india import COASTAL_STATES
 from coastal_security.watch import parse_time
+from dashboard.downloads import download_button
 
 WINDOWS = {"Last 60 minutes": 60, "Last 30 minutes": 30, "Full exercise so far": None}
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -297,11 +298,10 @@ def render_history(state: dict, exercise: dict, registry: dict) -> None:
             "The export includes accepted carry-in evidence before this window "
             "to explain freshness. No receipt after the exercise clock is included."
         )
-    st.download_button(
+    download_button(
         "Download vessel history (JSON)",
         history_export(history, registry),
         f"{selected}-synthetic-history.json",
         "application/json",
-        on_click="ignore",
         key="history_download",
     )
