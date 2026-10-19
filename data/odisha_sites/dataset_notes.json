@@ -1,0 +1,30 @@
+{
+  "source": "User-supplied image 1001271336.jpg",
+  "source_date": null,
+  "transcription_date": "2026-10-19",
+  "intended_use": "Site registry for an AI coastal defence project; hazard, erosion, flooding or preparedness use remains to be specified.",
+  "grain": "One row per numbered entry in the image; entry 20 contains two named places and is preserved as one entry.",
+  "geography_assumption": "Odisha, India, inferred from district names; not stated in image.",
+  "field_notes": {
+    "site_id": "Locally assigned identifier; not an official identifier.",
+    "site_name_source": "Source spelling retained without geographic verification.",
+    "facility_type_source": "Only explicit FH or FLC labels are extracted; null otherwise. Acronym expansions require source verification.",
+    "operational_status_source": "Only explicit defunct label extracted; null does not mean active.",
+    "latitude/longitude": "Not provided; null. Verify coordinates before mapping or spatial joins."
+  },
+  "quality_summary": {
+    "rows": 25,
+    "districts": 7,
+    "unique_local_ids": 25,
+    "unique_district_name_pairs": 25,
+    "missing_coordinates": 25,
+    "status_unspecified": 24
+  },
+  "model_readiness": "Reference registry only. No time series, hazard measurements, outcomes or training labels are supplied; risk scores cannot be derived from this table.",
+  "next_data_needed": [
+    "Confirm application: cyclone/storm surge, erosion, flood preparedness, or another coastal use case.",
+    "Verify site coordinates, source date, facility types and current operating status.",
+    "For the chosen hazard, join timestamped observations such as weather, tides, waves, elevation, shoreline change and historical impacts using verified locations.",
+    "Define prediction target and forecast horizon; evaluate on held-out times and locations before operational use."
+  ]
+}
