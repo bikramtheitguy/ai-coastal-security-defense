@@ -14,6 +14,7 @@ from dashboard.casebook_view import render_investigations
 from dashboard.downloads import download_button
 from dashboard.globe_view import render_globe
 from dashboard.history_view import focus_history, render_history
+from dashboard.odisha_sites_view import render_odisha_sites
 
 
 def focus_investigation(vessel_id: str) -> None:
@@ -543,6 +544,7 @@ def render_watch() -> None:
             st.dataframe(pd.DataFrame(state["flags"]), hide_index=True, width="stretch")
         else:
             st.info("No current rule flags in this cohort.")
+        render_odisha_sites(state_iso, coast_scope)
         with st.expander("Fictional harbour and landing-centre records"):
             st.caption(
                 "INVENTED EXERCISE CONTEXT. Not real ports, harbours, landing centres or "
