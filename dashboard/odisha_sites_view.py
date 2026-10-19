@@ -20,7 +20,8 @@ def render_odisha_sites(state_iso: str, coast: str) -> None:
             "These records are separate from the fictional exercise sites."
         )
         if state_iso not in {"All coastal states/UTs", "IN-OR"} or coast not in {
-            "All coasts", "East coast"
+            "All coasts",
+            "East coast",
         }:
             st.info("Select Odisha or all coastal states, and East coast or all coasts.")
             return
@@ -36,8 +37,15 @@ def render_odisha_sites(state_iso: str, coast: str) -> None:
         st.write(f"{len(selected)} source entries")
         frame = pd.DataFrame(selected).replace("", None)
         st.dataframe(
-            frame[["source_serial", "district", "site_name_source",
-                   "facility_type_source", "operational_status_source"]],
+            frame[
+                [
+                    "source_serial",
+                    "district",
+                    "site_name_source",
+                    "facility_type_source",
+                    "operational_status_source",
+                ]
+            ],
             hide_index=True,
             width="stretch",
         )
